@@ -11,15 +11,23 @@ class RtcWebSocket {
       switch (event.$1) {
         case 'webrtc_offer':
           _offersController.add(OfferUpdate.fromJson(data));
+          break;
 
         case 'webrtc_answer':
           _answersController.add(AnswerUpdate.fromJson(data));
+          break;
 
         case 'webrtc_ice_candidate':
           _candidatesController.add(CandidateUpdate.fromJson(data));
+          break;
+
+        case 'webrtc_camera_status':
+          _remoteCameraStatusController.add(data['is_camera_on'] as bool);
+          break;
 
         case 'webrtc_end_call':
           _endCallController.add(EndCallUpdate.fromJson(data));
+          break;
       }
     });
   }
@@ -30,6 +38,7 @@ class RtcWebSocket {
   final _answersController = StreamController<AnswerUpdate>.broadcast();
   final _candidatesController = StreamController<CandidateUpdate>.broadcast();
   final _endCallController = StreamController<EndCallUpdate>.broadcast();
+  final _remoteCameraStatusController = StreamController<bool>.broadcast();
 
   void sendOffer(RTCSessionDescription offer, int toUserId) {
     _webSocket.emit('webrtc_send_offer', {
@@ -52,6 +61,13 @@ class RtcWebSocket {
     });
   }
 
+  void sentCameraStatus(bool isCameraOn, int toUserId) {
+    _webSocket.emit('webrtc_send_camera_status', {
+      'to_user_id': toUserId,
+      'is_camera_on': isCameraOn,
+    });
+  }
+
   void endCall(int toUserId, {required bool markCallAsMissed}) {
     _webSocket.emit('webrtc_end_call', {
       'to_user_id': toUserId,
@@ -66,4 +82,6 @@ class RtcWebSocket {
   Stream<CandidateUpdate> get candidatesStream => _candidatesController.stream;
 
   Stream<EndCallUpdate> get endCallStream => _endCallController.stream;
+
+  Stream<bool> get remoteCameraStatusStream => _remoteCameraStatusController.stream;
 }

@@ -140,6 +140,7 @@ class CallsService {
   Future<void> hideCall(String id) async {
     await _eventsSub?.cancel();
     await FlutterCallkitIncoming.endCall(id);
+    await Future<void>.delayed(const Duration(seconds: 1));
     _eventsSub = FlutterCallkitIncoming.onEvent.listen(_handleCallKitEvents);
   }
 

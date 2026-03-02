@@ -33,6 +33,9 @@ abstract class CallData with _$CallData implements CallState {
     @Default(RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) RTCPeerConnectionState connectionState,
     RTCVideoRenderer? localRenderer,
     RTCVideoRenderer? remoteRenderer,
+    @Default(true) bool isLocalCameraOn,
+    @Default(true) bool isRemoteCameraOn,
+    @Default(true) bool isLocalMicrophoneOn,
     @Default(false) bool isCallAccepted,
   }) = _CallData;
 

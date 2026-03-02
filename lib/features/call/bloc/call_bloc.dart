@@ -17,7 +17,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     required CallsRepository callsRepository,
     required RtcWebSocket webRtcWebSocket,
   }) : _callsRepository = callsRepository,
-       _webRtcWebSocket = webRtcWebSocket,
+       _rtcWebSocket = webRtcWebSocket,
        super(CallStateBase.initial()) {
     // on<CallEvent>(
     //   (event, emit) => switch (event) {
@@ -31,13 +31,21 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     on<CallEventAcceptCall>(_onAcceptCall);
     on<CallEventEndCall>(_onEndCall);
     on<CallEventFlipCamera>(_onFlipCamera);
+    on<CallEventToggleCamera>(_onToggleCamera);
+    on<CallEventToggleMicrophone>(_onToggleMicrophone);
     on<_CallEventEmit>(_onEmit);
     // on<_CallEventEmitStatus>(_onEmitStatus);
 
-    _endCallSub = _webRtcWebSocket.endCallStream.listen((_) {
+    _endCallSub = _rtcWebSocket.endCallStream.listen((_) {
       print('KlmLog END CAlL IN CALL BLOC');
       _notifyOtherUserWhenClose = false;
       add(const CallEventEndCall());
+    });
+    _remoteCameraStatusSub = _rtcWebSocket.remoteCameraStatusStream.listen((
+      isCameraOn,
+    ) {
+      _data = _data.copyWith(isRemoteCameraOn: isCameraOn);
+      add(const _CallEventEmit());
     });
 
     FlutterCallkitIncoming.activeCalls().then((calls) {
@@ -55,30 +63,17 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         add(const CallEventAcceptCall());
       }
     });
-    // _incomingCallsSub = FlutterCallkitIncoming.onEvent.listen((event) {
-    //   switch (event?.event) {
-    //     case Event.actionCallAccept:
-    //       add(const CallEventAcceptCall());
-    //       break;
-    //
-    //     // case Event.actionCallDecline:
-    //     //   add(const CallEventEndCall());
-    //     //   break;
-    //
-    //     default:
-    //       break;
-    //   }
-    // });
   }
 
   final CallsRepository _callsRepository;
-  final RtcWebSocket _webRtcWebSocket;
+  final RtcWebSocket _rtcWebSocket;
 
-  bool _notifyOtherUserWhenClose = true;
   late StreamSubscription<void> _endCallSub;
+  late StreamSubscription<void> _remoteCameraStatusSub;
+  bool _notifyOtherUserWhenClose = true;
+
   RTCVideoRenderer? _localRenderer;
   RTCVideoRenderer? _remoteRenderer;
-
   RTCSessionDescription? _cachedOffer;
   late CallData _data = CallData.initial();
 
@@ -96,6 +91,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
       _localRenderer = await _setUpLocalRenderer();
       _remoteRenderer = await _setUpRemoteRenderer();
+
+      _data = _data.copyWith(localRenderer: _localRenderer);
+      emit(CallStateBase(data: _data));
+
       await _callsRepository.doCall(
         toUserId: event.otherUser.id,
         localRenderer: _localRenderer!,
@@ -103,11 +102,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       );
       if (isClosed) return;
 
-      _data = _data.copyWith(
-        isCallAccepted: true,
-        localRenderer: _localRenderer,
-        remoteRenderer: _remoteRenderer,
-      );
+      _data = _data.copyWith(isCallAccepted: true, remoteRenderer: _remoteRenderer);
       emit(CallStateBase(data: _data));
     } catch (e, st) {
       logger.e(e, stackTrace: st);
@@ -127,6 +122,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
       _localRenderer = await _setUpLocalRenderer();
       _remoteRenderer = await _setUpRemoteRenderer();
+
       await _callsRepository.acceptCall(
         otherUserId: _data.otherUser.id,
         offer: _cachedOffer!,
@@ -142,11 +138,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       );
       emit(CallStateBase(data: _data));
 
-      unawaited(
-        CallsService.instance.endCall(
-          _data.otherUser.id.toString(),
-        ),
-      );
+      unawaited(CallsService.instance.hideCall(_data.otherUser.id.toString()));
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       add(const CallEventEndCall());
@@ -154,7 +146,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   Future<RTCVideoRenderer> _setUpLocalRenderer() async {
-    final localStream = await navigator.mediaDevices.getUserMedia({
+    final mediaStream = await navigator.mediaDevices.getUserMedia({
       'audio': true,
       'video': {
         'facingMode': 'environment', // or user
@@ -163,7 +155,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
     final renderer = RTCVideoRenderer();
     await renderer.initialize();
-    renderer.srcObject = localStream;
+    renderer.srcObject = mediaStream;
     return renderer;
   }
 
@@ -173,7 +165,29 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     return remoteRenderer;
   }
 
+  void _onToggleCamera(CallEventToggleCamera event, Emitter<CallState> emit) {
+    _data.localRenderer!.srcObject!.getVideoTracks().forEach((track) {
+      track.enabled = !track.enabled;
+    });
+    _rtcWebSocket.sentCameraStatus(!_data.isLocalCameraOn, _data.otherUser.id);
+    _data = _data.copyWith(isLocalCameraOn: !_data.isLocalCameraOn);
+    emit(CallStateBase(data: _data));
+  }
+
+  void _onToggleMicrophone(
+    CallEventToggleMicrophone event,
+    Emitter<CallState> emit,
+  ) {
+    _data.localRenderer!.srcObject!.getAudioTracks().forEach((track) {
+      track.enabled = !track.enabled;
+    });
+    _data = _data.copyWith(isLocalMicrophoneOn: !_data.isLocalMicrophoneOn);
+    emit(CallStateBase(data: _data));
+  }
+
   void _onFlipCamera(CallEventFlipCamera event, Emitter<CallState> emit) {
+    if (!_data.isLocalCameraOn) return;
+
     Helper.switchCamera(_data.localRenderer!.srcObject!.getVideoTracks()[0]);
   }
 
@@ -191,9 +205,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   Future<void> close() {
     print('KlmLog close');
     _endCallSub.cancel();
+    _remoteCameraStatusSub.cancel();
 
     if (_notifyOtherUserWhenClose) {
-      _webRtcWebSocket.endCall(
+      _rtcWebSocket.endCall(
         _data.otherUser.id,
         markCallAsMissed: !_data.isCallAccepted && _cachedOffer == null,
       );
@@ -240,6 +255,14 @@ class CallEventCall implements CallEvent {
 
 class CallEventAcceptCall implements CallEvent {
   const CallEventAcceptCall();
+}
+
+class CallEventToggleCamera implements CallEvent {
+  const CallEventToggleCamera();
+}
+
+class CallEventToggleMicrophone implements CallEvent {
+  const CallEventToggleMicrophone();
 }
 
 class CallEventFlipCamera implements CallEvent {

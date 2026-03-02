@@ -48,10 +48,29 @@ class _CallScreenState extends State<CallScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => _callBloc,
-      child: Scaffold(
-        backgroundColor: Colors.blue,
-        //appBar: _AppBar(),
-        body: _Body(doCall: widget.doCall),
+      child: BlocBuilder<CallBloc, CallState>(
+        buildWhen: (oldState, newState) {
+          if (newState is! CallStateBase) return false;
+
+          if (oldState is! CallStateBase) return true;
+
+          final oldData = oldState.data;
+          final newData = newState.data;
+          return oldData.remoteRenderer != newData.remoteRenderer ||
+              oldData.isRemoteCameraOn != newData.isRemoteCameraOn;
+        },
+        builder: (context, state) {
+          return Scaffold(
+            backgroundColor:
+                state is CallStateBase &&
+                    state.data.remoteRenderer != null &&
+                    state.data.isRemoteCameraOn
+                ? const Color(0xFF121212)
+                : Colors.blue,
+            //appBar: _AppBar(),
+            body: _Body(doCall: widget.doCall),
+          );
+        },
       ),
     );
   }
@@ -89,8 +108,9 @@ class _BodyState extends State<_Body> {
 
           return Stack(
             children: [
-              if (data.remoteRenderer != null) RTCVideoView(data.remoteRenderer!),
-              if (data.localRenderer != null)
+              if (data.remoteRenderer != null && data.isRemoteCameraOn)
+                RTCVideoView(data.remoteRenderer!),
+              if (data.localRenderer != null && data.isLocalCameraOn)
                 Positioned(
                   right: 10,
                   bottom: 150,
@@ -103,7 +123,7 @@ class _BodyState extends State<_Body> {
 
               Column(
                 children: [
-                  if (data.remoteRenderer == null) ...[
+                  if (data.remoteRenderer == null || !data.isRemoteCameraOn) ...[
                     const SizedBox(height: 80),
                     UserImage(user: data.otherUser, size: 200),
                     const SizedBox(height: 10),
@@ -141,11 +161,17 @@ class _BodyState extends State<_Body> {
                     children: [
                       if (data.isCallAccepted) ...[
                         _Button(
-                          'Start video',
-                          icon: Icons.videocam_off_outlined,
+                          data.isLocalCameraOn ? 'Stop video' : 'Start video',
+                          icon: data.isLocalCameraOn
+                              ? Icons.videocam_off_outlined
+                              : Icons.videocam,
                           iconColor: Colors.blue,
                           color: Colors.white,
-                          onPressed: () {},
+                          onPressed: () {
+                            context.read<CallBloc>().add(
+                              const CallEventToggleCamera(),
+                            );
+                          },
                         ),
                         _Button(
                           'Flip',
@@ -159,16 +185,24 @@ class _BodyState extends State<_Body> {
                           },
                         ),
                         _Button(
-                          'Mute',
-                          icon: Icons.mic,
+                          data.isLocalMicrophoneOn ? 'Mute' : 'Unmute',
+                          icon: data.isLocalMicrophoneOn ? Icons.mic : Icons.mic_off,
                           iconColor: Colors.blue,
                           color: Colors.white,
-                          onPressed: () {},
+                          onPressed: () {
+                            context.read<CallBloc>().add(
+                              const CallEventToggleMicrophone(),
+                            );
+                          },
                         ),
                       ],
 
                       _Button(
-                        data.isCallAccepted ? 'End Call' : 'Decline',
+                        data.isCallAccepted
+                            ? 'End Call'
+                            : widget.doCall
+                            ? 'Cancel'
+                            : 'Decline',
                         icon: Icons.call_end,
                         iconColor: Colors.white,
                         color: Colors.red,
