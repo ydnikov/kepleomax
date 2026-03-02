@@ -7,6 +7,7 @@ import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
 import 'package:kepleomax/features/call/bloc/call_bloc.dart';
 import 'package:kepleomax/features/call/bloc/call_state.dart';
+import 'package:kepleomax/features/call/widgets/call_stopwatch_widget.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({
@@ -136,6 +137,10 @@ class _BodyState extends State<_Body> {
                         color: Colors.white,
                       ),
                     ),
+                    if (data.callStartedTime != null) ...[
+                      const SizedBox(height: 4),
+                      CallStopwatchWidget(callStartedTime: data.callStartedTime!),
+                    ],
                   ],
                   const Expanded(child: SizedBox()),
                   // Text(
@@ -250,27 +255,6 @@ class _BodyState extends State<_Body> {
         return 'New';
     }
   }
-
-  // String _mapStatus(CallStatus state) {
-  //   switch (state) {
-  //     case CallStatus.waitingForResponse:
-  //       return 'Waiting for the response';
-  //     case CallStatus.waitingForYourResponse:
-  //       return '';
-  //     case CallStatus.accepted:
-  //       return 'Accepted';
-  //     case CallStatus.disconnected:
-  //       return 'Disconnected';
-  //     case CallStatus.cancelledDueToTimeout:
-  //       return 'Cancelled due to timeout';
-  //
-  //     /// TODO change to otherUser.username
-  //     case CallStatus.otherUserEndedCall:
-  //       return 'Other user ended call';
-  //     case CallStatus.none:
-  //       return '';
-  //   }
-  // }
 }
 
 class _Button extends StatelessWidget {

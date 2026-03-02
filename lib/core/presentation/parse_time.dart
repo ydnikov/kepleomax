@@ -65,6 +65,16 @@ class ParseTime {
 
   static String toTime(DateTime dateTime) => DateFormat.Hm().format(dateTime);
 
+  static String toStopwatch(Duration duration) {
+    final minutes = duration.inMinutes % 60;
+    final seconds = duration.inSeconds % 60;
+    if (duration.inHours > 0) {
+      return '${duration.inHours}:${minutes > 9 ? minutes : '0$minutes'}:${seconds > 9 ? seconds : '0$seconds'}';
+    } else {
+      return '${minutes > 9 ? minutes : '0$minutes'}:${seconds > 9 ? seconds : '0$seconds'}';
+    }
+  }
+
   static String toDate(DateTime dateTime) {
     final now = DateTime.now();
     if (dateTime.day == now.day &&

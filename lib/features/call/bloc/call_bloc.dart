@@ -102,7 +102,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       );
       if (isClosed) return;
 
-      _data = _data.copyWith(isCallAccepted: true, remoteRenderer: _remoteRenderer);
+      _data = _data.copyWith(
+        isCallAccepted: true,
+        remoteRenderer: _remoteRenderer,
+        callStartedTime: DateTime.now(),
+      );
       emit(CallStateBase(data: _data));
     } catch (e, st) {
       logger.e(e, stackTrace: st);
@@ -135,6 +139,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         isCallAccepted: true,
         localRenderer: _localRenderer,
         remoteRenderer: _remoteRenderer,
+        callStartedTime: DateTime.now(),
       );
       emit(CallStateBase(data: _data));
 
@@ -166,7 +171,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   void _onToggleCamera(CallEventToggleCamera event, Emitter<CallState> emit) {
-    _data.localRenderer!.srcObject!.getVideoTracks().forEach((track) {
+    _localRenderer!.srcObject!.getVideoTracks().forEach((track) {
       track.enabled = !track.enabled;
     });
     _rtcWebSocket.sentCameraStatus(!_data.isLocalCameraOn, _data.otherUser.id);
@@ -178,7 +183,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     CallEventToggleMicrophone event,
     Emitter<CallState> emit,
   ) {
-    _data.localRenderer!.srcObject!.getAudioTracks().forEach((track) {
+    _localRenderer!.srcObject!.getAudioTracks().forEach((track) {
       track.enabled = !track.enabled;
     });
     _data = _data.copyWith(isLocalMicrophoneOn: !_data.isLocalMicrophoneOn);
@@ -188,7 +193,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   void _onFlipCamera(CallEventFlipCamera event, Emitter<CallState> emit) {
     if (!_data.isLocalCameraOn) return;
 
-    Helper.switchCamera(_data.localRenderer!.srcObject!.getVideoTracks()[0]);
+    Helper.switchCamera(_localRenderer!.srcObject!.getVideoTracks()[0]);
   }
 
   void _onEmit(_CallEventEmit event, Emitter<CallState> emit) {
