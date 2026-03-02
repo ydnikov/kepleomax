@@ -32,7 +32,7 @@ abstract class AppConstantsType {
 
   Duration get showTypingAfterActivity => const Duration(seconds: 3);
 
-  Duration get callingTimeout => const Duration(seconds: 45);
+  Duration get callingTimeout => const Duration(seconds: 15);
 
   int get msgPagingLimit => 15;
 
@@ -47,6 +47,9 @@ class _AppConstatsRelease extends AppConstantsType {
 
   @override
   Duration get showTypingAfterActivity => const Duration(seconds: 5);
+
+  @override
+  Duration get callingTimeout => const Duration(seconds: 45);
 
   @override
   int get msgPagingLimit => 30;

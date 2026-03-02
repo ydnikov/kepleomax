@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:focus_detector/focus_detector.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
-import 'package:kepleomax/core/notifications/notifications_service.dart';
+import 'package:kepleomax/core/services/notifications_service.dart';
 
 class ConnectionScope extends StatefulWidget {
   const ConnectionScope({required this.child, super.key});

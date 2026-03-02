@@ -19,7 +19,7 @@ import 'package:kepleomax/core/network/websockets/models/new_message_update.dart
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart';
 import 'package:kepleomax/core/network/websockets/models/read_messages_update.dart';
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
-import 'package:kepleomax/core/notifications/notifications_service.dart';
+import 'package:kepleomax/core/services/notifications_service.dart';
 
 part 'on_delete_message.dart';
 

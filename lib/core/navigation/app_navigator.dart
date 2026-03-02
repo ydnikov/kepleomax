@@ -38,6 +38,9 @@ class AppNavigator extends StatefulWidget {
 
   static void pop(BuildContext context) => of(context)?.pop();
 
+  static void popIfType<T extends AppPage>(BuildContext context) =>
+      of(context)?.popIfType<T>();
+
   static void popAll(BuildContext context) => of(context)?.popAll();
 
   static Future<void>? showGeneralDialog(BuildContext context, Widget dialog) =>
@@ -100,6 +103,12 @@ class AppNavigatorState extends State<AppNavigator> with WidgetsBindingObserver 
     if (state.length > 1) state.removeLast();
     return state;
   });
+
+  void popIfType<T extends AppPage>() {
+    if (state.last is T) {
+      pop();
+    }
+  }
 
   void popAll() => change((state) {
     return [state[0]];

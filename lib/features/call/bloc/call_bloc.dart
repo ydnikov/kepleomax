@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
-import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
+import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:kepleomax/features/call/bloc/call_state.dart';
 import 'package:kepleomax/features/call/data/calls_repository.dart';
 
@@ -35,7 +35,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     // on<_CallEventEmitStatus>(_onEmitStatus);
 
     _endCallSub = _webRtcWebSocket.endCallStream.listen((_) {
-      print('KlmLog END CAlL STREAM');
+      print('KlmLog END CAlL IN CALL BLOC');
       _notifyOtherUserWhenClose = false;
       add(const CallEventEndCall());
     });
@@ -48,28 +48,27 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       }
     });
 
-    _incomingCallsSub = FlutterCallkitIncoming.onEvent.listen((event) {
-      if (event == null) return;
+    CallsService.instance.listen(hashCode, (event) {
+      if (isClosed) return;
 
-      switch (event.event) {
-        case Event.actionCallAccept:
-          add(const CallEventAcceptCall());
-          break;
-
-        case Event.actionCallDecline:
-          add(const CallEventEndCall());
-          break;
-
-        case Event.actionCallEnded:
-          break;
-
-        case Event.actionCallTimeout:
-          break;
-
-        default:
-          break;
+      if (event == Event.actionCallAccept) {
+        add(const CallEventAcceptCall());
       }
     });
+    // _incomingCallsSub = FlutterCallkitIncoming.onEvent.listen((event) {
+    //   switch (event?.event) {
+    //     case Event.actionCallAccept:
+    //       add(const CallEventAcceptCall());
+    //       break;
+    //
+    //     // case Event.actionCallDecline:
+    //     //   add(const CallEventEndCall());
+    //     //   break;
+    //
+    //     default:
+    //       break;
+    //   }
+    // });
   }
 
   final CallsRepository _callsRepository;
@@ -77,7 +76,6 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
   bool _notifyOtherUserWhenClose = true;
   late StreamSubscription<void> _endCallSub;
-  late StreamSubscription<void> _incomingCallsSub;
   RTCVideoRenderer? _localRenderer;
   RTCVideoRenderer? _remoteRenderer;
 
@@ -94,6 +92,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
   Future<void> _onCall(CallEventCall event, Emitter<CallState> emit) async {
     try {
+      CallsService.instance.stopListening(hashCode);
+
       _localRenderer = await _setUpLocalRenderer();
       _remoteRenderer = await _setUpRemoteRenderer();
       await _callsRepository.doCall(
@@ -143,8 +143,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       emit(CallStateBase(data: _data));
 
       unawaited(
-        FlutterCallkitIncoming.hideCallkitIncoming(
-          CallKitParams(id: _data.otherUser.id.toString()),
+        CallsService.instance.endCall(
+          _data.otherUser.id.toString(),
         ),
       );
     } catch (e, st) {
@@ -191,10 +191,12 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   Future<void> close() {
     print('KlmLog close');
     _endCallSub.cancel();
-    _incomingCallsSub.cancel();
 
     if (_notifyOtherUserWhenClose) {
-      _webRtcWebSocket.endCall(_data.otherUser.id);
+      _webRtcWebSocket.endCall(
+        _data.otherUser.id,
+        markCallAsMissed: !_data.isCallAccepted && _cachedOffer == null,
+      );
     }
     _callsRepository.endCall().ignore();
 

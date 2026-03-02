@@ -44,12 +44,6 @@ class _CallScreenState extends State<CallScreen> {
     super.initState();
   }
 
-  // @override
-  // void dispose() {
-  //   _callBloc.add(const CallEventEndCall(notifyOtherUser: true));
-  //   super.dispose();
-  // }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(

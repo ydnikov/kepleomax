@@ -3,19 +3,15 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_callkit_incoming/entities/android_params.dart';
-import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
-import 'package:flutter_callkit_incoming/entities/notification_params.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app.dart';
-import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
+import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 
 class NotificationService {
@@ -162,63 +158,26 @@ class NotificationService {
         }
 
       case 'incoming_call':
-        await _handleIncomingCall(
-          UserDto.fromJson(
+        await CallsService.instance.showIncomingCall(
+          otherUser: UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
           ),
-          RTCSessionDescription(
+          offer: RTCSessionDescription(
             message.data['offer_sdp'] as String?,
             message.data['offer_type'] as String?,
           ),
         );
-    }
-  }
+        break;
 
-  Future<void> _handleIncomingCall(
-    UserDto otherUser,
-    RTCSessionDescription offer,
-  ) async {
-    final callKitParams = CallKitParams(
-      id: otherUser.id.toString(),
-      nameCaller: otherUser.username,
-      appName: 'KepLeoMax',
-      avatar: otherUser.profileImage,
-      type: 0,
-      textAccept: 'Accept',
-      textDecline: 'Decline',
-      missedCallNotification: const NotificationParams(
-        showNotification: true,
-        isShowCallback: false,
-        subtitle: 'Missed call',
-        //callbackText: 'Call back',
-      ),
-      callingNotification: const NotificationParams(
-        showNotification: true,
-        isShowCallback: true,
-        subtitle: 'Calling...',
-        callbackText: 'Hang Up',
-      ),
-      duration: AppConstants.callingTimeout.inMilliseconds,
-      extra: <String, dynamic>{
-        'other_user_id': otherUser.id,
-        'offer_sdp': offer.sdp,
-        'offer_type': offer.type,
-      },
-      android: AndroidParams(
-        isCustomNotification: true,
-        isShowLogo: false,
-        logoUrl: otherUser.profileImage,
-        ringtonePath: 'system_ringtone_default',
-        backgroundColor: '#0955fa',
-        backgroundUrl: otherUser.profileImage,
-        actionColor: '#4CAF50',
-        textColor: '#ffffff',
-        incomingCallNotificationChannelName: 'Incoming Call',
-        missedCallNotificationChannelName: 'Missed Call',
-        isShowCallID: false,
-      ),
-    );
-    await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
+      case 'end_incoming_call':
+        {
+          final userDto = UserDto.fromJson(
+            jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
+          );
+          await CallsService.instance.markCallAsMissed(otherUser: userDto);
+          break;
+        }
+    }
   }
 
   void _handleAppOpened(NotificationResponse response) {
