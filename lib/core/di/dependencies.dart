@@ -13,6 +13,7 @@ import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/data/post_repository.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
+import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_api.dart';
 import 'package:kepleomax/core/network/apis/files/files_api.dart';
 import 'package:kepleomax/core/network/apis/messages/messages_api.dart';
@@ -46,6 +47,8 @@ class Dependencies {
   late final PostApi postApi;
   late final MessagesApi messagesApi;
   late final ChatsApi chatsApi;
+  late final CallsApi callsApi;
+
   late final KlmWebSocket klmWebSocket;
   late final MessengerWebSocket messengerWebSocket;
   late final RtcWebSocket rtcWebSocket;

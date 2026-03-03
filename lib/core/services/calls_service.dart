@@ -21,6 +21,7 @@ class CallsService {
   static CallsService get instance => _instance;
 
   StreamSubscription<void>? _offersSub;
+  StreamSubscription<void>? _callEndsSub;
   StreamSubscription<void>? _eventsSub;
   bool _ignoreEvents = false;
 
@@ -40,8 +41,10 @@ class CallsService {
         'offer_type': offerUpdate.offer.type,
       }, _userRepository);
     });
+    _callEndsSub = _webSocket.endCallStream.listen((update) {
+      endCallAndClosePage(update.fromUserId);
+    });
 
-    /// FlutterCallkitIncoming.onEvent can be listen only in one place
     _eventsSub = FlutterCallkitIncoming.onEvent.listen(_handleCallKitEvents);
   }
 
@@ -54,11 +57,7 @@ class CallsService {
         _openCallPage(event.body['extra'] as Map<dynamic, dynamic>, _userRepository);
         break;
       case Event.actionCallDecline:
-        _webSocket.endCall(
-          event.body['extra']['other_user_id'] as int,
-          markCallAsMissed: false,
-        );
-        _closeCallPage();
+        endCallAndClosePage(event.body['extra']['other_user_id'] as int);
         break;
       default:
         break;
@@ -68,7 +67,6 @@ class CallsService {
     }
   }
 
-  /// don't need to cancel manually, will be cleared in unsubscribeFromEvents
   final _additionListeners = <int, void Function(Event)>{};
 
   void listen(int subscriberId, void Function(Event) callback) {
@@ -85,8 +83,10 @@ class CallsService {
     _additionListeners.clear();
     _offersSub?.cancel();
     _eventsSub?.cancel();
+    _callEndsSub?.cancel();
     _offersSub = null;
     _eventsSub = null;
+    _callEndsSub = null;
   }
 
   void checkActiveCalls(UserRepository userRepository) {
@@ -194,7 +194,15 @@ class CallsService {
     );
   }
 
-  void _closeCallPage() {
+  int _endCallWasCalled = 0;
+  void endCallAndClosePage(int otherUserId) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (_endCallWasCalled + 300 > now) {
+      return;
+    }
+    _endCallWasCalled = now;
+
+    _webSocket.endCall(otherUserId);
     mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
   }
 }

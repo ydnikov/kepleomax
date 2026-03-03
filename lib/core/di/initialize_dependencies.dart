@@ -22,6 +22,7 @@ import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
+import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_api.dart';
 import 'package:kepleomax/core/network/apis/files/files_api.dart';
 import 'package:kepleomax/core/network/apis/messages/messages_api.dart';
@@ -41,14 +42,16 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-Future<Dependencies> initializeDependencies() async {
+Future<Dependencies> initializeDependencies({List<DiStep>? onlySteps}) async {
   final dp = Dependencies();
 
   for (final step in _steps) {
     try {
-      await step.call(dp);
+      if (onlySteps == null || onlySteps.contains(step.step)) {
+        await step.call(dp);
+      }
     } catch (e, st) {
-      logger.e('Error while initializing step ${step.name}: $e', stackTrace: st);
+      logger.e('Error while initializing step ${step.step}: $e', stackTrace: st);
       rethrow;
     }
   }
@@ -57,7 +60,7 @@ Future<Dependencies> initializeDependencies() async {
 }
 
 List<_InitializationStep> _steps = [
-  _InitializationStep('storages', (dp) async {
+  _InitializationStep(DiStep.storages, (dp) async {
     dp
       ..sharedPreferences = await SharedPreferences.getInstance()
       ..appSettings = AppSettingsImpl(prefs: dp.sharedPreferences)
@@ -65,7 +68,7 @@ List<_InitializationStep> _steps = [
     CachedNetworkImage.logLevel = CacheManagerLogLevel.verbose;
   }),
 
-  _InitializationStep('local_data_sources', (dp) async {
+  _InitializationStep(DiStep.localDataSources, (dp) async {
     final db = await LocalDatabaseManager.getDatabase();
     dp
       ..database = db
@@ -77,7 +80,7 @@ List<_InitializationStep> _steps = [
       ..chatsLocalDataSource = ChatsLocalDataSourceImpl(database: db);
   }),
 
-  _InitializationStep('dioLogger, dio', (dp) async {
+  _InitializationStep(DiStep.dio, (dp) async {
     dp.prettyDioLogger = PrettyDioLogger(
       request: kDebugMode,
       requestHeader: kDebugMode,
@@ -100,7 +103,7 @@ List<_InitializationStep> _steps = [
     dp.dio = dio;
   }),
 
-  _InitializationStep('token_provider', (dp) async {
+  _InitializationStep(DiStep.tokenProvider, (dp) async {
     dp.tokenProvider = TokenProviderImpl(
       prefs: dp.sharedPreferences,
       secureStorage: dp.secureStorage,
@@ -115,7 +118,7 @@ List<_InitializationStep> _steps = [
     );
   }),
 
-  _InitializationStep('auth_apis', (dp) async {
+  _InitializationStep(DiStep.authApis, (dp) async {
     dp
       ..authApi = AuthApi(dp.dio, flavor.baseUrl)
       ..userApi = UserApi(dp.dio, flavor.baseUrl)
@@ -123,7 +126,7 @@ List<_InitializationStep> _steps = [
       ..filesApi = FilesApi(dp.dio, flavor.baseUrl);
   }),
 
-  _InitializationStep('auth', (dp) async {
+  _InitializationStep(DiStep.auth, (dp) async {
     dp
       ..authRepository = AuthRepositoryImpl(authApi: dp.authApi)
       ..userRepository = UserRepositoryImpl(
@@ -149,7 +152,7 @@ List<_InitializationStep> _steps = [
     );
   }),
 
-  _InitializationStep('web_socket', (dp) async {
+  _InitializationStep(DiStep.webSockets, (dp) async {
     dp
       ..klmWebSocket = KlmWebSocketImpl(
         baseUrl: flavor.baseUrl,
@@ -159,14 +162,15 @@ List<_InitializationStep> _steps = [
       ..rtcWebSocket = RtcWebSocket(klmWebSocket: dp.klmWebSocket);
   }),
 
-  _InitializationStep('apis', (dp) async {
+  _InitializationStep(DiStep.apis, (dp) async {
     dp
       ..postApi = PostApi(dp.dio, flavor.baseUrl)
       ..messagesApi = MessagesApi(dp.dio, flavor.baseUrl)
-      ..chatsApi = ChatsApi(dp.dio, flavor.baseUrl);
+      ..chatsApi = ChatsApi(dp.dio, flavor.baseUrl)
+      ..callsApi = CallsApi(dp.dio, flavor.baseUrl);
   }),
 
-  _InitializationStep('repositories', (dp) async {
+  _InitializationStep(DiStep.repositories, (dp) async {
     final chatsApiDataSource = ChatsApiDataSourceImpl(chatsApi: dp.chatsApi);
 
     dp
@@ -196,11 +200,11 @@ List<_InitializationStep> _steps = [
       );
   }),
 
-  _InitializationStep('firebase', (_) async {
+  _InitializationStep(DiStep.firebase, (_) async {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   }),
 
-  _InitializationStep('global_settings', (_) async {
+  _InitializationStep(DiStep.globalSettings, (_) async {
     VisibilityDetectorController.instance.updateInterval = const Duration(
       milliseconds: 100,
     );
@@ -208,8 +212,22 @@ List<_InitializationStep> _steps = [
 ];
 
 class _InitializationStep {
-  _InitializationStep(this.name, this.call);
+  _InitializationStep(this.step, this.call);
 
-  final String name;
+  final DiStep step;
   final Future<void> Function(Dependencies) call;
+}
+
+enum DiStep {
+  storages,
+  localDataSources,
+  dio,
+  tokenProvider,
+  authApis,
+  auth,
+  webSockets,
+  apis,
+  repositories,
+  firebase,
+  globalSettings,
 }

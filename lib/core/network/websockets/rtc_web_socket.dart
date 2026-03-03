@@ -68,11 +68,12 @@ class RtcWebSocket {
     });
   }
 
-  void endCall(int toUserId, {required bool markCallAsMissed}) {
-    _webSocket.emit('webrtc_end_call', {
-      'to_user_id': toUserId,
-      'mark_call_as_missed': markCallAsMissed,
-    });
+  void endCall(int toUserId) {
+    _webSocket.emit('webrtc_end_call', {'to_user_id': toUserId});
+  }
+
+  void sendMissedCallNotification(int toUserId) {
+    _webSocket.emit('webrtc_send_missed_call_notification', {'to_user_id'});
   }
 
   Stream<OfferUpdate> get offersStream => _offersController.stream;

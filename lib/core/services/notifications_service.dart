@@ -3,13 +3,15 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_callkit_incoming/entities/call_event.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app.dart';
+import 'package:kepleomax/core/di/initialize_dependencies.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
-import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
 import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
@@ -190,7 +192,7 @@ class NotificationService {
         payload['other_user'] as Map<String, dynamic>,
       );
 
-      (mainNavigatorGlobalKey.currentState as AppNavigatorState).push(
+      mainNavigatorGlobalKey.currentState!.push(
         ChatPage(chatId: chatId, otherUser: User.fromDto(otherUser)),
       );
     } catch (e, st) {
@@ -204,4 +206,26 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
   await NotificationService.instance.setupFlutterNotifications();
   await NotificationService.instance.showNotification(message);
+
+  FlutterCallkitIncoming.onEvent.listen((event) async {
+    if (event?.event == Event.actionCallDecline) {
+      await sendDeclineApiCall(event!.body['extra']['other_user_id'] as int);
+    }
+  });
+}
+
+@pragma('vm:entry-point')
+Future<void> sendDeclineApiCall(int otherUserId) async {
+  final dp = await initializeDependencies(
+    onlySteps: [
+      DiStep.storages,
+      DiStep.localDataSources,
+      DiStep.dio,
+      DiStep.tokenProvider,
+      DiStep.authApis,
+      DiStep.auth,
+      DiStep.apis,
+    ],
+  );
+  await dp.callsApi.declineCall(otherUserId: otherUserId);
 }

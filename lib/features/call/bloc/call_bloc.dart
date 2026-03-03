@@ -33,13 +33,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     on<CallEventToggleCamera>(_onToggleCamera);
     on<CallEventToggleMicrophone>(_onToggleMicrophone);
     on<_CallEventEmit>(_onEmit);
-    // on<_CallEventEmitStatus>(_onEmitStatus);
 
-    _endCallSub = _rtcWebSocket.endCallStream.listen((_) {
-      print('KlmLog END CAlL IN CALL BLOC');
-      _notifyOtherUserWhenClose = false;
-      add(const CallEventEndCall());
-    });
     _remoteCameraStatusSub = _rtcWebSocket.remoteCameraStatusStream.listen((
       isCameraOn,
     ) {
@@ -67,9 +61,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   final CallsRepository _callsRepository;
   final RtcWebSocket _rtcWebSocket;
 
-  late StreamSubscription<void> _endCallSub;
   late StreamSubscription<void> _remoteCameraStatusSub;
-  bool _notifyOtherUserWhenClose = true;
 
   RTCVideoRenderer? _localRenderer;
   RTCVideoRenderer? _remoteRenderer;
@@ -210,16 +202,12 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   @override
   Future<void> close() {
     print('KlmLog CallBloc close');
-    _endCallSub.cancel();
     _remoteCameraStatusSub.cancel();
 
-    if (_notifyOtherUserWhenClose) {
-      _rtcWebSocket.endCall(
-        _data.otherUser.id,
-        markCallAsMissed: !_data.isCallAccepted && _cachedOffer == null,
-      );
+    if (!_data.isCallAccepted && _cachedOffer == null) {
+      _rtcWebSocket.sendMissedCallNotification(_data.otherUser.id);
     }
-    _callsRepository.endCall().ignore();
+    _callsRepository.dispose().ignore();
 
     _localRenderer?.srcObject?.dispose();
     _localRenderer?.dispose();
@@ -237,6 +225,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     });
 
     CallsService.instance.hideNotification(_data.otherUser.id.toString());
+    CallsService.instance.endCallAndClosePage(_data.otherUser.id);
 
     return super.close();
   }
@@ -282,9 +271,3 @@ class CallEventEndCall implements CallEvent {
 class _CallEventEmit implements CallEvent {
   const _CallEventEmit();
 }
-
-// class _CallEventEmitStatus implements CallEvent {
-//   _CallEventEmitStatus({required this.status});
-//
-//   final CallStatus status;
-// }
