@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kepleomax/core/models/call_model.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
@@ -12,6 +13,7 @@ import 'package:kepleomax/core/presentation/klm_button.dart';
 import 'package:kepleomax/core/presentation/klm_error_widget.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/scopes/auth_scope.dart';
 import 'package:kepleomax/features/chats/bloc/chats_bloc.dart';
 import 'package:kepleomax/features/chats/bloc/chats_state.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';

@@ -20,6 +20,7 @@ class LocalDatabaseManager {
           sender_id INT NOT NULL, 
           is_current_user BIT, 
           message VARCHAR(4000) NOT NULL, 
+          type VARCHAR(50) NOT NULL, 
           is_read BIT DEFAULT FALSE NOT NULL, 
           created_at BIGINT NOT NULL, 
           edited_at BIGINT

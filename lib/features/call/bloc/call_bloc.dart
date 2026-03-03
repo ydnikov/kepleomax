@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
@@ -48,7 +47,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       add(const _CallEventEmit());
     });
 
-    FlutterCallkitIncoming.activeCalls().then((calls) {
+    CallsService.instance.getActiveCalls().then((calls) {
       if (calls is List && calls.isNotEmpty) {
         if (calls[0]['isAccepted'] == true) {
           add(const CallEventAcceptCall());
@@ -143,7 +142,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       );
       emit(CallStateBase(data: _data));
 
-      unawaited(CallsService.instance.hideCall(_data.otherUser.id.toString()));
+      unawaited(
+        CallsService.instance.hideNotification(_data.otherUser.id.toString()),
+      );
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       add(const CallEventEndCall());
@@ -208,7 +209,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
   @override
   Future<void> close() {
-    print('KlmLog close');
+    print('KlmLog CallBloc close');
     _endCallSub.cancel();
     _remoteCameraStatusSub.cancel();
 
@@ -235,7 +236,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         ..stop();
     });
 
-    FlutterCallkitIncoming.endCall(_data.otherUser.id.toString());
+    CallsService.instance.hideNotification(_data.otherUser.id.toString());
 
     return super.close();
   }

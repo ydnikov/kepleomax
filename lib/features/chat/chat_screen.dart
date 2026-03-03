@@ -4,9 +4,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:focus_detector/focus_detector.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/flavor.dart';
@@ -15,7 +13,6 @@ import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
-import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/context_wrapper.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
@@ -23,19 +20,16 @@ import 'package:kepleomax/core/presentation/klm_error_widget.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/features/chat/bloc/chat_bloc.dart';
 import 'package:kepleomax/features/chat/bloc/chat_state.dart';
+import 'package:kepleomax/features/chat/widgets/message_widget.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 part 'widgets/chat_bottom.dart';
-
-part 'widgets/message_widget.dart';
-
 part 'widgets/read_button.dart';
-
 part 'widgets/tech_message.dart';
 
 /// screen

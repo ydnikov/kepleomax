@@ -169,7 +169,7 @@ class NotificationService {
         );
         break;
 
-      case 'end_incoming_call':
+      case 'missed_call':
         {
           final userDto = UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,

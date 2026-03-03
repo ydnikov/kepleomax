@@ -49,7 +49,12 @@ class _CallScreenState extends State<CallScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => _callBloc,
-      child: BlocBuilder<CallBloc, CallState>(
+      child: BlocConsumer<CallBloc, CallState>(
+        listener: (context, state) {
+          if (state is CallStateExit && context.mounted) {
+            AppNavigator.of(context)!.pop();
+          }
+        },
         buildWhen: (oldState, newState) {
           if (newState is! CallStateBase) return false;
 
@@ -90,12 +95,7 @@ class _BodyState extends State<_Body> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: BlocConsumer<CallBloc, CallState>(
-        listener: (context, state) {
-          if (state is CallStateExit) {
-            AppNavigator.of(context)!.pop();
-          }
-        },
+      child: BlocBuilder<CallBloc, CallState>(
         buildWhen: (oldState, newState) {
           if (newState is! CallStateBase) return false;
 

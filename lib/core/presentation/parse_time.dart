@@ -65,6 +65,16 @@ class ParseTime {
 
   static String toTime(DateTime dateTime) => DateFormat.Hm().format(dateTime);
 
+  static String toDuration(Duration duration) {
+    if (duration.inMinutes == 0) {
+      return '${duration.inSeconds} seconds';
+    } else if (duration.inHours == 0) {
+      return '${duration.inMinutes} minute${_isSingular(duration.inMinutes) ? '' : 's'}';
+    } else {
+      return '${duration.inHours} h ${duration.inMinutes} m';
+    }
+  }
+
   static String toStopwatch(Duration duration) {
     final minutes = duration.inMinutes % 60;
     final seconds = duration.inSeconds % 60;

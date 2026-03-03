@@ -22,6 +22,7 @@ class CallsService {
 
   StreamSubscription<void>? _offersSub;
   StreamSubscription<void>? _eventsSub;
+  bool _ignoreEvents = false;
 
   late UserRepository _userRepository;
   late RtcWebSocket _webSocket;
@@ -45,15 +46,12 @@ class CallsService {
   }
 
   void _handleCallKitEvents(CallEvent? event) {
-    print('KlmLog event: ${event?.event}');
-    if (event?.event == null) return;
+    print('KlmLog event: ${event?.event}, _ignoreEvents: $_ignoreEvents');
+    if (event?.event == null || _ignoreEvents) return;
 
     switch (event!.event) {
       case Event.actionCallAccept:
-        _openCallPage(
-          event.body['extra'] as Map<dynamic, dynamic>,
-          _userRepository,
-        );
+        _openCallPage(event.body['extra'] as Map<dynamic, dynamic>, _userRepository);
         break;
       case Event.actionCallDecline:
         _webSocket.endCall(
@@ -109,90 +107,76 @@ class CallsService {
     await FlutterCallkitIncoming.showCallkitIncoming(params);
   }
 
-  Future<void> endCall(String id) async {
-    await FlutterCallkitIncoming.endCall(id);
-  }
-
   Future<void> markCallAsMissed({required UserDto otherUser}) async {
+    _ignoreEvents = true;
     await FlutterCallkitIncoming.endCall(otherUser.id.toString());
     await FlutterCallkitIncoming.showMissCallNotification(
       _generateCallKitParams(otherUser),
     );
-    return;
-
-    // final activeCalls = await FlutterCallkitIncoming.activeCalls();
-    // if (activeCalls is List && activeCalls.isNotEmpty) {
-    //   final call = activeCalls.first;
-    //   final isAccepted = (call['isAccepted'] as bool?) ?? false;
-    //   final id = call['id'];
-    //
-    //   print('KlmLog markCallAsMissed, id: $id, isAccepted: $isAccepted');
-    //
-    //   if (id == otherUser.id.toString() && !isAccepted) {
-    //     await FlutterCallkitIncoming.endCall(otherUser.id.toString());
-    //     await FlutterCallkitIncoming.showMissCallNotification(
-    //       _generateCallKitParams(otherUser),
-    //     );
-    //   }
-    // }
+    await Future<void>.delayed(const Duration(seconds: 1));
+    _ignoreEvents = false;
   }
 
-  Future<void> hideCall(String id) async {
-    await _eventsSub?.cancel();
+  Future<void> hideNotification(String id) async {
+    _ignoreEvents = true;
     await FlutterCallkitIncoming.endCall(id);
     await Future<void>.delayed(const Duration(seconds: 1));
-    _eventsSub = FlutterCallkitIncoming.onEvent.listen(_handleCallKitEvents);
+    _ignoreEvents = false;
   }
 
-  CallKitParams _generateCallKitParams(UserDto otherUser, {
+  Future<dynamic> getActiveCalls() => FlutterCallkitIncoming.activeCalls();
+
+  CallKitParams _generateCallKitParams(
+    UserDto otherUser, {
     RTCSessionDescription? offer,
-  }) =>
-      CallKitParams(
-        id: otherUser.id.toString(),
-        nameCaller: otherUser.username,
-        appName: 'KepLeoMax',
-        avatar: otherUser.profileImage,
-        type: 0,
-        textAccept: 'Accept',
-        textDecline: 'Decline',
-        missedCallNotification: const NotificationParams(
-          showNotification: true,
-          isShowCallback: true,
-          subtitle: 'Missed call',
-          callbackText: 'Call back',
-        ),
-        callingNotification: const NotificationParams(
-          showNotification: true,
-          isShowCallback: true,
-          subtitle: 'Calling...',
-          callbackText: 'Hang Up',
-        ),
-        duration: AppConstants.callingTimeout.inMilliseconds,
-        extra: offer == null
-            ? <String, dynamic>{'other_user_id': otherUser.id}
-            : {
-          'other_user_id': otherUser.id,
-          'offer_sdp': offer.sdp,
-          'offer_type': offer.type,
-        },
-        android: AndroidParams(
-          isCustomNotification: true,
-          isShowLogo: false,
-          logoUrl: otherUser.profileImage,
-          ringtonePath: 'system_ringtone_default',
-          backgroundColor: '#2196F3',
-          backgroundUrl: otherUser.profileImage,
-          actionColor: '#4CAF50;',
-          textColor: '#ffffff',
-          incomingCallNotificationChannelName: 'Incoming Call',
-          missedCallNotificationChannelName: 'Missed Call',
-          isShowCallID: false,
-        ),
-      );
+  }) => CallKitParams(
+    id: otherUser.id.toString(),
+    nameCaller: otherUser.username,
+    appName: 'KepLeoMax',
+    avatar: otherUser.profileImage,
+    type: 0,
+    textAccept: 'Accept',
+    textDecline: 'Decline',
+    missedCallNotification: const NotificationParams(
+      showNotification: true,
+      isShowCallback: true,
+      subtitle: 'Missed call',
+      callbackText: 'Call back',
+    ),
+    callingNotification: const NotificationParams(
+      showNotification: true,
+      isShowCallback: true,
+      subtitle: 'Calling...',
+      callbackText: 'Hang Up',
+    ),
+    duration: AppConstants.callingTimeout.inMilliseconds,
+    extra: offer == null
+        ? <String, dynamic>{'other_user_id': otherUser.id}
+        : {
+            'other_user_id': otherUser.id,
+            'offer_sdp': offer.sdp,
+            'offer_type': offer.type,
+          },
+    android: AndroidParams(
+      isCustomNotification: true,
+      isShowLogo: false,
+      logoUrl: otherUser.profileImage,
+      ringtonePath: 'system_ringtone_default',
+      backgroundColor: '#2196F3',
+      backgroundUrl: otherUser.profileImage,
+      actionColor: '#4CAF50;',
+      textColor: '#ffffff',
+      incomingCallNotificationChannelName: 'Incoming Call',
+      missedCallNotificationChannelName: 'Missed Call',
+      isShowCallID: false,
+    ),
+  );
 
   /// navigation
-  Future<void> _openCallPage(Map<dynamic, dynamic> extra,
-      UserRepository userRepository,) async {
+  Future<void> _openCallPage(
+    Map<dynamic, dynamic> extra,
+    UserRepository userRepository,
+  ) async {
     final otherUser = await userRepository.getUser(
       userId: extra['other_user_id'] as int,
     );
@@ -202,9 +186,9 @@ class CallsService {
         doCall: false,
         offer: (extra['offer_sdp'] != null || extra['offer_type'] != null)
             ? RTCSessionDescription(
-          extra['offer_sdp'] as String?,
-          extra['offer_type'] as String?,
-        )
+                extra['offer_sdp'] as String?,
+                extra['offer_type'] as String?,
+              )
             : null,
       ),
     );

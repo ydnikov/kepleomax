@@ -25,6 +25,7 @@ abstract class MessageDto with _$MessageDto {
     required int senderId,
     required bool isCurrentUser,
     required String message,
+    required String type,
     required bool isRead,
     required int createdAt,
     required int? editedAt,
@@ -46,6 +47,7 @@ abstract class MessageDto with _$MessageDto {
                       ? false
                       : json['is_current_user'] as bool),
         message: json['message'] as String,
+        type: json['type'] as String,
         isRead: json['is_read'] == 1
             ? true
             : json['is_read'] == 0
@@ -62,6 +64,7 @@ abstract class MessageDto with _$MessageDto {
     'sender_id': senderId,
     'is_current_user': isCurrentUser,
     'message': message,
+    'type': type,
     'is_read': isRead,
     'created_at': createdAt,
     'edited_at': editedAt,
@@ -73,6 +76,7 @@ abstract class MessageDto with _$MessageDto {
     'sender_id': senderId,
     'is_current_user': isCurrentUser ? 1 : 0,
     'message': message,
+    'type': type,
     'is_read': isRead ? 1 : 0,
     'created_at': createdAt,
     'edited_at': editedAt,
