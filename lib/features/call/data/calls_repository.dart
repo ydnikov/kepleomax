@@ -17,7 +17,7 @@ abstract class CallsRepository {
     required RTCVideoRenderer remoteRenderer,
   });
 
-  Future<void> dispose();
+  Future<void> disposeConnection();
 }
 
 class CallsRepositoryImpl implements CallsRepository {
@@ -107,7 +107,8 @@ class CallsRepositoryImpl implements CallsRepository {
   }
 
   @override
-  Future<void> dispose() async {
+  Future<void> disposeConnection() async {
+    print('KlmLog callsRepository disposeConnection');
     await _peerConnection.dispose();
   }
 }

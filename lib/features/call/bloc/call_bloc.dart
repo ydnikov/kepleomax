@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
@@ -54,8 +55,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   final CallsRepository _callsRepository;
   final RtcWebSocket _rtcWebSocket;
 
-  late StreamSubscription<void> _remoteCameraStatusSub;
-  late StreamSubscription<void> _acceptCallSub;
+  late final StreamSubscription<void> _remoteCameraStatusSub;
+  late final StreamSubscription<void> _acceptCallSub;
 
   RTCVideoRenderer? _localRenderer;
   RTCVideoRenderer? _remoteRenderer;
@@ -96,10 +97,17 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     }
   }
 
+  int _lastTimeAcceptCallCalled = 0;
   Future<void> _onAcceptCall(
     CallEventAcceptCall event,
     Emitter<CallState> emit,
   ) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (_lastTimeAcceptCallCalled + 1000 > now || flavor.isTesting) {
+      return;
+    }
+    _lastTimeAcceptCallCalled = now;
+
     try {
       if (CallsService.instance.cachedOffer == null) {
         throw Exception('Trying to accept the call, but the offer is null');
@@ -193,7 +201,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _remoteCameraStatusSub.cancel();
     _acceptCallSub.cancel();
 
-    _callsRepository.dispose().ignore();
+    _callsRepository.disposeConnection().ignore();
 
     _localRenderer?.srcObject?.dispose();
     _localRenderer?.dispose();

@@ -10,7 +10,7 @@ abstract class PeerConnectionController {
 
   Future<RTCSessionDescription> createAnswer();
 
-  Future<void> addIceCandidate(RTCIceCandidate candidate);
+  void addIceCandidate(RTCIceCandidate candidate);
 
   Future<void> setLocalDescription(RTCSessionDescription desc);
 
@@ -49,19 +49,15 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
     };
     _peerConnection!.onIceCandidate = onIceCandidate;
 
+    if (_candidatesCache.isNotEmpty) {
+      _candidatesCache
+        ..forEach(_peerConnection!.addCandidate)
+        ..clear();
+    }
+
     /// DEBUG
     _peerConnection!.onConnectionState = (RTCPeerConnectionState state) {
-      // _data = _data.copyWith(connectionState: state);
-      // add(const _CallEventEmit());
       print('KlmLog RTCPeerConnectionState: $state');
-
-      if (state == RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
-        _peerConnection!.getStats().then((stats) {
-          stats.forEach((report) {
-            print('KlmLog failed, type: ${report.type}, values: ${report.values}');
-          });
-        });
-      }
     };
 
     _peerConnection!.onIceConnectionState = (RTCIceConnectionState state) {
@@ -86,19 +82,26 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
     _peerConnection = null;
   }
 
+  List<RTCIceCandidate> _candidatesCache = [];
+
   @override
-  Future<void> addIceCandidate(RTCIceCandidate candidate) =>
+  void addIceCandidate(RTCIceCandidate candidate) {
+    if (_peerConnection != null) {
       _peerConnection!.addCandidate(candidate);
+    } else {
+      _candidatesCache.add(candidate);
+    }
+  }
 
   @override
   Future<RTCSessionDescription> createAnswer() => _peerConnection!.createAnswer();
 
   @override
-  Future<void> setLocalDescription(RTCSessionDescription desc)  =>
+  Future<void> setLocalDescription(RTCSessionDescription desc) =>
       _peerConnection!.setLocalDescription(desc);
 
   @override
-  Future<void> setRemoteDescription(RTCSessionDescription desc)  =>
+  Future<void> setRemoteDescription(RTCSessionDescription desc) async =>
       _peerConnection!.setRemoteDescription(desc);
 
   @override

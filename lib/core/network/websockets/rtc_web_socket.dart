@@ -9,10 +9,6 @@ class RtcWebSocket {
     _webSocket.eventsStream.listen((event) {
       final data = event.$2 as Map<String, dynamic>;
       switch (event.$1) {
-        case 'webrtc_offer':
-          _offersController.add(OfferUpdate.fromJson(data));
-          break;
-
         case 'webrtc_answer':
           _answersController.add(AnswerUpdate.fromJson(data));
           break;
@@ -34,7 +30,6 @@ class RtcWebSocket {
 
   final KlmWebSocket _webSocket;
 
-  final _offersController = StreamController<OfferUpdate>.broadcast();
   final _answersController = StreamController<AnswerUpdate>.broadcast();
   final _candidatesController = StreamController<CandidateUpdate>.broadcast();
   final _endCallController = StreamController<EndCallUpdate>.broadcast();
@@ -77,8 +72,6 @@ class RtcWebSocket {
       'to_user_id': toUserId,
     });
   }
-
-  Stream<OfferUpdate> get offersStream => _offersController.stream;
 
   Stream<AnswerUpdate> get answersStream => _answersController.stream;
 

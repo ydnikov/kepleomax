@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_callkit_incoming/entities/android_params.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
@@ -32,8 +34,11 @@ class CallsNotificationsService {
 
     await FlutterCallkitIncoming.endCall(callId);
 
-    await Future<void>.delayed(_ignoreEventsDuration);
-    _ignoreEvents = false;
+    unawaited(
+      Future<void>.delayed(_ignoreEventsDuration).then((_) {
+        _ignoreEvents = false;
+      }),
+    );
   }
 
   Future<void> showMissedCall({required UserDto otherUser}) async {
@@ -43,8 +48,11 @@ class CallsNotificationsService {
     final params = _generateCallKitParams(otherUser);
     await FlutterCallkitIncoming.showMissCallNotification(params);
 
-    await Future<void>.delayed(_ignoreEventsDuration);
-    _ignoreEvents = false;
+    unawaited(
+      Future<void>.delayed(_ignoreEventsDuration).then((_) {
+        _ignoreEvents = false;
+      }),
+    );
   }
 
   CallKitParams _generateCallKitParams(

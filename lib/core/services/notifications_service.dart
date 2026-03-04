@@ -3,9 +3,11 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:kepleomax/core/app.dart';
+import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/di/initialize_dependencies.dart';
 import 'package:kepleomax/core/extensions/rtc_session_description_extension.dart';
 import 'package:kepleomax/core/flavor.dart';
@@ -19,7 +21,7 @@ class NotificationService {
   NotificationService._privateConstructor();
 
   static final NotificationService instance =
-      NotificationService._privateConstructor();
+  NotificationService._privateConstructor();
 
   final _messaging = FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
@@ -32,8 +34,8 @@ class NotificationService {
     );
     await _localNotifications
         .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
+        AndroidFlutterLocalNotificationsPlugin
+    >()
         ?.createNotificationChannel(androidChannel);
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -109,8 +111,8 @@ class NotificationService {
     final List<int> messagesIds = message.data['ids'] == null
         ? []
         : (jsonDecode(message.data['ids'] as String) as List<dynamic>)
-              .map<int>((id) => id as int)
-              .toList();
+        .map<int>((id) => id as int)
+        .toList();
 
     /// check type
     final type = message.data['type'] as String?;
@@ -171,11 +173,12 @@ class NotificationService {
 
       case 'missed_call':
         {
-          print('KlmLog missed_call notification');
           final userDto = UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
           );
-          await CallsNotificationsService.instance.showMissedCall(otherUser: userDto);
+          await CallsNotificationsService.instance.showMissedCall(
+            otherUser: userDto,
+          );
           break;
         }
     }
@@ -206,11 +209,18 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
   await NotificationService.instance.setupFlutterNotifications();
   await NotificationService.instance.showNotification(message);
 
-  FlutterCallkitIncoming.onEvent.listen((event) async {
-    // if (event?.event == Event.actionCallDecline) {
-    //   await sendDeclineApiCall(event!.body['extra']['other_user_id'] as int);
-    // }
-  });
+  print('KlmLog new notification, type: ${message.data['type']}');
+  if (message.data['type'] == 'incoming_call') {
+    try {
+      /// elementAt(0) will be Event.actionCallIncoming
+      final event = await FlutterCallkitIncoming.onEvent.elementAt(1)
+          .timeout(AppConstants.callingTimeout + const Duration(seconds: 1));
+
+      if (event?.event == Event.actionCallDecline) {
+        await sendDeclineApiCall(event!.body['extra']['other_user_id'] as int);
+      }
+    } catch (_) {}
+  }
 }
 
 @pragma('vm:entry-point')

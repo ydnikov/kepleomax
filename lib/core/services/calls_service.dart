@@ -52,6 +52,7 @@ class CallsService {
   }
 
   bool _sendMissedCallNotification = true;
+
   void _callEnded(int otherUserId) {
     /// it closes the page and CallBloc will call endCall()
     _sendMissedCallNotification = false;
@@ -98,9 +99,6 @@ class CallsService {
     _userRepository = userRepository;
     _webSocket = webSocket;
 
-    _offersSub = _webSocket.offersStream.listen((offerUpdate) {
-      _incomingCall(offerUpdate.otherUserId, offerUpdate.offer);
-    });
     _callEndsSub = _webSocket.endCallStream.listen((update) {
       _callEnded(update.fromUserId);
     });
@@ -116,6 +114,13 @@ class CallsService {
       return;
 
     switch (event!.event) {
+      case Event.actionCallIncoming:
+        final extra = event.body['extra'] as Map<dynamic, dynamic>;
+        final offer = RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
+          extra,
+        );
+        _incomingCall(extra['other_user_id'] as int, offer);
+        break;
       case Event.actionCallAccept:
         final extra = event.body['extra'] as Map<dynamic, dynamic>;
         final offer = RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
