@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
@@ -28,11 +27,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     on<CallEventInit>(_onInit);
     on<CallEventCall>(_onCall);
     on<CallEventAcceptCall>(_onAcceptCall);
-    on<CallEventEndCall>(_onEndCall);
     on<CallEventFlipCamera>(_onFlipCamera);
     on<CallEventToggleCamera>(_onToggleCamera);
     on<CallEventToggleMicrophone>(_onToggleMicrophone);
     on<_CallEventEmit>(_onEmit);
+    on<_CallEventExit>(_onExit);
 
     _remoteCameraStatusSub = _rtcWebSocket.remoteCameraStatusStream.listen((
       isCameraOn,
@@ -41,18 +40,12 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       add(const _CallEventEmit());
     });
 
-    CallsService.instance.getActiveCalls().then((calls) {
-      if (calls is List && calls.isNotEmpty) {
-        if (calls[0]['isAccepted'] == true) {
-          add(const CallEventAcceptCall());
-        }
-      }
+    _acceptCallSub = CallsService.instance.acceptCallStream.listen((_) {
+      add(const CallEventAcceptCall());
     });
 
-    CallsService.instance.listen(hashCode, (event) {
-      if (isClosed) return;
-
-      if (event == Event.actionCallAccept) {
+    CallsService.instance.hasAcceptedCall().then((has) {
+      if (has) {
         add(const CallEventAcceptCall());
       }
     });
@@ -62,14 +55,13 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   final RtcWebSocket _rtcWebSocket;
 
   late StreamSubscription<void> _remoteCameraStatusSub;
+  late StreamSubscription<void> _acceptCallSub;
 
   RTCVideoRenderer? _localRenderer;
   RTCVideoRenderer? _remoteRenderer;
-  RTCSessionDescription? _cachedOffer;
   late CallData _data = CallData.initial();
 
   Future<void> _onInit(CallEventInit event, Emitter<CallState> emit) async {
-    _cachedOffer = event.offer;
     _data = _data.copyWith(otherUser: event.otherUser);
     emit(CallStateBase(data: _data));
 
@@ -78,8 +70,6 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
   Future<void> _onCall(CallEventCall event, Emitter<CallState> emit) async {
     try {
-      CallsService.instance.stopListening(hashCode);
-
       _localRenderer = await _setUpLocalRenderer();
       _remoteRenderer = await _setUpRemoteRenderer();
 
@@ -102,7 +92,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       if (isClosed) return;
-      add(const CallEventEndCall());
+      add(const _CallEventExit());
     }
   }
 
@@ -111,7 +101,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     Emitter<CallState> emit,
   ) async {
     try {
-      if (_cachedOffer == null) {
+      if (CallsService.instance.cachedOffer == null) {
         throw Exception('Trying to accept the call, but the offer is null');
       }
 
@@ -120,11 +110,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
       await _callsRepository.acceptCall(
         otherUserId: _data.otherUser.id,
-        offer: _cachedOffer!,
+        offer: CallsService.instance.cachedOffer!,
         localRenderer: _localRenderer!,
         remoteRenderer: _remoteRenderer!,
       );
-      _cachedOffer = null;
 
       _data = _data.copyWith(
         isCallAccepted: true,
@@ -134,12 +123,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       );
       emit(CallStateBase(data: _data));
 
-      unawaited(
-        CallsService.instance.hideNotification(_data.otherUser.id.toString()),
-      );
+      unawaited(CallsService.instance.callAccepted(_data.otherUser.id));
     } catch (e, st) {
       logger.e(e, stackTrace: st);
-      add(const CallEventEndCall());
+      if (isClosed) return;
+      add(const _CallEventExit());
     }
   }
 
@@ -193,8 +181,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     emit(CallStateBase(data: _data));
   }
 
-  void _onEndCall(CallEventEndCall event, Emitter<CallState> emit) {
-    print('KlmLog endCall');
+  void _onExit(_CallEventExit event, Emitter<CallState> emit) {
+    print('KlmLog onExit');
     emit(const CallStateExit());
     emit(CallStateBase(data: _data));
   }
@@ -203,10 +191,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   Future<void> close() {
     print('KlmLog CallBloc close');
     _remoteCameraStatusSub.cancel();
+    _acceptCallSub.cancel();
 
-    if (!_data.isCallAccepted && _cachedOffer == null) {
-      _rtcWebSocket.sendMissedCallNotification(_data.otherUser.id);
-    }
     _callsRepository.dispose().ignore();
 
     _localRenderer?.srcObject?.dispose();
@@ -224,8 +210,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         ..stop();
     });
 
-    CallsService.instance.hideNotification(_data.otherUser.id.toString());
-    CallsService.instance.endCallAndClosePage(_data.otherUser.id);
+    CallsService.instance.endCall(
+      _data.otherUser.id,
+      isCallAccepted: _data.isCallAccepted,
+    );
 
     return super.close();
   }
@@ -264,8 +252,8 @@ class CallEventFlipCamera implements CallEvent {
   const CallEventFlipCamera();
 }
 
-class CallEventEndCall implements CallEvent {
-  const CallEventEndCall();
+class _CallEventExit implements CallEvent {
+  const _CallEventExit();
 }
 
 class _CallEventEmit implements CallEvent {

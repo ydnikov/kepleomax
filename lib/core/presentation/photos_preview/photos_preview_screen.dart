@@ -8,7 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gal/gal.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
-import 'package:kepleomax/core/presentation/context_wrapper.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_cached_image.dart';
 import 'package:num_remap/num_remap.dart';

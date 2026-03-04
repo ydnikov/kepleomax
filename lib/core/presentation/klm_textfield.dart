@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/presentation/context_wrapper.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/scopes/user_activity_scope.dart';
 
 class KlmTextField extends StatefulWidget {

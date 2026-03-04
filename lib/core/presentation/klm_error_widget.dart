@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kepleomax/core/presentation/context_wrapper.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 
 import 'package:kepleomax/core/presentation/klm_button.dart' show KlmButton;
 

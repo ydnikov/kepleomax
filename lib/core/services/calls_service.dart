@@ -1,16 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter_callkit_incoming/entities/android_params.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
-import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
-import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app.dart';
-import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
-import 'package:kepleomax/core/network/common/user_dto.dart';
+import 'package:kepleomax/core/extensions/rtc_session_description_extension.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
+import 'package:kepleomax/core/services/calls_notifications_service.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 
 class CallsService {
@@ -23,11 +20,78 @@ class CallsService {
   StreamSubscription<void>? _offersSub;
   StreamSubscription<void>? _callEndsSub;
   StreamSubscription<void>? _eventsSub;
-  bool _ignoreEvents = false;
+  RTCSessionDescription? _cachedOffer;
+  final _acceptCallController = StreamController<void>.broadcast();
 
   late UserRepository _userRepository;
   late RtcWebSocket _webSocket;
 
+  /// main methods
+  Future<void> _incomingCall(int otherUserId, RTCSessionDescription? offer) async {
+    _cachedOffer = offer;
+
+    /// TODO getUserFromCacheOrApi
+    final otherUser = await _userRepository.getUser(userId: otherUserId);
+    mainNavigatorGlobalKey.currentState!.push(
+      CallPage(otherUser: otherUser, doCall: false, offer: offer),
+    );
+  }
+
+  Future<void> _incomingCallAndAccept(
+    int otherUserId,
+    RTCSessionDescription? offer,
+  ) async {
+    if (_cachedOffer == null) {
+      /// _webSocket.offersStream hasn't received event, app was not connected (like in background)
+      await _incomingCall(otherUserId, offer);
+    } else {
+      /// app is connected (in foreground), call screen is already opened
+    }
+
+    _acceptCallController.add(null);
+  }
+
+  bool _sendMissedCallNotification = true;
+  void _callEnded(int otherUserId) {
+    /// it closes the page and CallBloc will call endCall()
+    _sendMissedCallNotification = false;
+    mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
+  }
+
+  Future<void> callAccepted(int otherUserId) async {
+    _cachedOffer = null;
+
+    await CallsNotificationsService.instance.hideNotification(
+      otherUserId.toString(),
+    );
+  }
+
+  Future<void> endCall(int otherUserId, {required bool isCallAccepted}) async {
+    if (!isCallAccepted && _sendMissedCallNotification) {
+      final bool isCurrentUserCaller = _cachedOffer == null;
+      if (isCurrentUserCaller) {
+        print('KlmLog sendMissedCallNotification');
+        _webSocket.sendMissedCallNotification(otherUserId);
+      }
+    }
+    if (!_sendMissedCallNotification) {
+      _sendMissedCallNotification = true;
+    }
+
+    _cachedOffer = null;
+
+    _webSocket.endCall(otherUserId);
+
+    await CallsNotificationsService.instance.hideNotification(
+      otherUserId.toString(),
+    );
+  }
+
+  RTCSessionDescription? get cachedOffer => _cachedOffer;
+
+  Stream<void> get acceptCallStream => _acceptCallController.stream;
+
+  /// other
   void subscribeOnEvents(RtcWebSocket webSocket, UserRepository userRepository) {
     print('KlmLog subscribeOnEvents');
 
@@ -35,52 +99,42 @@ class CallsService {
     _webSocket = webSocket;
 
     _offersSub = _webSocket.offersStream.listen((offerUpdate) {
-      _openCallPage({
-        'other_user_id': offerUpdate.otherUserId,
-        'offer_sdp': offerUpdate.offer.sdp,
-        'offer_type': offerUpdate.offer.type,
-      }, _userRepository);
+      _incomingCall(offerUpdate.otherUserId, offerUpdate.offer);
     });
     _callEndsSub = _webSocket.endCallStream.listen((update) {
-      endCallAndClosePage(update.fromUserId);
+      _callEnded(update.fromUserId);
     });
 
     _eventsSub = FlutterCallkitIncoming.onEvent.listen(_handleCallKitEvents);
   }
 
   void _handleCallKitEvents(CallEvent? event) {
-    print('KlmLog event: ${event?.event}, _ignoreEvents: $_ignoreEvents');
-    if (event?.event == null || _ignoreEvents) return;
+    print(
+      'KlmLog event: ${event?.event}, ignore: ${CallsNotificationsService.instance.ignoreEvents}',
+    );
+    if (event?.event == null || CallsNotificationsService.instance.ignoreEvents)
+      return;
 
     switch (event!.event) {
       case Event.actionCallAccept:
-        _openCallPage(event.body['extra'] as Map<dynamic, dynamic>, _userRepository);
+        final extra = event.body['extra'] as Map<dynamic, dynamic>;
+        final offer = RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
+          extra,
+        );
+        _incomingCallAndAccept(extra['other_user_id'] as int, offer);
         break;
       case Event.actionCallDecline:
-        endCallAndClosePage(event.body['extra']['other_user_id'] as int);
+        endCall(event.body['extra']['other_user_id'] as int, isCallAccepted: false);
         break;
+
       default:
         break;
     }
-    for (final callback in _additionListeners.values) {
-      callback(event.event);
-    }
-  }
-
-  final _additionListeners = <int, void Function(Event)>{};
-
-  void listen(int subscriberId, void Function(Event) callback) {
-    _additionListeners[subscriberId] = callback;
-  }
-
-  void stopListening(int subscriberId) {
-    _additionListeners.remove(subscriberId);
   }
 
   void unsubscribeFromEvents() {
     print('KlmLog unsubscribeFromEvents');
 
-    _additionListeners.clear();
     _offersSub?.cancel();
     _eventsSub?.cancel();
     _callEndsSub?.cancel();
@@ -93,116 +147,23 @@ class CallsService {
     FlutterCallkitIncoming.activeCalls().then((calls) {
       if (calls is List && calls.isNotEmpty) {
         if (calls[0]['isAccepted'] == true) {
-          _openCallPage(calls[0]['extra'] as Map<dynamic, dynamic>, userRepository);
+          final extra = calls[0]['extra'] as Map<dynamic, dynamic>;
+          final offer = RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
+            extra,
+          );
+          _incomingCallAndAccept(extra['other_user_id'] as int, offer);
         }
       }
     });
   }
 
-  Future<void> showIncomingCall({
-    required UserDto otherUser,
-    RTCSessionDescription? offer,
-  }) async {
-    final params = _generateCallKitParams(otherUser, offer: offer);
-    await FlutterCallkitIncoming.showCallkitIncoming(params);
-  }
-
-  Future<void> markCallAsMissed({required UserDto otherUser}) async {
-    _ignoreEvents = true;
-    await FlutterCallkitIncoming.endCall(otherUser.id.toString());
-    await FlutterCallkitIncoming.showMissCallNotification(
-      _generateCallKitParams(otherUser),
-    );
-    await Future<void>.delayed(const Duration(seconds: 1));
-    _ignoreEvents = false;
-  }
-
-  Future<void> hideNotification(String id) async {
-    _ignoreEvents = true;
-    await FlutterCallkitIncoming.endCall(id);
-    await Future<void>.delayed(const Duration(seconds: 1));
-    _ignoreEvents = false;
-  }
-
-  Future<dynamic> getActiveCalls() => FlutterCallkitIncoming.activeCalls();
-
-  CallKitParams _generateCallKitParams(
-    UserDto otherUser, {
-    RTCSessionDescription? offer,
-  }) => CallKitParams(
-    id: otherUser.id.toString(),
-    nameCaller: otherUser.username,
-    appName: 'KepLeoMax',
-    avatar: otherUser.profileImage,
-    type: 0,
-    textAccept: 'Accept',
-    textDecline: 'Decline',
-    missedCallNotification: const NotificationParams(
-      showNotification: true,
-      isShowCallback: true,
-      subtitle: 'Missed call',
-      callbackText: 'Call back',
-    ),
-    callingNotification: const NotificationParams(
-      showNotification: true,
-      isShowCallback: true,
-      subtitle: 'Calling...',
-      callbackText: 'Hang Up',
-    ),
-    duration: AppConstants.callingTimeout.inMilliseconds,
-    extra: offer == null
-        ? <String, dynamic>{'other_user_id': otherUser.id}
-        : {
-            'other_user_id': otherUser.id,
-            'offer_sdp': offer.sdp,
-            'offer_type': offer.type,
-          },
-    android: AndroidParams(
-      isCustomNotification: true,
-      isShowLogo: false,
-      logoUrl: otherUser.profileImage,
-      ringtonePath: 'system_ringtone_default',
-      backgroundColor: '#2196F3',
-      backgroundUrl: otherUser.profileImage,
-      actionColor: '#4CAF50;',
-      textColor: '#ffffff',
-      incomingCallNotificationChannelName: 'Incoming Call',
-      missedCallNotificationChannelName: 'Missed Call',
-      isShowCallID: false,
-    ),
-  );
-
-  /// navigation
-  Future<void> _openCallPage(
-    Map<dynamic, dynamic> extra,
-    UserRepository userRepository,
-  ) async {
-    final otherUser = await userRepository.getUser(
-      userId: extra['other_user_id'] as int,
-    );
-    mainNavigatorGlobalKey.currentState!.push(
-      CallPage(
-        otherUser: otherUser,
-        doCall: false,
-        offer: (extra['offer_sdp'] != null || extra['offer_type'] != null)
-            ? RTCSessionDescription(
-                extra['offer_sdp'] as String?,
-                extra['offer_type'] as String?,
-              )
-            : null,
-      ),
-    );
-  }
-
-  int _endCallWasCalled = 0;
-  void endCallAndClosePage(int otherUserId) {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    if (_endCallWasCalled + 300 > now) {
-      return;
+  Future<bool> hasAcceptedCall() async {
+    final calls = await FlutterCallkitIncoming.activeCalls();
+    if (calls is List && calls.isNotEmpty) {
+      if (calls[0]['isAccepted'] == true) {
+        return true;
+      }
     }
-    _endCallWasCalled = now;
-
-    _webSocket.endCall(otherUserId);
-    mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
+    return false;
   }
 }

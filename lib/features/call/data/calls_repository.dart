@@ -33,6 +33,7 @@ class CallsRepositoryImpl implements CallsRepository {
 
   final RtcWebSocket _webSocket;
   final PeerConnectionController _peerConnection;
+  int? _doCallLastInstanceId;
 
   @override
   Future<void> doCall({
@@ -40,12 +41,14 @@ class CallsRepositoryImpl implements CallsRepository {
     required RTCVideoRenderer localRenderer,
     required RTCVideoRenderer remoteRenderer,
   }) async {
+    _doCallLastInstanceId = DateTime.now().millisecondsSinceEpoch;
+    final currentInstanceId = _doCallLastInstanceId;
+
     final iceCandidates = <RTCIceCandidate>[];
     bool isRemoteDescriptionSet = false;
     await _peerConnection.init(
       onTrack: (track) {
         if (track.track.kind == 'video') {
-          print('KlmLog set track from otherUser');
           remoteRenderer.srcObject = track.streams[0];
         }
       },
@@ -66,7 +69,8 @@ class CallsRepositoryImpl implements CallsRepository {
     final answer = await _webSocket.answersStream.first.timeout(
       AppConstants.callingTimeout,
     );
-    if (!_peerConnection.isActive) return;
+    if (!_peerConnection.isActive || _doCallLastInstanceId != currentInstanceId)
+      return;
 
     await _peerConnection.setLocalDescription(offer);
     await _peerConnection.setRemoteDescription(answer.answer);

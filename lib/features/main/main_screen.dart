@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/presentation/context_wrapper.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/features/chats/bloc/chats_bloc.dart';
 import 'package:kepleomax/features/chats/bloc/chats_state.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/presentation/context_wrapper.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_button.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
 import 'package:kepleomax/core/presentation/validators.dart';

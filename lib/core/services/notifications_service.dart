@@ -3,17 +3,16 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app.dart';
 import 'package:kepleomax/core/di/initialize_dependencies.dart';
+import 'package:kepleomax/core/extensions/rtc_session_description_extension.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
-import 'package:kepleomax/core/services/calls_service.dart';
+import 'package:kepleomax/core/services/calls_notifications_service.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 
 class NotificationService {
@@ -160,23 +159,23 @@ class NotificationService {
         }
 
       case 'incoming_call':
-        await CallsService.instance.showIncomingCall(
+        await CallsNotificationsService.instance.showIncomingCall(
           otherUser: UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
           ),
-          offer: RTCSessionDescription(
-            message.data['offer_sdp'] as String?,
-            message.data['offer_type'] as String?,
+          offer: RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
+            message.data,
           ),
         );
         break;
 
       case 'missed_call':
         {
+          print('KlmLog missed_call notification');
           final userDto = UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
           );
-          await CallsService.instance.markCallAsMissed(otherUser: userDto);
+          await CallsNotificationsService.instance.showMissedCall(otherUser: userDto);
           break;
         }
     }
@@ -208,9 +207,9 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
   await NotificationService.instance.showNotification(message);
 
   FlutterCallkitIncoming.onEvent.listen((event) async {
-    if (event?.event == Event.actionCallDecline) {
-      await sendDeclineApiCall(event!.body['extra']['other_user_id'] as int);
-    }
+    // if (event?.event == Event.actionCallDecline) {
+    //   await sendDeclineApiCall(event!.body['extra']['other_user_id'] as int);
+    // }
   });
 }
 

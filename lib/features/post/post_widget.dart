@@ -6,7 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/post.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
-import 'package:kepleomax/core/presentation/context_wrapper.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_cached_image.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/photos_preview/photos_preview_screen.dart';

@@ -7,7 +7,7 @@ import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/presentation/context_wrapper.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_button.dart';
 import 'package:kepleomax/core/presentation/klm_error_widget.dart';

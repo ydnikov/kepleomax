@@ -28,8 +28,8 @@ class Flavor {
   );
 
   factory Flavor.devLocal() => Flavor(
-    baseUrl: 'http://192.168.0.106:13000',
-    imageUrl: 'http://192.168.0.106:13000/api/files/',
+    baseUrl: 'http://192.168.0.104:13000',
+    imageUrl: 'http://192.168.0.104:13000/api/files/',
     type: FlavorType.develop,
     constants: AppConstantsType.develop(),
   );

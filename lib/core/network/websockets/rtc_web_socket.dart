@@ -73,7 +73,9 @@ class RtcWebSocket {
   }
 
   void sendMissedCallNotification(int toUserId) {
-    _webSocket.emit('webrtc_send_missed_call_notification', {'to_user_id'});
+    _webSocket.emit('webrtc_send_missed_call_notification', {
+      'to_user_id': toUserId,
+    });
   }
 
   Stream<OfferUpdate> get offersStream => _offersController.stream;

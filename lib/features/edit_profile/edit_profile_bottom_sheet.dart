@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/user_profile.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/presentation/context_wrapper.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_cached_image.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
