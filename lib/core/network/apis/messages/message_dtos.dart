@@ -25,11 +25,11 @@ abstract class MessageDto with _$MessageDto {
     required int senderId,
     required bool isCurrentUser,
     required String message,
-    required String type,
     required bool isRead,
     required int createdAt,
     required int? editedAt,
     required bool fromCache,
+    @Default('message') String type,
   }) = _MessageDto;
   const MessageDto._();
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
-import 'package:kepleomax/features/chat/chat_screen.dart';
+import 'package:kepleomax/features/chat/widgets/message_widget.dart';
 import 'package:kepleomax/features/chats/chats_screen.dart';
 
 part 'checkers.dart';

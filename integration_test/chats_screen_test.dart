@@ -10,8 +10,8 @@ import 'package:kepleomax/core/app.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/data/local_data_sources/local_database_manager.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
-import 'package:kepleomax/core/di/initialize_dependencies.dart';
 import 'package:kepleomax/core/flavor.dart';
+import 'package:kepleomax/core/models/call_model.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
@@ -22,6 +22,8 @@ import 'package:kepleomax/core/network/websockets/models/typing_activity_update.
 import 'package:mockito/mockito.dart';
 import 'package:retrofit/dio.dart';
 
+import 'initialize_tests_dependencies.dart';
+import 'mocks/mock_klm_web_socket.dart';
 import 'mocks/mock_messages_web_socket.dart';
 import 'mocks/mockito_mocks.mocks.dart';
 import 'utils/mock_objects.dart';
@@ -32,7 +34,8 @@ void main() {
 
   group('chats_screen_tests', () {
     late Dependencies dp;
-    late MockMessagesWebSocket ws;
+    late MockMessengerWebSocket ws;
+    late MockKlmWebSocket baseWs;
     late Completer<void> _getChatsCompleter;
 
     setUpAll(() {
@@ -40,8 +43,9 @@ void main() {
     });
 
     setUp(() async {
-      dp = await initializeDependencies();
-      ws = dp.messengerWebSocket as MockMessagesWebSocket;
+      dp = await initializeTestsDependencies();
+      ws = dp.messengerWebSocket as MockMessengerWebSocket;
+      baseWs = dp.klmWebSocket as MockKlmWebSocket;
       await dp.authController.setUser(User.testing());
     });
 
@@ -67,7 +71,7 @@ void main() {
       if (!connect) {
         return;
       }
-      ws.setIsConnected(true);
+      baseWs.setIsConnected(true);
       if (getChatsAsyncControl) {
         await tester.pump();
       } else {
@@ -91,10 +95,10 @@ void main() {
     }
 
     Future<void> restartApp(WidgetTester tester) async {
-      ws.setIsConnected(false);
+      baseWs.setIsConnected(false);
       await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(dp.inject(child: const App()));
-      ws.setIsConnected(true);
+      baseWs.setIsConnected(true);
       await tester.pumpAndSettle();
     }
 
@@ -105,7 +109,7 @@ void main() {
         ..checkFindPeopleButton(isShown: false);
 
       /// connect, check
-      ws.setIsConnected(true);
+      baseWs.setIsConnected(true);
       await tester.pump();
       tester
         ..checkChatsAppBarStatus(ChatsAppBarStatus.updating)
@@ -118,14 +122,14 @@ void main() {
         ..checkFindPeopleButton(isShown: true);
 
       /// disconnect, check
-      ws.setIsConnected(false);
+      baseWs.setIsConnected(false);
       await tester.pump();
       tester
         ..checkChatsAppBarStatus(ChatsAppBarStatus.connecting)
         ..checkFindPeopleButton(isShown: true);
 
       /// connect, check
-      ws.setIsConnected(true);
+      baseWs.setIsConnected(true);
       await tester.pump();
       tester
         ..checkChatsAppBarStatus(ChatsAppBarStatus.updating)
@@ -518,6 +522,83 @@ void main() {
       tester.getChat(0).check(message: messageDto1.message);
       await sendGetChatsResponse(tester);
       tester.getChat(0).check(message: messageDto1.message);
+    });
+
+    testWidgets('incoming_call_test', (tester) async {
+      await setupAppWithChats(tester, [chatDto2], getChatsAsyncControl: true);
+      await sendGetChatsResponse(tester);
+
+      /// send call message, check
+      ws.addMessage(createCallMessage(callerId: 3, answererId: 0, callType: CallType.incoming, isRead: true));
+      await tester.pumpAndSettle();
+      tester.getChat(2).check(unreadCount: 0, message: 'Incoming Call', msgFromCurrentUser: false);
+
+      /// check cache
+      await restartApp(tester);
+      tester.getChat(2).check(unreadCount: 0, message: 'Incoming Call');
+    });
+
+    testWidgets('outgoing_call_test', (tester) async {
+      await setupAppWithChats(tester, [chatDto2], getChatsAsyncControl: true);
+      await sendGetChatsResponse(tester);
+
+      /// send call message, check
+      ws.addMessage(createCallMessage(callerId: 0, answererId: 3, callType: CallType.outgoing, isRead: true));
+      await tester.pumpAndSettle();
+      tester.getChat(2).check(unreadCount: 0, message: 'Outgoing Call', msgFromCurrentUser: true);
+
+      /// check cache
+      await restartApp(tester);
+      tester.getChat(2).check(unreadCount: 0, message: 'Outgoing Call', msgFromCurrentUser: true);
+    });
+
+    testWidgets('missed_call_test', (tester) async {
+      await setupAppWithChats(tester, [chatDto2], getChatsAsyncControl: true);
+      await sendGetChatsResponse(tester);
+
+      /// check chat, send call message, check
+      tester.getChat(2).check(unreadCount: 0);
+      ws.addMessage(createCallMessage(callerId: 3, answererId: 0, callType: CallType.missed, isRead: false));
+      await tester.pumpAndSettle();
+      tester.getChat(2).check(unreadCount: 1, message: 'Missed Call', msgFromCurrentUser: false);
+
+      /// check cache
+      await restartApp(tester);
+      tester.getChat(2).check(unreadCount: 1, message: 'Missed Call', msgFromCurrentUser: false);
+    });
+
+    testWidgets('canceled_call_test', (tester) async {
+      await setupAppWithChats(tester, [chatDto2], getChatsAsyncControl: true);
+      await sendGetChatsResponse(tester);
+
+      /// send call message, check
+      ws.addMessage(createCallMessage(callerId: 0, answererId: 3, callType: CallType.canceled, isRead: false));
+      await tester.pumpAndSettle();
+      tester.getChat(2).check(unreadCount: 0, message: 'Canceled Call', msgFromCurrentUser: true);
+
+      /// check cache
+      await restartApp(tester);
+      tester.getChat(2).check(unreadCount: 0, message: 'Canceled Call', msgFromCurrentUser: true);
+    });
+
+    testWidgets('missed_and_incoming_call_test', (tester) async {
+      await setupAppWithChats(tester, [chatDto2], getChatsAsyncControl: true);
+      await sendGetChatsResponse(tester);
+
+      /// check chat, send call message, check
+      tester.getChat(2).check(unreadCount: 0);
+      ws.addMessage(createCallMessage(callerId: 3, answererId: 0, callType: CallType.missed, isRead: false));
+      await tester.pumpAndSettle();
+      tester.getChat(2).check(unreadCount: 1, message: 'Missed Call', msgFromCurrentUser: false);
+
+      /// send call message, check
+      ws.addMessage(createCallMessage(callerId: 3, answererId: 0, callType: CallType.incoming, isRead: true, createdAt: 1210));
+      await tester.pumpAndSettle();
+      tester.getChat(2).check(unreadCount: 1, message: 'Incoming Call', msgFromCurrentUser: false);
+
+      /// check cache
+      await restartApp(tester);
+      tester.getChat(2).check(unreadCount: 1, message: 'Incoming Call', msgFromCurrentUser: false);
     });
 
     /// TODO error cases test ?

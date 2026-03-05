@@ -25,6 +25,7 @@ import 'package:mockito/mockito.dart';
 import 'package:retrofit/dio.dart';
 
 import 'initialize_tests_dependencies.dart';
+import 'mocks/mock_klm_web_socket.dart';
 import 'mocks/mock_messages_web_socket.dart';
 import 'mocks/mockito_mocks.mocks.dart';
 import 'utils/mock_objects.dart';
@@ -35,7 +36,8 @@ void main() {
 
   group('chat_screen_tests', () {
     late Dependencies dp;
-    late MockMessagesWebSocket ws;
+    late MockMessengerWebSocket ws;
+    late MockKlmWebSocket baseWs;
     late Completer<void> _getMessagesCompleter;
     late Completer<void> _getChatWithIdCompleter;
 
@@ -45,7 +47,8 @@ void main() {
 
     setUp(() async {
       dp = await initializeTestsDependencies();
-      ws = dp.messengerWebSocket as MockMessagesWebSocket;
+      ws = dp.messengerWebSocket as MockMessengerWebSocket;
+      baseWs = dp.klmWebSocket as MockKlmWebSocket;
       await dp.authController.setUser(User.testing());
     });
 
@@ -54,10 +57,10 @@ void main() {
     });
 
     Future<void> restartApp(WidgetTester tester) async {
-      ws.setIsConnected(false);
+      baseWs.setIsConnected(false);
       await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(dp.inject(child: const App()));
-      ws.setIsConnected(true);
+      baseWs.setIsConnected(true);
       await tester.pumpAndSettle();
     }
 
@@ -107,7 +110,7 @@ void main() {
       }
 
       await tester.pumpWidget(dp.inject(child: const App()));
-      ws.setIsConnected(true);
+      baseWs.setIsConnected(true);
       await tester.pumpAndSettle();
 
       if (chats.isNotEmpty) {
@@ -156,7 +159,7 @@ void main() {
         ..checkMessagesOrder([0, 1, 2, 3, 4]);
 
       /// disconnect, check
-      ws.setIsConnected(false);
+      baseWs.setIsConnected(false);
       await tester.pump();
       tester
         ..checkChatAppBarStatus(ChatAppBarStatus.connecting)
@@ -164,7 +167,7 @@ void main() {
         ..checkMessagesOrder([0, 1, 2, 3, 4]);
 
       /// connect, check
-      ws.setIsConnected(true);
+      baseWs.setIsConnected(true);
       await tester.pump();
       tester
         ..checkChatAppBarStatus(ChatAppBarStatus.updating)
@@ -214,12 +217,12 @@ void main() {
 
       /// check, send message from anotherUser, check
       tester.checkMessagesOrder([0, 1, 2, 3, 4]);
-      ws.addMessage(const MessageDto(id: 10, chatId: 1, senderId: 1, isCurrentUser: false, message: 'MSG_10', isRead: false, createdAt: 1500, editedAt: null, fromCache: false));
+      ws.addMessage(const MessageDto(id: 10, chatId: 1, senderId: 1, isCurrentUser: false, message: 'MSG_10', type: 'message', isRead: false, createdAt: 1500, editedAt: null, fromCache: false));
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([0, 1, 2, 3, 4]);
 
       /// send message from currentUser, check
-      ws.addMessage(const MessageDto(id: 11, chatId: 1, senderId: 0, isCurrentUser: true, message: 'MSG_11', isRead: false, createdAt: 1550, editedAt: null, fromCache: false));
+      ws.addMessage(const MessageDto(id: 11, chatId: 1, senderId: 0, isCurrentUser: true, message: 'MSG_11', type: 'message', isRead: false, createdAt: 1550, editedAt: null, fromCache: false));
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([0, 1, 2, 3, 4]);
     });
@@ -520,7 +523,7 @@ void main() {
       tester.checkChatsOrder([]);
       await tester.pump(const Duration(milliseconds: 100));
 
-      ws.addMessage(const MessageDto(id: 13, chatId: 7, senderId: 10, isCurrentUser: false, message: 'MSG_0', isRead: false, createdAt: 1000, editedAt: null, fromCache: false), createdChatInfo: CreatedChatInfo(chatId: 7, usersIds: [0, 10]));
+      ws.addMessage(const MessageDto(id: 13, chatId: 7, senderId: 10, isCurrentUser: false, message: 'MSG_0', type: 'message', isRead: false, createdAt: 1000, editedAt: null, fromCache: false), createdChatInfo: CreatedChatInfo(chatId: 7, usersIds: [0, 10]));
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([13]);
     });

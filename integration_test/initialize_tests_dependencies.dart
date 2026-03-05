@@ -33,7 +33,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'mocks/fake_user_api.dart';
+import 'mocks/mock_klm_web_socket.dart';
 import 'mocks/mock_messages_web_socket.dart';
+import 'mocks/mock_rtc_web_socket.dart';
 import 'mocks/mock_token_provider.dart';
 import 'mocks/mockito_mocks.mocks.dart';
 
@@ -100,16 +102,13 @@ List<_InitializationStep> _steps = [
     dp.tokenProvider = MockTokenProvider();
   }),
 
-  _InitializationStep(
-    'auth_apis',
-    (dp) async {
-      dp
-        ..authApi = AuthApi(dp.dio, flavor.baseUrl)
-        ..userApi = FakeUserApi()
-        ..profileApi = ProfileApi(dp.dio, flavor.baseUrl)
-        ..filesApi = FilesApi(dp.dio, flavor.baseUrl);
-    },
-  ),
+  _InitializationStep('auth_apis', (dp) async {
+    dp
+      ..authApi = AuthApi(dp.dio, flavor.baseUrl)
+      ..userApi = FakeUserApi()
+      ..profileApi = ProfileApi(dp.dio, flavor.baseUrl)
+      ..filesApi = FilesApi(dp.dio, flavor.baseUrl);
+  }),
 
   _InitializationStep('auth', (dp) async {
     dp
@@ -137,22 +136,19 @@ List<_InitializationStep> _steps = [
     );
   }),
 
-  _InitializationStep(
-    'web_socket',
-    (dp) async {
-      dp.messengerWebSocket = MockMessagesWebSocket();
-    },
-  ),
+  _InitializationStep('web_socket', (dp) async {
+    dp
+      ..klmWebSocket = MockKlmWebSocket()
+      ..messengerWebSocket = MockMessengerWebSocket()
+      ..rtcWebSocket = MockRtcWebSocket();
+  }),
 
-  _InitializationStep(
-    'apis',
-    (dp) async {
-      dp
-        ..postApi = PostApi(dp.dio, flavor.baseUrl)
-        ..messagesApi = MockMessagesApi()
-        ..chatsApi = MockChatsApi();
-    },
-  ),
+  _InitializationStep('apis', (dp) async {
+    dp
+      ..postApi = PostApi(dp.dio, flavor.baseUrl)
+      ..messagesApi = MockMessagesApi()
+      ..chatsApi = MockChatsApi();
+  }),
 
   _InitializationStep('repositories', (dp) async {
     final chatsApiDataSource = ChatsApiDataSourceImpl(chatsApi: dp.chatsApi);
@@ -161,7 +157,7 @@ List<_InitializationStep> _steps = [
       ..filesRepository = FilesRepositoryImpl(filesApi: dp.filesApi)
       ..postRepository = PostRepositoryImpl(postApi: dp.postApi)
       ..connectionRepository = ConnectionRepositoryImpl(
-        webSocket: dp.messengerWebSocket,
+        klmWebSocket: dp.klmWebSocket,
       )
       ..messengerRepository = MessengerRepositoryImpl(
         webSocket: dp.messengerWebSocket,

@@ -33,7 +33,9 @@ extension _OnNewMessageUpdateExtension on MessengerRepositoryImpl {
         (chat) => chat.id == messageDto.chatId,
       );
       if (affectedChat != null) {
-        _chatsLocal.increaseUnreadCountBy1(affectedChat.id);
+        if (!messageDto.isCurrentUser && !messageDto.isRead) {
+          _chatsLocal.increaseUnreadCountBy1(affectedChat.id);
+        }
         newChats
           ..remove(affectedChat)
           ..insert(

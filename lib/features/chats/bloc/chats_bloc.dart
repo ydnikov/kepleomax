@@ -83,7 +83,6 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
     try {
       await _messengerRepository.loadChats();
     } catch (e, st) {
-      /// TODO ?
       add(_ChatsEventEmitError(error: e, stackTrace: st));
     }
   }

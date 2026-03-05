@@ -8,6 +8,8 @@ part 'message.freezed.dart';
 
 @freezed
 abstract class Message with _$Message {
+  /// TODO make it better
+  /// used to display line in the ui
   const factory Message({
     required int id,
     required int chatId,
@@ -21,6 +23,8 @@ abstract class Message with _$Message {
     required DateTime? editedAt,
     CallModel? callData,
   }) = _Message;
+
+  const Message._();
 
   factory Message.loading() => Message(
     id: -10,
@@ -56,10 +60,8 @@ abstract class Message with _$Message {
     );
   }
 
-  /// TODO make it better
-  /// used to display line in the ui
   factory Message.unreadMessages() => Message(
-    id: -11,
+    id: unreadMessagesId,
     senderId: -1,
     fromCache: false,
     // TODO true or false to work properly?
@@ -74,7 +76,7 @@ abstract class Message with _$Message {
   );
 
   factory Message.date(DateTime dateTime) => Message(
-    id: -12,
+    id: dateId,
     senderId: -1,
     fromCache: false,
     isCurrentUser: false,
@@ -87,7 +89,9 @@ abstract class Message with _$Message {
     editedAt: null,
   );
 
-  const Message._();
+  /// for testing
+  static const unreadMessagesId = -11;
+  static const dateId = -12;
 
   bool get isSystem => [
     MessageType.loading,
@@ -100,8 +104,6 @@ abstract class Message with _$Message {
     chatId: chatId,
     senderId: senderId,
     isCurrentUser: isCurrentUser,
-    //user: user.toDto(),
-    //otherUserId: null,
     type: messageTypeToString(type),
     message: message,
     isRead: isRead,

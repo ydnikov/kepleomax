@@ -8,18 +8,12 @@ import 'package:kepleomax/core/network/websockets/models/online_status_update.da
 import 'package:kepleomax/core/network/websockets/models/read_messages_update.dart';
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
 
-class MockMessagesWebSocket implements MessengerWebSocket {
+class MockMessengerWebSocket implements MessengerWebSocket {
   /// testing stuff
-  bool _isConnected = false;
   int? _nextSendMessageId;
   final _readMessagesBeforeTimeWasCalls = <(int, DateTime)>[];
   final _readAllCalls = <int>[];
   final _deleteMessageCalls = <int>[];
-
-  void setIsConnected(bool value) {
-    _isConnected = value;
-    _connectionController.add(value);
-  }
 
   void addMessage(MessageDto messageDto, {CreatedChatInfo? createdChatInfo}) =>
       _messageController.add(
@@ -68,7 +62,6 @@ class MockMessagesWebSocket implements MessengerWebSocket {
       StreamController.broadcast();
   final StreamController<DeletedMessageUpdate> _deletedMessageController =
       StreamController.broadcast();
-  final StreamController<bool> _connectionController = StreamController.broadcast();
   final StreamController<OnlineStatusUpdate> _onlineUpdatesController =
       StreamController.broadcast();
   final StreamController<TypingActivityUpdate> _typingUpdatesController =
@@ -108,6 +101,7 @@ class MockMessagesWebSocket implements MessengerWebSocket {
           senderId: 0,
           isCurrentUser: true,
           message: '$message FIX THIS METHOD',
+          type: 'message',
           isRead: false,
           createdAt: 2000,
           editedAt: null,

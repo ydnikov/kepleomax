@@ -57,7 +57,7 @@ class AuthControllerImpl implements AuthController {
     final user = _userRepository.getCurrentUserFromCache();
     _user = user;
 
-    if (_user == null) return;
+    if (_user == null || flavor.isTesting) return;
 
     Future(() async {
       try {
