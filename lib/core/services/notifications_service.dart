@@ -21,7 +21,7 @@ class NotificationService {
   NotificationService._privateConstructor();
 
   static final NotificationService instance =
-  NotificationService._privateConstructor();
+      NotificationService._privateConstructor();
 
   final _messaging = FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
@@ -34,8 +34,8 @@ class NotificationService {
     );
     await _localNotifications
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin
-    >()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(androidChannel);
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -59,7 +59,7 @@ class NotificationService {
 
     await setupFlutterNotifications();
 
-    FirebaseMessaging.onMessage.listen(showNotification);
+    FirebaseMessaging.onMessage.listen(handleNotification);
 
     FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
 
@@ -102,7 +102,7 @@ class NotificationService {
     });
   }
 
-  Future<void> showNotification(RemoteMessage message) async {
+  Future<void> handleNotification(RemoteMessage message) async {
     // TODO came up with something
     // final userProvider = UserProvider(prefs: await SharedPreferences.getInstance());
     // final user = await userProvider.getSavedUser();
@@ -111,8 +111,8 @@ class NotificationService {
     final List<int> messagesIds = message.data['ids'] == null
         ? []
         : (jsonDecode(message.data['ids'] as String) as List<dynamic>)
-        .map<int>((id) => id as int)
-        .toList();
+              .map<int>((id) => id as int)
+              .toList();
 
     /// check type
     final type = message.data['type'] as String?;
@@ -120,7 +120,16 @@ class NotificationService {
 
     switch (type) {
       case 'new':
+      case 'new_missed_call':
         {
+          if (type == 'new_missed_call') {
+            CallsNotificationsService.instance
+                .hideNotification(
+                  jsonDecode(message.data['other_user'] as String)['id'].toString(),
+                )
+                .ignore();
+          }
+
           /// check chat_id
           final chatId = message.data['chat_id'] as String?;
           if (chatId == null) return;
@@ -138,8 +147,8 @@ class NotificationService {
               android: AndroidNotificationDetails(
                 'high_importance_channel',
                 'Base notifications channel',
-                importance: Importance.high,
-                priority: Priority.high,
+                importance: Importance.max,
+                priority: Priority.max,
                 icon: '@drawable/icon_transparent',
               ),
               iOS: DarwinNotificationDetails(),
@@ -170,17 +179,6 @@ class NotificationService {
           ),
         );
         break;
-
-      case 'missed_call':
-        {
-          final userDto = UserDto.fromJson(
-            jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
-          );
-          await CallsNotificationsService.instance.showMissedCall(
-            otherUser: userDto,
-          );
-          break;
-        }
     }
   }
 
@@ -207,15 +205,19 @@ class NotificationService {
 Future<void> onBackgroundMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
   await NotificationService.instance.setupFlutterNotifications();
-  await NotificationService.instance.showNotification(message);
+  await NotificationService.instance.handleNotification(message);
 
   print('KlmLog new notification, type: ${message.data['type']}');
   if (message.data['type'] == 'incoming_call') {
     try {
+      if (CallsNotificationsService.instance.ignoreEvents) return;
+
       /// elementAt(0) will be Event.actionCallIncoming
-      final event = await FlutterCallkitIncoming.onEvent.elementAt(1)
+      final event = await FlutterCallkitIncoming.onEvent
+          .elementAt(1)
           .timeout(AppConstants.callingTimeout + const Duration(seconds: 1));
 
+      if (CallsNotificationsService.instance.ignoreEvents) return;
       if (event?.event == Event.actionCallDecline) {
         await sendDeclineApiCall(event!.body['extra']['other_user_id'] as int);
       }

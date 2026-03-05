@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
@@ -66,15 +67,22 @@ class _CallScreenState extends State<CallScreen> {
               oldData.isRemoteCameraOn != newData.isRemoteCameraOn;
         },
         builder: (context, state) {
-          return Scaffold(
-            backgroundColor:
-                state is CallStateBase &&
-                    state.data.remoteRenderer != null &&
-                    state.data.isRemoteCameraOn
-                ? const Color(0xFF121212)
-                : Colors.blue,
-            //appBar: _AppBar(),
-            body: _Body(doCall: widget.doCall),
+          return AnnotatedRegion(
+            value: const SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.light,
+              statusBarBrightness: Brightness.dark,
+            ),
+            child: Scaffold(
+              backgroundColor:
+                  state is CallStateBase &&
+                      state.data.remoteRenderer != null &&
+                      state.data.isRemoteCameraOn
+                  ? const Color(0xFF121212)
+                  : Colors.blue,
+              //appBar: _AppBar(),
+              body: _Body(doCall: widget.doCall),
+            ),
           );
         },
       ),
@@ -183,6 +191,7 @@ class _BodyState extends State<_Body> {
                           icon: Icons.cameraswitch,
                           iconColor: Colors.blue,
                           color: Colors.white,
+                          enabled: data.isLocalCameraOn,
                           onPressed: () {
                             context.read<CallBloc>().add(
                               const CallEventFlipCamera(),
@@ -264,12 +273,14 @@ class _Button extends StatelessWidget {
     required this.iconColor,
     required this.color,
     required this.onPressed,
+    this.enabled = true,
   });
 
   final String title;
   final IconData icon;
   final Color iconColor;
   final Color color;
+  final bool enabled;
   final VoidCallback onPressed;
 
   @override
@@ -277,8 +288,9 @@ class _Button extends StatelessWidget {
     return Column(
       children: [
         IconButton(
-          onPressed: onPressed,
+          onPressed: enabled ? onPressed : null,
           style: IconButton.styleFrom(
+            disabledBackgroundColor: Colors.grey.shade300,
             backgroundColor: color,
             minimumSize: const Size(70, 70),
           ),

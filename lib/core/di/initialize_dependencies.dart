@@ -159,7 +159,7 @@ List<_InitializationStep> _steps = [
         tokenProvider: dp.tokenProvider,
       )
       ..messengerWebSocket = MessengerWebSocketImpl(klmWebSocket: dp.klmWebSocket)
-      ..rtcWebSocket = RtcWebSocket(klmWebSocket: dp.klmWebSocket);
+      ..rtcWebSocket = RtcWebSocketImpl(klmWebSocket: dp.klmWebSocket);
   }),
 
   _InitializationStep(DiStep.apis, (dp) async {

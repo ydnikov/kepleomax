@@ -18,6 +18,8 @@ abstract class CallsRepository {
   });
 
   Future<void> disposeConnection();
+
+  Stream<RTCPeerConnectionState> get connectionStream;
 }
 
 class CallsRepositoryImpl implements CallsRepository {
@@ -111,4 +113,8 @@ class CallsRepositoryImpl implements CallsRepository {
     print('KlmLog callsRepository disposeConnection');
     await _peerConnection.dispose();
   }
+
+  @override
+  Stream<RTCPeerConnectionState> get connectionStream =>
+      _peerConnection.connectionStream;
 }

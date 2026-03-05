@@ -4,8 +4,31 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/webrtc_models.dart';
 
-class RtcWebSocket {
-  RtcWebSocket({required KlmWebSocket klmWebSocket}) : _webSocket = klmWebSocket {
+abstract class RtcWebSocket {
+  /// actions
+  void sendOffer(RTCSessionDescription offer, int toUserId);
+
+  void sendAnswer(RTCSessionDescription answer, int toUserId);
+
+  void sendIceCandidate(RTCIceCandidate candidate, int toUserId);
+
+  void sendCameraStatus(bool isCameraOn, int toUserId);
+
+  void endCall(int toUserId);
+
+  /// streams
+  Stream<AnswerUpdate> get answersStream;
+
+  Stream<CandidateUpdate> get candidatesStream;
+
+  Stream<EndCallUpdate> get endCallStream;
+
+  Stream<bool> get remoteCameraStatusStream;
+}
+
+class RtcWebSocketImpl implements RtcWebSocket {
+  RtcWebSocketImpl({required KlmWebSocket klmWebSocket})
+    : _webSocket = klmWebSocket {
     _webSocket.eventsStream.listen((event) {
       final data = event.$2 as Map<String, dynamic>;
       switch (event.$1) {
@@ -35,6 +58,7 @@ class RtcWebSocket {
   final _endCallController = StreamController<EndCallUpdate>.broadcast();
   final _remoteCameraStatusController = StreamController<bool>.broadcast();
 
+  @override
   void sendOffer(RTCSessionDescription offer, int toUserId) {
     _webSocket.emit('webrtc_send_offer', {
       'to_user_id': toUserId,
@@ -42,6 +66,7 @@ class RtcWebSocket {
     });
   }
 
+  @override
   void sendAnswer(RTCSessionDescription answer, int toUserId) {
     _webSocket.emit('webrtc_send_answer', {
       'to_user_id': toUserId,
@@ -49,6 +74,7 @@ class RtcWebSocket {
     });
   }
 
+  @override
   void sendIceCandidate(RTCIceCandidate candidate, int toUserId) {
     _webSocket.emit('webrtc_send_ice_candidate', {
       'to_user_id': toUserId,
@@ -56,28 +82,28 @@ class RtcWebSocket {
     });
   }
 
-  void sentCameraStatus(bool isCameraOn, int toUserId) {
+  @override
+  void sendCameraStatus(bool isCameraOn, int toUserId) {
     _webSocket.emit('webrtc_send_camera_status', {
       'to_user_id': toUserId,
       'is_camera_on': isCameraOn,
     });
   }
 
+  @override
   void endCall(int toUserId) {
     _webSocket.emit('webrtc_end_call', {'to_user_id': toUserId});
   }
 
-  void sendMissedCallNotification(int toUserId) {
-    _webSocket.emit('webrtc_send_missed_call_notification', {
-      'to_user_id': toUserId,
-    });
-  }
-
+  @override
   Stream<AnswerUpdate> get answersStream => _answersController.stream;
 
+  @override
   Stream<CandidateUpdate> get candidatesStream => _candidatesController.stream;
 
+  @override
   Stream<EndCallUpdate> get endCallStream => _endCallController.stream;
 
+  @override
   Stream<bool> get remoteCameraStatusStream => _remoteCameraStatusController.stream;
 }

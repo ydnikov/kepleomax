@@ -8,18 +8,7 @@ import 'package:kepleomax/core/network/websockets/models/read_messages_update.da
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
 
 abstract class MessengerWebSocket {
-  /// streams
-  Stream<NewMessageUpdate> get newMessageUpdatesStream;
-
-  Stream<ReadMessagesUpdate> get readMessagesStream;
-
-  Stream<DeletedMessageUpdate> get deletedMessageStream;
-
-  Stream<OnlineStatusUpdate> get onlineUpdatesStream;
-
-  Stream<TypingActivityUpdate> get typingUpdatesStream;
-
-  /// events
+  /// actions
   void sendMessage({required String message, required int recipientId});
 
   void deleteMessage({required int messageId});
@@ -31,6 +20,17 @@ abstract class MessengerWebSocket {
   void subscribeOnOnlineStatusUpdates({required Iterable<int> usersIds});
 
   void typingActivityDetected({required int chatId});
+
+  /// streams
+  Stream<NewMessageUpdate> get newMessageUpdatesStream;
+
+  Stream<ReadMessagesUpdate> get readMessagesStream;
+
+  Stream<DeletedMessageUpdate> get deletedMessageStream;
+
+  Stream<OnlineStatusUpdate> get onlineUpdatesStream;
+
+  Stream<TypingActivityUpdate> get typingUpdatesStream;
 }
 
 class MessengerWebSocketImpl implements MessengerWebSocket {

@@ -41,10 +41,18 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       add(const _CallEventEmit());
     });
 
+    _connectionStatusSub = _callsRepository.connectionStream.listen((status) {
+      if (status == RTCPeerConnectionState.RTCPeerConnectionStateFailed ||
+          status == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected ||
+          status == RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
+        add(const _CallEventExit());
+      }
+    });
+
+    /// accept call can be called twice in a short time, so onAcceptCall has debouncer
     _acceptCallSub = CallsService.instance.acceptCallStream.listen((_) {
       add(const CallEventAcceptCall());
     });
-
     CallsService.instance.hasAcceptedCall().then((has) {
       if (has) {
         add(const CallEventAcceptCall());
@@ -56,6 +64,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   final RtcWebSocket _rtcWebSocket;
 
   late final StreamSubscription<void> _remoteCameraStatusSub;
+  late final StreamSubscription<void> _connectionStatusSub;
   late final StreamSubscription<void> _acceptCallSub;
 
   RTCVideoRenderer? _localRenderer;
@@ -98,6 +107,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   int _lastTimeAcceptCallCalled = 0;
+
   Future<void> _onAcceptCall(
     CallEventAcceptCall event,
     Emitter<CallState> emit,
@@ -163,7 +173,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _localRenderer!.srcObject!.getVideoTracks().forEach((track) {
       track.enabled = !track.enabled;
     });
-    _rtcWebSocket.sentCameraStatus(!_data.isLocalCameraOn, _data.otherUser.id);
+    _rtcWebSocket.sendCameraStatus(!_data.isLocalCameraOn, _data.otherUser.id);
     _data = _data.copyWith(isLocalCameraOn: !_data.isLocalCameraOn);
     emit(CallStateBase(data: _data));
   }
@@ -199,6 +209,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   Future<void> close() {
     print('KlmLog CallBloc close');
     _remoteCameraStatusSub.cancel();
+    _connectionStatusSub.cancel();
     _acceptCallSub.cancel();
 
     _callsRepository.disposeConnection().ignore();

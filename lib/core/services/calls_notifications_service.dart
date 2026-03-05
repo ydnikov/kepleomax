@@ -7,6 +7,7 @@ import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CallsNotificationsService {
   CallsNotificationsService._();
@@ -15,44 +16,50 @@ class CallsNotificationsService {
 
   static CallsNotificationsService get instance => _instance;
 
+  static SharedPreferences? _prefs;
   static const _ignoreEventsDuration = Duration(seconds: 1);
+  static const _ignoreEventsKey = '__ignore_events_key__';
 
-  bool _ignoreEvents = false;
-
-  bool get ignoreEvents => _ignoreEvents;
+  bool get ignoreEvents => _prefs?.getBool(_ignoreEventsKey) ?? false;
 
   Future<void> showIncomingCall({
     required UserDto otherUser,
     RTCSessionDescription? offer,
   }) async {
+    _prefs ??= await SharedPreferences.getInstance();
+
     final params = _generateCallKitParams(otherUser, offer: offer);
     await FlutterCallkitIncoming.showCallkitIncoming(params);
   }
 
   Future<void> hideNotification(String callId) async {
-    _ignoreEvents = true;
+    await _startIgnoringEvents();
 
     await FlutterCallkitIncoming.endCall(callId);
 
-    unawaited(
-      Future<void>.delayed(_ignoreEventsDuration).then((_) {
-        _ignoreEvents = false;
-      }),
-    );
+    unawaited(_stopIgnoringEvents());
   }
 
   Future<void> showMissedCall({required UserDto otherUser}) async {
-    _ignoreEvents = true;
+    await _startIgnoringEvents();
 
     await FlutterCallkitIncoming.endCall(otherUser.id.toString());
     final params = _generateCallKitParams(otherUser);
     await FlutterCallkitIncoming.showMissCallNotification(params);
 
-    unawaited(
-      Future<void>.delayed(_ignoreEventsDuration).then((_) {
-        _ignoreEvents = false;
-      }),
-    );
+    unawaited(_stopIgnoringEvents());
+  }
+
+  Future<void> _startIgnoringEvents() async {
+    _prefs ??= await SharedPreferences.getInstance();
+    await _prefs!.setBool(_ignoreEventsKey, true);
+  }
+
+  Future<void> _stopIgnoringEvents() async {
+    _prefs ??= await SharedPreferences.getInstance();
+    await Future<void>.delayed(_ignoreEventsDuration).then((_) async {
+      await _prefs!.setBool(_ignoreEventsKey, false);
+    });
   }
 
   CallKitParams _generateCallKitParams(
@@ -66,17 +73,15 @@ class CallsNotificationsService {
     type: 0,
     textAccept: 'Accept',
     textDecline: 'Decline',
-    missedCallNotification: const NotificationParams(
-      showNotification: true,
-      isShowCallback: true,
-      subtitle: 'Missed call',
-      callbackText: 'Call back',
-    ),
     callingNotification: const NotificationParams(
       showNotification: true,
       isShowCallback: true,
       subtitle: 'Calling...',
       callbackText: 'Hang Up',
+    ),
+    missedCallNotification: const NotificationParams(
+      showNotification: false,
+      isShowCallback: false,
     ),
     duration: AppConstants.callingTimeout.inMilliseconds,
     extra: offer == null

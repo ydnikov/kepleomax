@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 abstract class PeerConnectionController {
@@ -21,10 +23,14 @@ abstract class PeerConnectionController {
   Future<void> dispose();
 
   bool get isActive;
+
+  Stream<RTCPeerConnectionState> get connectionStream;
 }
 
 class PeerConnectionControllerImpl implements PeerConnectionController {
   RTCPeerConnection? _peerConnection;
+  final List<RTCIceCandidate> _candidatesCache = [];
+  final _connectionController = StreamController<RTCPeerConnectionState>.broadcast();
 
   @override
   Future<void> init({
@@ -58,6 +64,7 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
     /// DEBUG
     _peerConnection!.onConnectionState = (RTCPeerConnectionState state) {
       print('KlmLog RTCPeerConnectionState: $state');
+      _connectionController.add(state);
     };
 
     _peerConnection!.onIceConnectionState = (RTCIceConnectionState state) {
@@ -82,7 +89,6 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
     _peerConnection = null;
   }
 
-  List<RTCIceCandidate> _candidatesCache = [];
 
   @override
   void addIceCandidate(RTCIceCandidate candidate) {
@@ -106,4 +112,8 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
 
   @override
   bool get isActive => _peerConnection != null;
+
+  @override
+  Stream<RTCPeerConnectionState> get connectionStream =>
+      _connectionController.stream;
 }

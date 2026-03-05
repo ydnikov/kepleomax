@@ -25,9 +25,11 @@ class CallsService {
 
   late UserRepository _userRepository;
   late RtcWebSocket _webSocket;
+  bool _hasActiveCall = false;
 
   /// main methods
   Future<void> _incomingCall(int otherUserId, RTCSessionDescription? offer) async {
+    _hasActiveCall = true;
     _cachedOffer = offer;
 
     /// TODO getUserFromCacheOrApi
@@ -41,6 +43,7 @@ class CallsService {
     int otherUserId,
     RTCSessionDescription? offer,
   ) async {
+    _hasActiveCall = true;
     if (_cachedOffer == null) {
       /// _webSocket.offersStream hasn't received event, app was not connected (like in background)
       await _incomingCall(otherUserId, offer);
@@ -51,15 +54,13 @@ class CallsService {
     _acceptCallController.add(null);
   }
 
-  bool _sendMissedCallNotification = true;
-
   void _callEnded(int otherUserId) {
     /// it closes the page and CallBloc will call endCall()
-    _sendMissedCallNotification = false;
     mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
   }
 
   Future<void> callAccepted(int otherUserId) async {
+    _hasActiveCall = true;
     _cachedOffer = null;
 
     await CallsNotificationsService.instance.hideNotification(
@@ -68,17 +69,7 @@ class CallsService {
   }
 
   Future<void> endCall(int otherUserId, {required bool isCallAccepted}) async {
-    if (!isCallAccepted && _sendMissedCallNotification) {
-      final bool isCurrentUserCaller = _cachedOffer == null;
-      if (isCurrentUserCaller) {
-        print('KlmLog sendMissedCallNotification');
-        _webSocket.sendMissedCallNotification(otherUserId);
-      }
-    }
-    if (!_sendMissedCallNotification) {
-      _sendMissedCallNotification = true;
-    }
-
+    _hasActiveCall = false;
     _cachedOffer = null;
 
     _webSocket.endCall(otherUserId);
@@ -115,6 +106,13 @@ class CallsService {
 
     switch (event!.event) {
       case Event.actionCallIncoming:
+        if (_hasActiveCall) {
+          endCall(
+            event.body['extra']['other_user_id'] as int,
+            isCallAccepted: false,
+          );
+        }
+
         final extra = event.body['extra'] as Map<dynamic, dynamic>;
         final offer = RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
           extra,
