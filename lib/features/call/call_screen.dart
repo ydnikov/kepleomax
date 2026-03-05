@@ -132,6 +132,17 @@ class _BodyState extends State<_Body> {
 
               Column(
                 children: [
+                  const SizedBox(height: 6),
+                  if (data.remoteRenderer != null && data.isRemoteCameraOn)
+                    Text(
+                      _mapConnectionState(data.connectionStatus),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey,
+                      ),
+                    ),
                   if (data.remoteRenderer == null || !data.isRemoteCameraOn) ...[
                     const SizedBox(height: 80),
                     UserImage(user: data.otherUser, size: 200),
@@ -146,29 +157,11 @@ class _BodyState extends State<_Body> {
                       ),
                     ),
                     if (data.callStartedTime != null) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       CallStopwatchWidget(callStartedTime: data.callStartedTime!),
                     ],
                   ],
                   const Expanded(child: SizedBox()),
-                  // Text(
-                  //   'status: ${_mapStatus(data.status)}',
-                  //   textAlign: TextAlign.center,
-                  //   style: const TextStyle(
-                  //     fontSize: 18,
-                  //     fontWeight: FontWeight.w500,
-                  //     color: Colors.white,
-                  //   ),
-                  // ),
-                  // Text(
-                  //   'connection state: ${_mapConnectionState(data.connectionState)}',
-                  //   textAlign: TextAlign.center,
-                  //   style: const TextStyle(
-                  //     fontSize: 18,
-                  //     fontWeight: FontWeight.w500,
-                  //     color: Colors.white,
-                  //   ),
-                  // ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -251,7 +244,7 @@ class _BodyState extends State<_Body> {
   String _mapConnectionState(RTCPeerConnectionState state) {
     switch (state) {
       case RTCPeerConnectionState.RTCPeerConnectionStateClosed:
-        return 'Closed';
+        return 'Waiting';
       case RTCPeerConnectionState.RTCPeerConnectionStateConnecting:
         return 'Connecting';
       case RTCPeerConnectionState.RTCPeerConnectionStateConnected:

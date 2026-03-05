@@ -42,6 +42,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     });
 
     _connectionStatusSub = _callsRepository.connectionStream.listen((status) {
+      _data = _data.copyWith(connectionStatus: status);
+      add(const _CallEventEmit());
+
       if (status == RTCPeerConnectionState.RTCPeerConnectionStateFailed ||
           status == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected ||
           status == RTCPeerConnectionState.RTCPeerConnectionStateClosed) {

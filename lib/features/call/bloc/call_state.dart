@@ -30,7 +30,7 @@ abstract class CallStateMessage with _$CallStateMessage implements CallState {
 abstract class CallData with _$CallData implements CallState {
   const factory CallData({
     required User otherUser,
-    @Default(RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) RTCPeerConnectionState connectionState,
+    @Default(RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) RTCPeerConnectionState connectionStatus,
     RTCVideoRenderer? localRenderer,
     RTCVideoRenderer? remoteRenderer,
     DateTime? callStartedTime,
@@ -42,7 +42,7 @@ abstract class CallData with _$CallData implements CallState {
 
   factory CallData.initial() => CallData(
     otherUser: User.loading(),
-    connectionState: RTCPeerConnectionState.RTCPeerConnectionStateClosed,
+    connectionStatus: RTCPeerConnectionState.RTCPeerConnectionStateClosed,
   );
 }
 
