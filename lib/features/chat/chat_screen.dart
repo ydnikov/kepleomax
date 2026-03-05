@@ -309,7 +309,7 @@ class _BodyState extends State<_Body> {
     if (!widget.scrollController.hasClients || !_isScreenActive) return;
 
     if (widget.scrollController.offset >
-        widget.scrollController.position.maxScrollExtent - 300) {
+        widget.scrollController.position.maxScrollExtent - 500) {
       _chatBloc.add(const ChatEventLoadMore(toMessageId: null));
     }
   }

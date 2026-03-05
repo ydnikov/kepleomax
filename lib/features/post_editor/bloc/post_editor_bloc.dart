@@ -5,7 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kepleomax/core/data/files_repository.dart';
-import 'package:kepleomax/core/data/post_repository.dart';
+import 'package:kepleomax/features/post/data/post_repository.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/post.dart';
 import 'package:kepleomax/core/presentation/image_url_or_file.dart';

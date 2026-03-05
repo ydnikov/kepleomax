@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:kepleomax/core/network/websockets/models/webrtc_models.dart';
+import 'package:kepleomax/core/network/websockets/models/rtc_models.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:webrtc_interface/src/rtc_ice_candidate.dart';
 import 'package:webrtc_interface/src/rtc_session_description.dart';

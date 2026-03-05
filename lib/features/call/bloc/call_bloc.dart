@@ -104,6 +104,12 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       emit(CallStateBase(data: _data));
     } catch (e, st) {
       logger.e(e, stackTrace: st);
+
+      if (_localRenderer == null) {
+        emit(const CallStateMessage(message: 'Access denied. Check permissions'));
+        emit(CallStateBase(data: _data));
+      }
+
       if (isClosed) return;
       add(const _CallEventExit());
     }
@@ -147,6 +153,14 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       unawaited(CallsService.instance.callAccepted(_data.otherUser.id));
     } catch (e, st) {
       logger.e(e, stackTrace: st);
+
+      if (_localRenderer == null) {
+        emit(
+          const CallStateMessage(message: 'Access denied. Check the permissions'),
+        );
+        emit(CallStateBase(data: _data));
+      }
+
       if (isClosed) return;
       add(const _CallEventExit());
     }

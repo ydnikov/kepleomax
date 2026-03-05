@@ -31,7 +31,6 @@ abstract class PostRepository {
 }
 
 class PostRepositoryImpl implements PostRepository {
-
   PostRepositoryImpl({required PostApi postApi}) : _postApi = postApi;
   final PostApi _postApi;
 
@@ -41,8 +40,11 @@ class PostRepositoryImpl implements PostRepository {
     required int offset,
     required int cursor,
   }) async {
-    final res = await _postApi
-        .getPosts(limit: limit, offset: offset, cursor: cursor);
+    final res = await _postApi.getPosts(
+      limit: limit,
+      offset: offset,
+      cursor: cursor,
+    );
 
     if (res.response.statusCode != 200) {
       throw Exception(
@@ -60,13 +62,12 @@ class PostRepositoryImpl implements PostRepository {
     required int offset,
     required int cursor,
   }) async {
-    final res = await _postApi
-        .getPostsByUserId(
-          userId: userId,
-          limit: limit,
-          offset: offset,
-          cursor: cursor,
-        );
+    final res = await _postApi.getPostsByUserId(
+      userId: userId,
+      limit: limit,
+      offset: offset,
+      cursor: cursor,
+    );
 
     if (res.response.statusCode != 200) {
       throw Exception(
@@ -82,10 +83,9 @@ class PostRepositoryImpl implements PostRepository {
     required String content,
     required List<String> images,
   }) async {
-    final res = await _postApi
-        .createNewPost(
-          data: CreatePostRequestDto(content: content.trim(), images: images),
-        );
+    final res = await _postApi.createNewPost(
+      data: CreatePostRequestDto(content: content.trim(), images: images),
+    );
 
     if (res.response.statusCode != 201) {
       throw Exception(
@@ -102,11 +102,10 @@ class PostRepositoryImpl implements PostRepository {
     required String content,
     required List<String> images,
   }) async {
-    final res = await _postApi
-        .updatePost(
-          postId: postId,
-          data: CreatePostRequestDto(content: content.trim(), images: images),
-        );
+    final res = await _postApi.updatePost(
+      postId: postId,
+      data: CreatePostRequestDto(content: content.trim(), images: images),
+    );
 
     if (res.response.statusCode != 200) {
       throw Exception(
@@ -119,8 +118,7 @@ class PostRepositoryImpl implements PostRepository {
 
   @override
   Future<Post> deletePost({required int postId}) async {
-    final res = await _postApi
-        .deletePost(postId: postId);
+    final res = await _postApi.deletePost(postId: postId);
 
     if (res.response.statusCode != 200) {
       throw Exception(

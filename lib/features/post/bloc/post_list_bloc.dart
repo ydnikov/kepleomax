@@ -1,7 +1,7 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/app_constants.dart';
-import 'package:kepleomax/core/data/post_repository.dart';
+import 'package:kepleomax/features/post/data/post_repository.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/post.dart';
 import 'package:kepleomax/core/network/common/ntp_time.dart';

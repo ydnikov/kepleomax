@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
@@ -52,6 +53,12 @@ class _CallScreenState extends State<CallScreen> {
       create: (context) => _callBloc,
       child: BlocConsumer<CallBloc, CallState>(
         listener: (context, state) {
+          if (state is CallStateMessage) {
+            Fluttertoast.showToast(
+              msg: state.message,
+              toastLength: Toast.LENGTH_LONG,
+            );
+          }
           if (state is CallStateExit && context.mounted) {
             AppNavigator.of(context)!.pop();
           }

@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kepleomax/core/auth/auth_controller.dart';
 import 'package:kepleomax/core/data/auth_repository.dart';
-import 'package:kepleomax/core/data/chats_repository.dart';
+import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
 import 'package:kepleomax/core/data/data_sources/messages_api_data_sources.dart';
@@ -16,7 +16,7 @@ import 'package:kepleomax/core/data/local_data_sources/messages_local_data_sourc
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart';
 import 'package:kepleomax/core/data/messenger/combine_cache_and_api.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
-import 'package:kepleomax/core/data/post_repository.dart';
+import 'package:kepleomax/features/post/data/post_repository.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/flavor.dart';

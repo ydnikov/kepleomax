@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
-import 'package:kepleomax/core/network/websockets/models/webrtc_models.dart';
+import 'package:kepleomax/core/network/websockets/models/rtc_models.dart';
 
 abstract class RtcWebSocket {
   /// actions
