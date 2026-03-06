@@ -90,7 +90,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       emit(CallStateBase(data: _data));
 
       await _callsRepository.doCall(
-        toUserId: event.otherUser.id,
+        otherUserId: event.otherUser.id,
         localRenderer: _localRenderer!,
         remoteRenderer: _remoteRenderer!,
       );
@@ -150,7 +150,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       );
       emit(CallStateBase(data: _data));
 
-      unawaited(CallsService.instance.callAccepted(_data.otherUser.id));
+      unawaited(CallsService.instance.acceptCall(_data.otherUser.id));
     } catch (e, st) {
       logger.e(e, stackTrace: st);
 
@@ -246,10 +246,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         ..stop();
     });
 
-    CallsService.instance.endCall(
-      _data.otherUser.id,
-      isCallAccepted: _data.isCallAccepted,
-    );
+    CallsService.instance.endCall(_data.otherUser.id);
 
     return super.close();
   }

@@ -5,7 +5,7 @@ import 'package:kepleomax/features/call/data/peer_connection_controller.dart';
 
 abstract class CallsRepository {
   Future<void> doCall({
-    required int toUserId,
+    required int otherUserId,
     required RTCVideoRenderer localRenderer,
     required RTCVideoRenderer remoteRenderer,
   });
@@ -39,7 +39,7 @@ class CallsRepositoryImpl implements CallsRepository {
 
   @override
   Future<void> doCall({
-    required int toUserId,
+    required int otherUserId,
     required RTCVideoRenderer localRenderer,
     required RTCVideoRenderer remoteRenderer,
   }) async {
@@ -49,6 +49,7 @@ class CallsRepositoryImpl implements CallsRepository {
     final iceCandidates = <RTCIceCandidate>[];
     bool isRemoteDescriptionSet = false;
     await _peerConnection.init(
+      otherUserId: otherUserId,
       onTrack: (track) {
         if (track.track.kind == 'video') {
           remoteRenderer.srcObject = track.streams[0];
@@ -56,7 +57,7 @@ class CallsRepositoryImpl implements CallsRepository {
       },
       onIceCandidate: (candidate) {
         if (isRemoteDescriptionSet) {
-          _webSocket.sendIceCandidate(candidate, toUserId);
+          _webSocket.sendIceCandidate(candidate, otherUserId);
         } else {
           iceCandidates.add(candidate);
         }
@@ -66,7 +67,7 @@ class CallsRepositoryImpl implements CallsRepository {
     await _peerConnection.addTracks(localRenderer.srcObject!);
 
     final offer = await _peerConnection.createOffer();
-    _webSocket.sendOffer(offer, toUserId);
+    _webSocket.sendOffer(offer, otherUserId);
 
     final answer = await _webSocket.answersStream.first.timeout(
       AppConstants.callingTimeout,
@@ -79,7 +80,7 @@ class CallsRepositoryImpl implements CallsRepository {
     isRemoteDescriptionSet = true;
 
     for (final candidate in iceCandidates) {
-      _webSocket.sendIceCandidate(candidate, toUserId);
+      _webSocket.sendIceCandidate(candidate, otherUserId);
     }
   }
 
@@ -91,6 +92,7 @@ class CallsRepositoryImpl implements CallsRepository {
     required RTCVideoRenderer remoteRenderer,
   }) async {
     await _peerConnection.init(
+      otherUserId: otherUserId,
       onTrack: (track) {
         if (track.track.kind == 'video') {
           remoteRenderer.srcObject = track.streams[0];

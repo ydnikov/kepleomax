@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class PeerConnectionController {
   Future<void> init({
+    required int otherUserId,
     required void Function(RTCTrackEvent) onTrack,
     required void Function(RTCIceCandidate) onIceCandidate,
   });
@@ -28,12 +30,25 @@ abstract class PeerConnectionController {
 }
 
 class PeerConnectionControllerImpl implements PeerConnectionController {
+  PeerConnectionControllerImpl({required SharedPreferences prefs})
+      : _prefs = prefs {
+    _prefs.remove(_callOtherUserIdKey);
+  }
+
+  final SharedPreferences _prefs;
+
   RTCPeerConnection? _peerConnection;
   final List<RTCIceCandidate> _candidatesCache = [];
   final _connectionController = StreamController<RTCPeerConnectionState>.broadcast();
 
+  static const _callOtherUserIdKey = '__call_other_user_id_key__';
+
+  static Future<int?> get activeCallOtherUserId async =>
+      (await SharedPreferences.getInstance()).getInt(_callOtherUserIdKey) ?? null;
+
   @override
   Future<void> init({
+    required int otherUserId,
     required void Function(RTCTrackEvent) onTrack,
     required void Function(RTCIceCandidate) onIceCandidate,
   }) async {
@@ -48,6 +63,7 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
       ],
     };
     _peerConnection = await createPeerConnection(config);
+    unawaited(_prefs.setInt(_callOtherUserIdKey, otherUserId));
 
     _peerConnection!.onTrack = (track) async {
       print('KlmLog newTrack: ${track.track.kind}');
@@ -84,11 +100,11 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
 
   @override
   Future<void> dispose() async {
+    unawaited(_prefs.remove(_callOtherUserIdKey));
     await _peerConnection!.close();
     await _peerConnection!.dispose();
     _peerConnection = null;
   }
-
 
   @override
   void addIceCandidate(RTCIceCandidate candidate) {

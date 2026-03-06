@@ -123,11 +123,9 @@ class NotificationService {
       case 'new_missed_call':
         {
           if (type == 'new_missed_call') {
-            CallsNotificationsService.instance
-                .hideNotification(
-                  jsonDecode(message.data['other_user'] as String)['id'].toString(),
-                )
-                .ignore();
+            await CallsNotificationsService.instance.hideNotification(
+              jsonDecode(message.data['other_user'] as String)['id'].toString(),
+            );
           }
 
           /// check chat_id
@@ -203,25 +201,26 @@ class NotificationService {
 
 @pragma('vm:entry-point')
 Future<void> onBackgroundMessage(RemoteMessage message) async {
+  print('KlmLog onBackgroundMessage, type: ${message.data['type']}');
+
   await Firebase.initializeApp();
   await NotificationService.instance.setupFlutterNotifications();
   await NotificationService.instance.handleNotification(message);
 
-  print('KlmLog new notification, type: ${message.data['type']}');
   if (message.data['type'] == 'incoming_call') {
-    try {
+    Future(() async {
       if (CallsNotificationsService.instance.ignoreEvents) return;
 
       /// elementAt(0) will be Event.actionCallIncoming
       final event = await FlutterCallkitIncoming.onEvent
           .elementAt(1)
-          .timeout(AppConstants.callingTimeout + const Duration(seconds: 1));
+          .timeout(AppConstants.callingTimeout);
 
       if (CallsNotificationsService.instance.ignoreEvents) return;
       if (event?.event == Event.actionCallDecline) {
         await sendDeclineApiCall(event!.body['extra']['other_user_id'] as int);
       }
-    } catch (_) {}
+    }).ignore();
   }
 }
 

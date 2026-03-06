@@ -62,8 +62,8 @@ Future<Dependencies> initializeDependencies({List<DiStep>? onlySteps}) async {
 List<_InitializationStep> _steps = [
   _InitializationStep(DiStep.storages, (dp) async {
     dp
-      ..sharedPreferences = await SharedPreferences.getInstance()
-      ..appSettings = AppSettingsImpl(prefs: dp.sharedPreferences)
+      ..sharedPrefs = await SharedPreferences.getInstance()
+      ..appSettings = AppSettingsImpl(prefs: dp.sharedPrefs)
       ..secureStorage = const FlutterSecureStorage();
     CachedNetworkImage.logLevel = CacheManagerLogLevel.verbose;
   }),
@@ -74,7 +74,7 @@ List<_InitializationStep> _steps = [
       ..database = db
       ..usersLocalDataSource = UsersLocalDataSourceImpl(
         database: db,
-        prefs: dp.sharedPreferences,
+        prefs: dp.sharedPrefs,
       )
       ..messagesLocalDataSource = MessagesLocalDataSourceImpl(database: db)
       ..chatsLocalDataSource = ChatsLocalDataSourceImpl(database: db);
@@ -105,7 +105,7 @@ List<_InitializationStep> _steps = [
 
   _InitializationStep(DiStep.tokenProvider, (dp) async {
     dp.tokenProvider = TokenProviderImpl(
-      prefs: dp.sharedPreferences,
+      prefs: dp.sharedPrefs,
       secureStorage: dp.secureStorage,
       // needs its own dio, cause the current one will be locked
       dio: Dio(
@@ -140,7 +140,7 @@ List<_InitializationStep> _steps = [
       authRepository: dp.authRepository,
       userRepository: dp.userRepository,
       tokenProvider: dp.tokenProvider,
-      prefs: dp.sharedPreferences,
+      prefs: dp.sharedPrefs,
     )..init();
     dp.authController = authController;
 
@@ -196,7 +196,9 @@ List<_InitializationStep> _steps = [
       )
       ..callsRepository = CallsRepositoryImpl(
         rtcWebSocket: dp.rtcWebSocket,
-        peerConnectionController: PeerConnectionControllerImpl(),
+        peerConnectionController: PeerConnectionControllerImpl(
+          prefs: dp.sharedPrefs,
+        ),
       );
   }),
 

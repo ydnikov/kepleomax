@@ -59,7 +59,7 @@ class _ReadButtonState extends State<_ReadButton> {
             ? widget._scrollController.offset > _offsetToShow
             : false;
         if (unreadCount < 0 && !flavor.isRelease) {
-          logger.e('unreadCount < 0');
+          logger.w('unreadCount < 0');
         } else if (unreadCount <= 0 && !isScrolledUp) {
           return const SizedBox();
         }

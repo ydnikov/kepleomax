@@ -33,7 +33,7 @@ import 'package:sqflite/sqflite.dart';
 class Dependencies {
   late final AuthController authController;
   late final TokenProvider tokenProvider;
-  late final SharedPreferences sharedPreferences;
+  late final SharedPreferences sharedPrefs;
   late final FlutterSecureStorage secureStorage;
   late final PrettyDioLogger prettyDioLogger;
   late final Database database;

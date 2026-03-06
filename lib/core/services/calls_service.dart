@@ -8,6 +8,7 @@ import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/extensions/rtc_session_description_extension.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/services/calls_notifications_service.dart';
+import 'package:kepleomax/features/call/data/peer_connection_controller.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 
 class CallsService {
@@ -25,11 +26,17 @@ class CallsService {
 
   late UserRepository _userRepository;
   late RtcWebSocket _webSocket;
-  bool _hasActiveCall = false;
 
   /// main methods
   Future<void> _incomingCall(int otherUserId, RTCSessionDescription? offer) async {
-    _hasActiveCall = true;
+    if (await PeerConnectionControllerImpl.activeCallOtherUserId != null) {
+      _webSocket.endCall(otherUserId);
+      await CallsNotificationsService.instance.hideNotification(
+        otherUserId.toString(),
+      );
+      return;
+    }
+
     _cachedOffer = offer;
 
     /// TODO getUserFromCacheOrApi
@@ -43,7 +50,6 @@ class CallsService {
     int otherUserId,
     RTCSessionDescription? offer,
   ) async {
-    _hasActiveCall = true;
     if (_cachedOffer == null) {
       /// _webSocket.offersStream hasn't received event, app was not connected (like in background)
       await _incomingCall(otherUserId, offer);
@@ -54,13 +60,16 @@ class CallsService {
     _acceptCallController.add(null);
   }
 
-  void _callEnded(int otherUserId) {
+  bool _callEndedByCurrentUser = true;
+
+  void _callEnded() {
+    _callEndedByCurrentUser = false;
+
     /// it closes the page and CallBloc will call endCall()
     mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
   }
 
-  Future<void> callAccepted(int otherUserId) async {
-    _hasActiveCall = true;
+  Future<void> acceptCall(int otherUserId) async {
     _cachedOffer = null;
 
     await CallsNotificationsService.instance.hideNotification(
@@ -68,12 +77,16 @@ class CallsService {
     );
   }
 
-  Future<void> endCall(int otherUserId, {required bool isCallAccepted}) async {
-    _hasActiveCall = false;
+  Future<void> endCall(int otherUserId) async {
+    print('KlmLog endCall, byCurrentUser: $_callEndedByCurrentUser');
+    if (_callEndedByCurrentUser) {
+      /// TODO replace with api call?
+      _webSocket.endCall(otherUserId);
+    } else {
+      _callEndedByCurrentUser = true; // reset to default
+    }
+
     _cachedOffer = null;
-
-    _webSocket.endCall(otherUserId);
-
     await CallsNotificationsService.instance.hideNotification(
       otherUserId.toString(),
     );
@@ -91,7 +104,7 @@ class CallsService {
     _webSocket = webSocket;
 
     _callEndsSub = _webSocket.endCallStream.listen((update) {
-      _callEnded(update.fromUserId);
+      _callEnded();
     });
 
     _eventsSub = FlutterCallkitIncoming.onEvent.listen(_handleCallKitEvents);
@@ -106,13 +119,6 @@ class CallsService {
 
     switch (event!.event) {
       case Event.actionCallIncoming:
-        if (_hasActiveCall) {
-          endCall(
-            event.body['extra']['other_user_id'] as int,
-            isCallAccepted: false,
-          );
-        }
-
         final extra = event.body['extra'] as Map<dynamic, dynamic>;
         final offer = RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
           extra,
@@ -127,7 +133,8 @@ class CallsService {
         _incomingCallAndAccept(extra['other_user_id'] as int, offer);
         break;
       case Event.actionCallDecline:
-        endCall(event.body['extra']['other_user_id'] as int, isCallAccepted: false);
+        mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
+        // endCall(event.body['extra']['other_user_id'] as int, isCallAccepted: false);
         break;
 
       default:

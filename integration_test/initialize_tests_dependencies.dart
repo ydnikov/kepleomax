@@ -57,8 +57,8 @@ Future<Dependencies> initializeTestsDependencies({bool useMocks = false}) async 
 List<_InitializationStep> _steps = [
   _InitializationStep('storages', (dp) async {
     dp
-      ..sharedPreferences = await SharedPreferences.getInstance()
-      ..appSettings = AppSettingsImpl(prefs: dp.sharedPreferences)
+      ..sharedPrefs = await SharedPreferences.getInstance()
+      ..appSettings = AppSettingsImpl(prefs: dp.sharedPrefs)
       ..secureStorage = const FlutterSecureStorage();
     CachedNetworkImage.logLevel = CacheManagerLogLevel.verbose;
   }),
@@ -69,7 +69,7 @@ List<_InitializationStep> _steps = [
       ..database = db
       ..usersLocalDataSource = UsersLocalDataSourceImpl(
         database: db,
-        prefs: dp.sharedPreferences,
+        prefs: dp.sharedPrefs,
       )
       ..messagesLocalDataSource = MessagesLocalDataSourceImpl(database: db)
       ..chatsLocalDataSource = ChatsLocalDataSourceImpl(database: db);
@@ -124,7 +124,7 @@ List<_InitializationStep> _steps = [
       authRepository: dp.authRepository,
       userRepository: dp.userRepository,
       tokenProvider: dp.tokenProvider,
-      prefs: dp.sharedPreferences,
+      prefs: dp.sharedPrefs,
     )..init();
     dp.authController = authController;
 
