@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_detector/focus_detector.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/message.dart';
@@ -14,7 +15,7 @@ import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/extensions/build_context_extensions.dart';
+import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_error_widget.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
@@ -52,7 +53,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     final dp = Dependencies.of(context);
     _chatBloc = ChatBloc(
-      chatsRepository: dp.chatsRepository,
+      chatsRepository: dp.chatsRepositoryBuilder(),
       messengerRepository: dp.messengerRepository,
       connectionRepository: dp.connectionRepository,
       messengerWebSocket: dp.messengerWebSocket,
@@ -373,11 +374,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                       if (data.isLoading || !data.isConnected)
                         Text(
-                          !data.isConnected
-                              ? 'Connecting..'
-                              : data.isLoading
-                              ? 'Updating..'
-                              : '',
+                          !data.isConnected ? 'Connecting...' : 'Updating...',
                           key: const Key('chat_app_bar_status_text'),
                           style: context.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
@@ -393,12 +390,9 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                   onPressed: () {
                     if (data.isLoading || !data.isConnected) return;
 
-                    AppNavigator.of(context)!.push(
-                      CallPage(
-                        otherUser: data.otherUser,
-                        doCall: true,
-                      ),
-                    );
+                    AppNavigator.of(
+                      context,
+                    )!.push(CallPage(otherUser: data.otherUser, doCall: true));
                   },
                   icon: const Icon(Icons.call, color: KlmColors.primaryColor),
                 ),
@@ -434,9 +428,10 @@ class _UserStatusWidgetState extends State<_UserStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      widget.data.isTyping ? 'typing..' : _onlineStatusText(widget.data.otherUser),
-      key: const Key('user_status_text'),
+    return EllipsisTextWidget(
+      widget.data.isTyping ? 'typing' : _onlineStatusText(widget.data.otherUser),
+      ellipsis: widget.data.isTyping,
+      textKey: const Key('user_status_text'),
       style: context.textTheme.bodyMedium?.copyWith(
         fontSize: 13,
         fontWeight: FontWeight.w400,

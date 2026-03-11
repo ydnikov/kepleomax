@@ -20,10 +20,10 @@ abstract class ChatsRepository {
 class ChatsRepositoryImpl implements ChatsRepository {
 
   ChatsRepositoryImpl({
-    required ChatsApiDataSource chatsApi,
+    required ChatsApiDataSource chatsApiDataSource,
     required ChatsLocalDataSource chatsLocalDataSource,
   }) : _chatsLocal = chatsLocalDataSource,
-       _chatsApi = chatsApi;
+       _chatsApi = chatsApiDataSource;
   final ChatsApiDataSource _chatsApi;
   final ChatsLocalDataSource _chatsLocal;
 

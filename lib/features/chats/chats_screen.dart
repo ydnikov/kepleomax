@@ -8,6 +8,7 @@ import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
+import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_button.dart';
 import 'package:kepleomax/core/presentation/klm_error_widget.dart';
@@ -191,31 +192,11 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
         return KlmAppBar(
           context,
           !data.isConnected
-              ? 'Connecting..'
+              ? 'Connecting...'
               : data.isLoading
-              ? 'Updating..'
+              ? 'Updating...'
               : 'Chats',
-          // titleWidget: Row(
-          //   children: [
-          //     Text(
-          //       !data.isConnected
-          //           ? 'Connecting..'
-          //           : data.isLoading
-          //           ? 'Updating..'
-          //           : 'Chats',
-          //       style: context.textTheme.labelLarge?.copyWith(fontSize: 24),
-          //     ),
-          //     const SizedBox(width: 12),
-          //     if (!data.isConnected) Text(
-          //       '(swipe to refresh)',
-          //       style: context.textTheme.bodySmall?.copyWith(
-          //         fontWeight: FontWeight.w400,
-          //         fontSize: 12,
-          //         color: Colors.grey
-          //       ),
-          //     ),
-          //   ],
-          // ),
+          showLoading: !data.isConnected || data.isLoading,
           key: const Key('chats_app_bar'),
         );
       },

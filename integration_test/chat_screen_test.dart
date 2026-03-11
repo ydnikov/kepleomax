@@ -133,15 +133,6 @@ void main() {
       }
     }
 
-    Future<void> sendGetChatWithIdResponse(WidgetTester tester, {bool settle = true}) async {
-      _getChatWithIdCompleter.complete();
-      if (settle) {
-        await tester.pumpAndSettle();
-      } else {
-        await tester.pump(const Duration(milliseconds: 50));
-      }
-    }
-
     testWidgets('connection_test', (tester) async {
       /// after setup app will be connected to the ws, because the app must be connected to open the chat
       await setupApp(tester, [chatDto0], [messageDto0, messageDto1, messageDto2, messageDto3, messageDto4], getMessagesAsyncControl: true);
@@ -360,7 +351,7 @@ void main() {
       tester.checkChatOtherUserStatus('online');
       ws.addTypingUpdate(const TypingActivityUpdate(chatId: 0, isTyping: true));
       await tester.pumpAndSettle();
-      tester.checkChatOtherUserStatus('typing..');
+      tester.checkChatOtherUserStatus('typing');
 
       /// add typingUpdate, check
       ws.addTypingUpdate(const TypingActivityUpdate(chatId: 0, isTyping: false));
@@ -370,9 +361,9 @@ void main() {
       /// add typingUpdate, check, wait, check
       ws.addTypingUpdate(const TypingActivityUpdate(chatId: 0, isTyping: true));
       await tester.pumpAndSettle();
-      tester.checkChatOtherUserStatus('typing..');
+      tester.checkChatOtherUserStatus('typing');
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
-      tester.checkChatOtherUserStatus('typing..');
+      tester.checkChatOtherUserStatus('typing');
       await tester.pumpAndSettle(const Duration(milliseconds: 1000));
       tester.checkChatOtherUserStatus('online');
     });

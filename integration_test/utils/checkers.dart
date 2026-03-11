@@ -1,8 +1,8 @@
 part of 'utils.dart';
 
 class MessageChecker {
-
   MessageChecker(this.finder);
+
   final Finder finder;
 
   void check({
@@ -58,8 +58,8 @@ class MessageChecker {
 }
 
 class ChatChecker {
-
   ChatChecker(this.finder);
+
   final Finder finder;
 
   void check({
@@ -129,7 +129,7 @@ class ChatChecker {
     }
     if (isTyping != null) {
       expect(
-        find.descendant(of: finder, matching: find.text('typing..')),
+        find.descendant(of: finder, matching: find.textContaining('typing')),
         isTyping ? findsOneWidget : findsNothing,
       );
     }

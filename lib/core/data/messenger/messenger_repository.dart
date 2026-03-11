@@ -89,6 +89,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
 
   /// uses when chatId == -1 (it's a new chat with new user)
   int? _currentChatOtherUserId;
+  int _currentChatId = -1;
 
   final _messagesUpdatesController =
       StreamController<MessagesCollection>.broadcast();
@@ -168,12 +169,13 @@ class MessengerRepositoryImpl implements MessengerRepository {
     /// chatId may broke something check the integration test: "open_deleted_chat_from_notification_test"
     /// and also there are that check in other places in this method
     if (_currentChatOtherUserId != null) return;
+    _currentChatId = chatId;
 
     /// emit data from cache
     List<MessageDto> cache = [];
     if (withCache) {
       cache = await _messagesLocal.getMessagesByChatId(chatId);
-      if (_currentChatOtherUserId != null) return;
+      if (_currentChatOtherUserId != null || _currentChatId != chatId) return;
       _emitMessagesCollection(
         MessagesCollection(
           messages: cache.map(Message.fromDto),
@@ -188,7 +190,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
       chatId: chatId,
       limit: AppConstants.msgPagingLimit,
     );
-    if (_currentChatOtherUserId != null) return;
+    if (_currentChatOtherUserId != null || _currentChatId != chatId) return;
     final newList = _combiner.combineLoad(cache, apiMessagesDtos);
 
     _emitMessagesCollection(
@@ -225,6 +227,8 @@ class MessengerRepositoryImpl implements MessengerRepository {
       limit: newLimit,
       cursor: messages.lastWhere((e) => !e.fromCache).id,
     );
+    if (_currentChatId != chatId) return;
+
     if (api.isEmpty) {
       _emitMessagesCollection(
         MessagesCollection(

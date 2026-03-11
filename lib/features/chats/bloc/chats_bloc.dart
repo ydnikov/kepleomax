@@ -92,8 +92,13 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
     Emitter<ChatsState> emit,
   ) async {
     final data = event.data;
+
+    /// cache can't replace api chats
+    if (data.fromCache && !_data.isLoading) {
+      return;
+    }
     _data = _data.copyWith(
-      chats: data.chats.toList(growable: false), // TODO
+      chats: data.chats.toList(),
       totalUnreadCount: data.chats.fold(0, (a, b) => a + b.unreadCount),
       isLoading: data.fromCache,
     );

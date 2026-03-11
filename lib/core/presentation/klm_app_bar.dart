@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
+import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
 import 'package:kepleomax/core/scopes/auth_scope.dart';
 
@@ -10,7 +11,8 @@ class KlmAppBar extends AppBar {
     BuildContext context,
     String? title, {
     Widget? leading,
-    Widget? titleWidget,
+    bool ellipsisText = false,
+    bool showLoading = false,
     super.actions,
     super.key,
   }) : super(
@@ -30,13 +32,31 @@ class KlmAppBar extends AppBar {
          titleSpacing: 5,
          backgroundColor: Colors.white,
          surfaceTintColor: Colors.white,
-         title:
-             titleWidget ??
-             Text(
-               title ?? '',
-               key: const Key('app_bar_status_text'),
-               style: context.textTheme.labelLarge?.copyWith(fontSize: 24),
-             ),
+         title: Row(
+           children: [
+             if (ellipsisText)
+               EllipsisTextWidget(
+                 title ?? '',
+                 textKey: const Key('app_bar_status_text'),
+                 style: context.textTheme.labelLarge?.copyWith(fontSize: 24),
+               )
+             else
+               Text(
+                 title ?? '',
+                 key: const Key('app_bar_status_text'),
+                 style: context.textTheme.labelLarge?.copyWith(fontSize: 24),
+               ),
+             if (showLoading) ...[
+               const Spacer(),
+               const SizedBox(
+                 height: 20,
+                 width: 20,
+                 child: CircularProgressIndicator(strokeWidth: 3),
+               ),
+               const SizedBox(width: 12),
+             ],
+           ],
+         ),
        );
 }
 

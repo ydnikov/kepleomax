@@ -72,8 +72,12 @@ class CallsRepositoryImpl implements CallsRepository {
     final answer = await _webSocket.answersStream.first.timeout(
       AppConstants.callingTimeout,
     );
-    if (!_peerConnection.isActive || _doCallLastInstanceId != currentInstanceId)
+    if (!_peerConnection.isActive) {
       return;
+    } else if (_doCallLastInstanceId != currentInstanceId) {
+      disposeConnection().ignore();
+      return;
+    }
 
     await _peerConnection.setLocalDescription(offer);
     await _peerConnection.setRemoteDescription(answer.answer);

@@ -127,17 +127,15 @@ List<_InitializationStep> _steps = [
   }),
 
   _InitializationStep(DiStep.auth, (dp) async {
-    dp
-      ..authRepository = AuthRepositoryImpl(authApi: dp.authApi)
-      ..userRepository = UserRepositoryImpl(
-        profileApi: dp.profileApi,
-        filesApi: dp.filesApi,
-        userApi: dp.userApi,
-        usersLocalDataSource: dp.usersLocalDataSource,
-      );
+    dp.userRepository = UserRepositoryImpl(
+      profileApi: dp.profileApi,
+      filesApi: dp.filesApi,
+      userApi: dp.userApi,
+      usersLocalDataSource: dp.usersLocalDataSource,
+    );
 
     final authController = AuthControllerImpl(
-      authRepository: dp.authRepository,
+      authRepository: AuthRepositoryImpl(authApi: dp.authApi),
       userRepository: dp.userRepository,
       tokenProvider: dp.tokenProvider,
       prefs: dp.sharedPrefs,
@@ -190,16 +188,16 @@ List<_InitializationStep> _steps = [
         usersLocalDataSource: dp.usersLocalDataSource,
         combiner: CombineCacheAndApi(dp.messagesLocalDataSource),
       )
-      ..chatsRepository = ChatsRepositoryImpl(
-        chatsApi: chatsApiDataSource,
+      ..chatsRepositoryBuilder = (() => ChatsRepositoryImpl(
+        chatsApiDataSource: chatsApiDataSource,
         chatsLocalDataSource: dp.chatsLocalDataSource,
-      )
-      ..callsRepository = CallsRepositoryImpl(
+      ))
+      ..callsRepositoryBuilder = (() => CallsRepositoryImpl(
         rtcWebSocket: dp.rtcWebSocket,
         peerConnectionController: PeerConnectionControllerImpl(
           prefs: dp.sharedPrefs,
         ),
-      );
+      ));
   }),
 
   _InitializationStep(DiStep.firebase, (_) async {

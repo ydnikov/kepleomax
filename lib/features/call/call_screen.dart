@@ -36,7 +36,7 @@ class _CallScreenState extends State<CallScreen> {
     _callBloc =
         CallBloc(
           webRtcWebSocket: dp.rtcWebSocket,
-          callsRepository: dp.callsRepository,
+          callsRepository: dp.callsRepositoryBuilder(),
         )..add(
           CallEventInit(
             otherUser: widget.otherUser,
@@ -142,7 +142,7 @@ class _BodyState extends State<_Body> {
                   const SizedBox(height: 6),
                   if (data.remoteRenderer != null && data.isRemoteCameraOn)
                     Text(
-                      _mapConnectionState(data.connectionStatus),
+                      data.connectionStatus.toUserString(),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 18,
@@ -247,23 +247,6 @@ class _BodyState extends State<_Body> {
       ),
     );
   }
-
-  String _mapConnectionState(RTCPeerConnectionState state) {
-    switch (state) {
-      case RTCPeerConnectionState.RTCPeerConnectionStateClosed:
-        return 'Waiting';
-      case RTCPeerConnectionState.RTCPeerConnectionStateConnecting:
-        return 'Connecting';
-      case RTCPeerConnectionState.RTCPeerConnectionStateConnected:
-        return 'Connected';
-      case RTCPeerConnectionState.RTCPeerConnectionStateDisconnected:
-        return 'Disconnected';
-      case RTCPeerConnectionState.RTCPeerConnectionStateFailed:
-        return 'Failed';
-      case RTCPeerConnectionState.RTCPeerConnectionStateNew:
-        return 'New';
-    }
-  }
 }
 
 class _Button extends StatelessWidget {
@@ -303,5 +286,24 @@ class _Button extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+extension RTCConnectionStateToString on RTCPeerConnectionState {
+  String toUserString() {
+    switch (this) {
+      case RTCPeerConnectionState.RTCPeerConnectionStateClosed:
+        return 'Waiting';
+      case RTCPeerConnectionState.RTCPeerConnectionStateConnecting:
+        return 'Connecting';
+      case RTCPeerConnectionState.RTCPeerConnectionStateConnected:
+        return 'Connected';
+      case RTCPeerConnectionState.RTCPeerConnectionStateDisconnected:
+        return 'Disconnected';
+      case RTCPeerConnectionState.RTCPeerConnectionStateFailed:
+        return 'Failed';
+      case RTCPeerConnectionState.RTCPeerConnectionStateNew:
+        return 'New';
+    }
   }
 }

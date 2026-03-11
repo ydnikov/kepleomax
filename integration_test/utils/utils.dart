@@ -68,13 +68,13 @@ extension TesterExtension on WidgetTester {
     String text;
     switch (expected) {
       case ChatsAppBarStatus.connecting:
-        text = 'Connecting..';
+        text = 'Connecting';
       case ChatsAppBarStatus.updating:
-        text = 'Updating..';
+        text = 'Updating';
       case ChatsAppBarStatus.chats:
         text = 'Chats';
     }
-    expect(textByKey(const Key('app_bar_status_text')), equals(text));
+    expect(textByKey(const Key('app_bar_status_text')), contains(text));
   }
 
   void checkChatAppBarStatus(ChatAppBarStatus expected) {
@@ -86,13 +86,13 @@ extension TesterExtension on WidgetTester {
     String text;
     switch (expected) {
       case ChatAppBarStatus.connecting:
-        text = 'Connecting..';
+        text = 'Connecting';
       case ChatAppBarStatus.updating:
-        text = 'Updating..';
+        text = 'Updating';
       case ChatAppBarStatus.none:
         return;
     }
-    expect(textByKey(const Key('chat_app_bar_status_text')), equals(text));
+    expect(textByKey(const Key('chat_app_bar_status_text')), contains(text));
   }
 
   void checkChatOtherUserName(String expected) {

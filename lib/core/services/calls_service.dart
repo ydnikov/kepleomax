@@ -98,8 +98,6 @@ class CallsService {
 
   /// other
   void subscribeOnEvents(RtcWebSocket webSocket, UserRepository userRepository) {
-    print('KlmLog subscribeOnEvents');
-
     _userRepository = userRepository;
     _webSocket = webSocket;
 
@@ -143,8 +141,6 @@ class CallsService {
   }
 
   void unsubscribeFromEvents() {
-    print('KlmLog unsubscribeFromEvents');
-
     _offersSub?.cancel();
     _eventsSub?.cancel();
     _callEndsSub?.cancel();

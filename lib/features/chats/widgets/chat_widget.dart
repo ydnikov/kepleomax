@@ -118,8 +118,8 @@ class _MessageTextWidgetState extends State<_MessageTextWidget> {
   Widget build(BuildContext context) {
     _isTyping = _isTypingRightNow;
     return _isTyping
-        ? Text(
-            'typing..',
+        ? EllipsisTextWidget(
+            'typing',
             style: context.textTheme.bodyLarge?.copyWith(
               fontSize: 15,
               color: Colors.grey.shade700,
