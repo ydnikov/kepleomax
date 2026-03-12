@@ -24,9 +24,9 @@ class PeopleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<PeopleBloc>(
-      create: (context) =>
-          PeopleBloc(userRepository: Dependencies.of(context).userRepository)
-            ..add(const PeopleEventInstantLoad()),
+      create: (context) => PeopleBloc(
+        peopleRepository: Dependencies.of(context).peopleRepositoryBuilder(),
+      )..add(const PeopleEventInstantLoad()),
       child: const Scaffold(
         appBar: _AppBar(key: Key('people_app_bar')),
         body: _Body(key: Key('people_body')),

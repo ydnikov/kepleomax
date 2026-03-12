@@ -27,9 +27,3 @@ GetUsersResponse _$GetUsersResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$GetUsersResponseToJson(GetUsersResponse instance) =>
     <String, dynamic>{'data': instance.data, 'message': instance.message};
-
-FCMTokenRequest _$FCMTokenRequestFromJson(Map<String, dynamic> json) =>
-    FCMTokenRequest(token: json['token'] as String);
-
-Map<String, dynamic> _$FCMTokenRequestToJson(FCMTokenRequest instance) =>
-    <String, dynamic>{'token': instance.token};

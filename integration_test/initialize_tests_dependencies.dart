@@ -5,10 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kepleomax/core/auth/auth_controller.dart';
 import 'package:kepleomax/core/data/auth_repository.dart';
-import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
+import 'package:kepleomax/core/data/data_sources/fcm_api_data_source.dart';
+import 'package:kepleomax/core/data/data_sources/files_api_data_source.dart';
 import 'package:kepleomax/core/data/data_sources/messages_api_data_sources.dart';
+import 'package:kepleomax/core/data/data_sources/profile_api_data_source.dart';
+import 'package:kepleomax/core/data/data_sources/users_api_data_source.dart';
 import 'package:kepleomax/core/data/files_repository.dart';
 import 'package:kepleomax/core/data/local_data_sources/chats_local_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/local_database_manager.dart';
@@ -16,22 +19,25 @@ import 'package:kepleomax/core/data/local_data_sources/messages_local_data_sourc
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart';
 import 'package:kepleomax/core/data/messenger/combine_cache_and_api.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
-import 'package:kepleomax/features/post/data/post_repository.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
+import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
 import 'package:kepleomax/core/network/apis/files/files_api.dart';
 import 'package:kepleomax/core/network/apis/posts/post_api.dart';
 import 'package:kepleomax/core/network/apis/profile/profile_api.dart';
 import 'package:kepleomax/core/network/middlewares/auth_interceptor.dart';
 import 'package:kepleomax/core/settings/app_settings.dart';
+import 'package:kepleomax/features/chats/data/chats_repository.dart';
+import 'package:kepleomax/features/post/data/post_repository.dart';
 import 'package:kepleomax/firebase_options.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import 'mocks/fake_fcm_api.dart';
 import 'mocks/fake_user_api.dart';
 import 'mocks/mock_klm_web_socket.dart';
 import 'mocks/mock_messages_web_socket.dart';
@@ -107,15 +113,37 @@ List<_InitializationStep> _steps = [
       ..authApi = AuthApi(dp.dio, flavor.baseUrl)
       ..userApi = FakeUserApi()
       ..profileApi = ProfileApi(dp.dio, flavor.baseUrl)
-      ..filesApi = FilesApi(dp.dio, flavor.baseUrl);
+      ..filesApi = FilesApi(dp.dio, flavor.baseUrl)
+      ..fcmApi = FakeFcmApi();
+  }),
+
+  _InitializationStep('apis', (dp) async {
+    dp
+      ..messagesApi = MockMessagesApi()
+      ..chatsApi = MockChatsApi()
+      ..postApi = PostApi(dp.dio, flavor.baseUrl)
+      ..callsApi = CallsApi(dp.dio, flavor.baseUrl);
+  }),
+
+  _InitializationStep('api_data_sources', (dp) async {
+    dp
+      ..usersApiDataSource = UsersApiDataSourceImpl(usersApi: dp.userApi)
+      ..profileApiDataSource = ProfileApiDataSourceImpl(profileApi: dp.profileApi)
+      ..filesApiDataSource = FilesApiDataSourceImpl(filesApi: dp.filesApi)
+      ..fcmApiDataSourceImpl = FcmApiDataSourceImpl(fcmApi: dp.fcmApi)
+      ..chatsApiDataSource = ChatsApiDataSourceImpl(chatsApi: dp.chatsApi)
+      ..messagesApiDataSource = MessagesApiDataSourceImpl(
+        messagesApi: dp.messagesApi,
+      );
   }),
 
   _InitializationStep('auth', (dp) async {
     dp.userRepository = UserRepositoryImpl(
-      profileApi: dp.profileApi,
-      filesApi: dp.filesApi,
-      userApi: dp.userApi,
+      profileApiDataSource: dp.profileApiDataSource,
+      filesApiDataSource: dp.filesApiDataSource,
+      userApiDataSource: dp.usersApiDataSource,
       usersLocalDataSource: dp.usersLocalDataSource,
+      fcmApiDataSource: dp.fcmApiDataSourceImpl,
     );
 
     final authController = AuthControllerImpl(
@@ -141,18 +169,13 @@ List<_InitializationStep> _steps = [
       ..rtcWebSocket = MockRtcWebSocket();
   }),
 
-  _InitializationStep('apis', (dp) async {
-    dp
-      ..postApi = PostApi(dp.dio, flavor.baseUrl)
-      ..messagesApi = MockMessagesApi()
-      ..chatsApi = MockChatsApi();
-  }),
-
   _InitializationStep('repositories', (dp) async {
     final chatsApiDataSource = ChatsApiDataSourceImpl(chatsApi: dp.chatsApi);
 
     dp
-      ..filesRepository = FilesRepositoryImpl(filesApi: dp.filesApi)
+      ..filesRepository = FilesRepositoryImpl(
+        filesApiDataSource: dp.filesApiDataSource,
+      )
       ..postRepository = PostRepositoryImpl(postApi: dp.postApi)
       ..connectionRepository = ConnectionRepositoryImpl(
         klmWebSocket: dp.klmWebSocket,

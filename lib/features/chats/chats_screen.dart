@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/call_model.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
@@ -196,7 +197,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
               : data.isLoading
               ? 'Updating...'
               : 'Chats',
-          showLoading: !data.isConnected || data.isLoading,
+          showLoading: (!data.isConnected || data.isLoading) && !flavor.isTesting, // TODO is it good?
           key: const Key('chats_app_bar'),
         );
       },

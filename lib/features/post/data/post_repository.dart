@@ -30,6 +30,7 @@ abstract class PostRepository {
   Future<Post> deletePost({required int postId});
 }
 
+/// without PostApiDataSource, just postApi
 class PostRepositoryImpl implements PostRepository {
   PostRepositoryImpl({required PostApi postApi}) : _postApi = postApi;
   final PostApi _postApi;

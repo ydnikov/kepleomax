@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/data/models/users_collection.dart';
-import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/presentation/user_error_message.dart';
 import 'package:kepleomax/features/people/bloc/people_state.dart';
+import 'package:kepleomax/features/people/data/people_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
 class PeopleBloc extends Bloc<PeopleEvent, PeopleState> {
-  PeopleBloc({required UserRepository userRepository})
-    : _userRepository = userRepository,
+  PeopleBloc({required PeopleRepository peopleRepository})
+    : _peopleRepository = peopleRepository,
       super(PeopleStateBase.initial()) {
     on<_PeopleEventLoad>(
       _onLoad,
@@ -27,12 +27,12 @@ class PeopleBloc extends Bloc<PeopleEvent, PeopleState> {
     on<PeopleEventEditSearch>(_onEditSearch);
     on<_PeopleEventEmitUsers>(_onEmitUsers);
 
-    _usersSub = _userRepository.usersStream.listen((users) {
+    _usersSub = _peopleRepository.usersStream.listen((users) {
       add(_PeopleEventEmitUsers(users));
     });
   }
 
-  final UserRepository _userRepository;
+  final PeopleRepository _peopleRepository;
   late final StreamSubscription<void> _usersSub;
 
   late PeopleData _data = PeopleData.initial();
@@ -45,7 +45,7 @@ class PeopleBloc extends Bloc<PeopleEvent, PeopleState> {
     emit(PeopleStateBase(data: _data));
 
     try {
-      await _userRepository.loadSearch(search: '');
+      await _peopleRepository.loadSearch(search: '');
     } catch (e, st) {
       _onError(e, st, emit);
     }
@@ -57,7 +57,7 @@ class PeopleBloc extends Bloc<PeopleEvent, PeopleState> {
 
     print('searchEvent: ${_data.searchText}');
     try {
-      await _userRepository.loadSearch(search: _data.searchText);
+      await _peopleRepository.loadSearch(search: _data.searchText);
     } catch (e, st) {
       _onError(e, st, emit);
     }
@@ -70,7 +70,7 @@ class PeopleBloc extends Bloc<PeopleEvent, PeopleState> {
     if (_data.isLoading || _data.isAllUsersLoaded) return;
 
     try {
-      await _userRepository.loadMore();
+      await _peopleRepository.loadMore();
     } catch (e, st) {
       _onError(e, st, emit);
     }

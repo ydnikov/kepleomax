@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kepleomax/core/auth/auth_controller.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
+import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
+import 'package:kepleomax/core/data/data_sources/fcm_api_data_source.dart';
+import 'package:kepleomax/core/data/data_sources/files_api_data_source.dart';
+import 'package:kepleomax/core/data/data_sources/messages_api_data_sources.dart';
+import 'package:kepleomax/core/data/data_sources/profile_api_data_source.dart';
+import 'package:kepleomax/core/data/data_sources/users_api_data_source.dart';
 import 'package:kepleomax/core/data/files_repository.dart';
 import 'package:kepleomax/core/data/local_data_sources/chats_local_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/messages_local_data_source.dart';
@@ -12,11 +18,12 @@ import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
 import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_api.dart';
+import 'package:kepleomax/core/network/apis/fcm/fcm_api.dart';
 import 'package:kepleomax/core/network/apis/files/files_api.dart';
 import 'package:kepleomax/core/network/apis/messages/messages_api.dart';
 import 'package:kepleomax/core/network/apis/posts/post_api.dart';
 import 'package:kepleomax/core/network/apis/profile/profile_api.dart';
-import 'package:kepleomax/core/network/apis/user/user_api.dart';
+import 'package:kepleomax/core/network/apis/user/users_api.dart';
 import 'package:kepleomax/core/network/token_provider.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
@@ -24,6 +31,7 @@ import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/settings/app_settings.dart';
 import 'package:kepleomax/features/call/data/calls_repository.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
+import 'package:kepleomax/features/people/data/people_repository.dart';
 import 'package:kepleomax/features/post/data/post_repository.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,7 +48,8 @@ class Dependencies {
 
   late final Dio dio;
   late final AuthApi authApi;
-  late final UserApi userApi;
+  late final UsersApi userApi;
+  late final FcmApi fcmApi;
   late final ProfileApi profileApi;
   late final FilesApi filesApi;
   late final PostApi postApi;
@@ -56,11 +65,20 @@ class Dependencies {
   late final MessagesLocalDataSource messagesLocalDataSource;
   late final ChatsLocalDataSource chatsLocalDataSource;
 
+  late final UsersApiDataSource usersApiDataSource;
+  late final ProfileApiDataSource profileApiDataSource;
+  late final FilesApiDataSource filesApiDataSource;
+  late final FcmApiDataSource fcmApiDataSourceImpl;
+  late final ChatsApiDataSource chatsApiDataSource;
+  late final MessagesApiDataSource messagesApiDataSource;
+
+  /// TODO every repository should be builder, but it requires a lot of refactoring
   late final UserRepository userRepository;
   late final PostRepository postRepository;
   late final FilesRepository filesRepository;
   late final ConnectionRepository connectionRepository;
   late final MessengerRepository messengerRepository;
+  late final PeopleRepository Function() peopleRepositoryBuilder;
   late final ChatsRepository Function() chatsRepositoryBuilder;
   late final CallsRepository Function() callsRepositoryBuilder;
 

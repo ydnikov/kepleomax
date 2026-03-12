@@ -153,7 +153,6 @@ class MessengerRepositoryImpl implements MessengerRepository {
   @override
   void listenToMessagesWithOtherUserId({required int? otherUserId}) {
     _currentChatOtherUserId = otherUserId;
-    print('listenToMessagesWithOtherUserId: $otherUserId');
 
     if (otherUserId == null) return;
 

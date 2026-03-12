@@ -5,6 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kepleomax/core/auth/auth_controller.dart';
 import 'package:kepleomax/core/data/auth_repository.dart';
+import 'package:kepleomax/core/data/data_sources/fcm_api_data_source.dart';
+import 'package:kepleomax/core/data/data_sources/files_api_data_source.dart';
+import 'package:kepleomax/core/data/data_sources/profile_api_data_source.dart';
+import 'package:kepleomax/core/data/data_sources/users_api_data_source.dart';
+import 'package:kepleomax/core/network/apis/fcm/fcm_api.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
@@ -16,6 +21,7 @@ import 'package:kepleomax/core/data/local_data_sources/messages_local_data_sourc
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart';
 import 'package:kepleomax/core/data/messenger/combine_cache_and_api.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
+import 'package:kepleomax/features/people/data/people_repository.dart';
 import 'package:kepleomax/features/post/data/post_repository.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
@@ -28,7 +34,7 @@ import 'package:kepleomax/core/network/apis/files/files_api.dart';
 import 'package:kepleomax/core/network/apis/messages/messages_api.dart';
 import 'package:kepleomax/core/network/apis/posts/post_api.dart';
 import 'package:kepleomax/core/network/apis/profile/profile_api.dart';
-import 'package:kepleomax/core/network/apis/user/user_api.dart';
+import 'package:kepleomax/core/network/apis/user/users_api.dart';
 import 'package:kepleomax/core/network/middlewares/auth_interceptor.dart';
 import 'package:kepleomax/core/network/token_provider.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
@@ -121,16 +127,38 @@ List<_InitializationStep> _steps = [
   _InitializationStep(DiStep.authApis, (dp) async {
     dp
       ..authApi = AuthApi(dp.dio, flavor.baseUrl)
-      ..userApi = UserApi(dp.dio, flavor.baseUrl)
+      ..userApi = UsersApi(dp.dio, flavor.baseUrl)
       ..profileApi = ProfileApi(dp.dio, flavor.baseUrl)
-      ..filesApi = FilesApi(dp.dio, flavor.baseUrl);
+      ..filesApi = FilesApi(dp.dio, flavor.baseUrl)
+      ..fcmApi = FcmApi(dp.dio, flavor.baseUrl);
+  }),
+
+  _InitializationStep(DiStep.apis, (dp) async {
+    dp
+      ..postApi = PostApi(dp.dio, flavor.baseUrl)
+      ..messagesApi = MessagesApi(dp.dio, flavor.baseUrl)
+      ..chatsApi = ChatsApi(dp.dio, flavor.baseUrl)
+      ..callsApi = CallsApi(dp.dio, flavor.baseUrl);
+  }),
+
+  _InitializationStep(DiStep.apiDataSources, (dp) async {
+    dp
+      ..usersApiDataSource = UsersApiDataSourceImpl(usersApi: dp.userApi)
+      ..profileApiDataSource = ProfileApiDataSourceImpl(profileApi: dp.profileApi)
+      ..filesApiDataSource = FilesApiDataSourceImpl(filesApi: dp.filesApi)
+      ..fcmApiDataSourceImpl = FcmApiDataSourceImpl(fcmApi: dp.fcmApi)
+      ..chatsApiDataSource = ChatsApiDataSourceImpl(chatsApi: dp.chatsApi)
+      ..messagesApiDataSource = MessagesApiDataSourceImpl(
+        messagesApi: dp.messagesApi,
+      );
   }),
 
   _InitializationStep(DiStep.auth, (dp) async {
     dp.userRepository = UserRepositoryImpl(
-      profileApi: dp.profileApi,
-      filesApi: dp.filesApi,
-      userApi: dp.userApi,
+      profileApiDataSource: ProfileApiDataSourceImpl(profileApi: dp.profileApi),
+      filesApiDataSource: FilesApiDataSourceImpl(filesApi: dp.filesApi),
+      userApiDataSource: UsersApiDataSourceImpl(usersApi: dp.userApi),
+      fcmApiDataSource: FcmApiDataSourceImpl(fcmApi: dp.fcmApi),
       usersLocalDataSource: dp.usersLocalDataSource,
     );
 
@@ -160,19 +188,11 @@ List<_InitializationStep> _steps = [
       ..rtcWebSocket = RtcWebSocketImpl(klmWebSocket: dp.klmWebSocket);
   }),
 
-  _InitializationStep(DiStep.apis, (dp) async {
-    dp
-      ..postApi = PostApi(dp.dio, flavor.baseUrl)
-      ..messagesApi = MessagesApi(dp.dio, flavor.baseUrl)
-      ..chatsApi = ChatsApi(dp.dio, flavor.baseUrl)
-      ..callsApi = CallsApi(dp.dio, flavor.baseUrl);
-  }),
-
   _InitializationStep(DiStep.repositories, (dp) async {
-    final chatsApiDataSource = ChatsApiDataSourceImpl(chatsApi: dp.chatsApi);
-
     dp
-      ..filesRepository = FilesRepositoryImpl(filesApi: dp.filesApi)
+      ..filesRepository = FilesRepositoryImpl(
+        filesApiDataSource: dp.filesApiDataSource,
+      )
       ..postRepository = PostRepositoryImpl(postApi: dp.postApi)
       ..connectionRepository = ConnectionRepositoryImpl(
         klmWebSocket: dp.klmWebSocket,
@@ -182,14 +202,18 @@ List<_InitializationStep> _steps = [
         messagesApiDataSource: MessagesApiDataSourceImpl(
           messagesApi: dp.messagesApi,
         ),
-        chatsApiDataSource: chatsApiDataSource,
+        chatsApiDataSource: dp.chatsApiDataSource,
         messagesLocalDataSource: dp.messagesLocalDataSource,
         chatsLocalDataSource: dp.chatsLocalDataSource,
         usersLocalDataSource: dp.usersLocalDataSource,
         combiner: CombineCacheAndApi(dp.messagesLocalDataSource),
       )
+      ..peopleRepositoryBuilder = (() => PeopleRepositoryImpl(
+        userApiDataSource: dp.usersApiDataSource,
+        usersLocalDataSource: dp.usersLocalDataSource,
+      ))
       ..chatsRepositoryBuilder = (() => ChatsRepositoryImpl(
-        chatsApiDataSource: chatsApiDataSource,
+        chatsApiDataSource: dp.chatsApiDataSource,
         chatsLocalDataSource: dp.chatsLocalDataSource,
       ))
       ..callsRepositoryBuilder = (() => CallsRepositoryImpl(
@@ -227,6 +251,7 @@ enum DiStep {
   auth,
   webSockets,
   apis,
+  apiDataSources,
   repositories,
   firebase,
   globalSettings,

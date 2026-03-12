@@ -28,15 +28,3 @@ class GetUsersResponse {
 
   Map<String, dynamic> toJson() => _$GetUsersResponseToJson(this);
 }
-
-@JsonSerializable()
-class FCMTokenRequest {
-
-  FCMTokenRequest({required this.token});
-
-  factory FCMTokenRequest.fromJson(Map<String, dynamic> json) =>
-      _$FCMTokenRequestFromJson(json);
-  final String token;
-
-  Map<String, dynamic> toJson() => _$FCMTokenRequestToJson(this);
-}
