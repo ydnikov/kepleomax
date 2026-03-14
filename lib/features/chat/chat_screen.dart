@@ -30,7 +30,9 @@ import 'package:scrollview_observer/scrollview_observer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 part 'widgets/chat_bottom.dart';
+
 part 'widgets/read_button.dart';
+
 part 'widgets/tech_message.dart';
 
 /// screen
@@ -180,7 +182,7 @@ class _BodyState extends State<_Body> {
         return true;
       },
       listener: (context, state) {
-        if (state is ChatStateMessage) {
+        if (state is ChatStateMessage && !flavor.isRelease) {
           context.showSnackBar(
             text: state.message,
             color: state.isError ? KlmColors.errorRed : Colors.green,
@@ -289,6 +291,7 @@ class _BodyState extends State<_Body> {
     );
   }
 
+  /// listeners
   void _onVisibilityChanged(VisibilityInfo info, Message message) {
     if (_chatBloc.isClosed) return;
 
@@ -305,7 +308,6 @@ class _BodyState extends State<_Body> {
     }
   }
 
-  /// listeners
   void _onScrollListener() {
     if (!widget.scrollController.hasClients || !_isScreenActive) return;
 

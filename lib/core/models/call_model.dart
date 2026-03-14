@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:kepleomax/core/scopes/auth_scope.dart';
 
 part 'call_model.freezed.dart';
 
@@ -30,7 +31,9 @@ abstract class CallModel with _$CallModel {
 
   const CallModel._();
 
-  CallType getCallType(int userId) {
+  CallType getCallType() {
+    final userId = AuthScope.userOf(authScopeGlobalKey.currentContext!).id;
+
     if (startTime != null && endTime != null) {
       if (callerId == userId) {
         return CallType.outgoing;

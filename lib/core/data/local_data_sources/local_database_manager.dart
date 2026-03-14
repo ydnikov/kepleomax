@@ -14,7 +14,8 @@ class LocalDatabaseManager {
     'klm_database.db',
     version: 1,
     onCreate: (db, _) async {
-      await db.execute('''CREATE TABLE messages (
+      await db.execute('''
+        CREATE TABLE messages (
           id INT PRIMARY KEY, 
           chat_id INT NOT NULL, 
           sender_id INT NOT NULL, 
@@ -27,35 +28,42 @@ class LocalDatabaseManager {
           )''');
       await db.execute('CREATE INDEX messages_chat_id_index ON messages (chat_id)');
 
-      await db.execute('''CREATE TABLE chats (
+      await db.execute('''
+        CREATE TABLE chats (
           id INT PRIMARY KEY,
           other_user_id INT NOT NULL,
           unread_count INT NOT NULL
         )''');
 
-      await db.execute('''CREATE TABLE users (
+      await db.execute('''
+        CREATE TABLE users (
           id SERIAL PRIMARY KEY, 
           username VARCHAR(50) NOT NULL,
           profile_image VARCHAR(32),
           is_current BIT NOT NULL,
           is_online BIT NOT NULL,
-          last_activity_time BIGINT NOT NULL)
-          ''');
-
-      // don't forget to add each new table into reset()
+          last_activity_time BIGINT NOT NULL
+        )''');
     },
     onUpgrade: (db, oldV, newV) async {},
   );
 
   static Future<void> reset() async {
-    if (_db != null) {
-      // await deleteDatabase(_db!.path);
-      // _db = null;
-      await _db!.transaction((transaction) async {
-        await transaction.delete('messages');
-        await transaction.delete('chats');
-        await transaction.delete('users');
-      });
-    }
+    if (_db == null) return;
+
+    await _db!.transaction((transaction) async {
+      final tableNames = (await transaction.query(
+        'sqlite_master',
+        columns: ['name'],
+        where: 'type = ?',
+        whereArgs: ['table'],
+      )).map((row) => row['name']! as String);
+
+      for (final name in tableNames) {
+        if (name.startsWith('sqlite_')) continue;
+
+        await transaction.delete(name);
+      }
+    });
   }
 }

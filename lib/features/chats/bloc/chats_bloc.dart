@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
@@ -14,7 +13,6 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   ChatsBloc({
     required MessengerRepository messengerRepository,
     required ConnectionRepository connectionRepository,
-    this.callsTimeout = const Duration(milliseconds: 500),
   }) : _messengerRepository = messengerRepository,
        _connectionRepository = connectionRepository,
        super(ChatsStateBase.initial()) {
@@ -30,15 +28,8 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
       },
     );
 
-    on<ChatsEvent>(
-      (event, emit) => switch (event) {
-        /// TODO improve that
-        final ChatsEventLoadCache event => _onLoadCache(event, emit),
-        final ChatsEventLoad event => _onLoad(event, emit),
-        ChatsEvent _ => () {},
-      },
-      transformer: sequential(),
-    );
+    on<ChatsEventLoad>(_onLoad);
+    on<ChatsEventLoadCache>(_onLoadCache);
     on<ChatsEventReconnect>(_onReconnect);
 
     /// local events
@@ -52,9 +43,6 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
   late ChatsData _data = ChatsData.initial();
   late final StreamSubscription<void> _chatsUpdatesSub;
   late final StreamSubscription<void> _subConnectionState;
-
-  /// fot testing
-  final Duration callsTimeout;
 
   Future<void> _onLoadCache(
     ChatsEventLoadCache event,
@@ -98,7 +86,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
       return;
     }
     _data = _data.copyWith(
-      chats: data.chats.toList(),
+      chats: data.chats,
       totalUnreadCount: data.chats.fold(0, (a, b) => a + b.unreadCount),
       isLoading: data.fromCache,
     );

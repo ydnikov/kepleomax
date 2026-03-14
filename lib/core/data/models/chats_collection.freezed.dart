@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatsCollection {
 
- Iterable<Chat> get chats; bool get fromCache;
+ List<Chat> get chats; bool get fromCache;
 /// Create a copy of ChatsCollection
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +45,7 @@ abstract mixin class $ChatsCollectionCopyWith<$Res>  {
   factory $ChatsCollectionCopyWith(ChatsCollection value, $Res Function(ChatsCollection) _then) = _$ChatsCollectionCopyWithImpl;
 @useResult
 $Res call({
- Iterable<Chat> chats, bool fromCache
+ List<Chat> chats, bool fromCache
 });
 
 
@@ -65,7 +65,7 @@ class _$ChatsCollectionCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? chats = null,Object? fromCache = null,}) {
   return _then(_self.copyWith(
 chats: null == chats ? _self.chats : chats // ignore: cast_nullable_to_non_nullable
-as Iterable<Chat>,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
+as List<Chat>,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -151,7 +151,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Iterable<Chat> chats,  bool fromCache)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Chat> chats,  bool fromCache)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatsCollection() when $default != null:
 return $default(_that.chats,_that.fromCache);case _:
@@ -172,7 +172,7 @@ return $default(_that.chats,_that.fromCache);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Iterable<Chat> chats,  bool fromCache)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Chat> chats,  bool fromCache)  $default,) {final _that = this;
 switch (_that) {
 case _ChatsCollection():
 return $default(_that.chats,_that.fromCache);case _:
@@ -192,7 +192,7 @@ return $default(_that.chats,_that.fromCache);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Iterable<Chat> chats,  bool fromCache)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Chat> chats,  bool fromCache)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatsCollection() when $default != null:
 return $default(_that.chats,_that.fromCache);case _:
@@ -207,10 +207,16 @@ return $default(_that.chats,_that.fromCache);case _:
 
 
 class _ChatsCollection implements ChatsCollection {
-  const _ChatsCollection({required this.chats, this.fromCache = false});
+  const _ChatsCollection({required final  List<Chat> chats, this.fromCache = false}): _chats = chats;
   
 
-@override final  Iterable<Chat> chats;
+ final  List<Chat> _chats;
+@override List<Chat> get chats {
+  if (_chats is EqualUnmodifiableListView) return _chats;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chats);
+}
+
 @override@JsonKey() final  bool fromCache;
 
 /// Create a copy of ChatsCollection
@@ -223,12 +229,12 @@ _$ChatsCollectionCopyWith<_ChatsCollection> get copyWith => __$ChatsCollectionCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatsCollection&&const DeepCollectionEquality().equals(other.chats, chats)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatsCollection&&const DeepCollectionEquality().equals(other._chats, _chats)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(chats),fromCache);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_chats),fromCache);
 
 @override
 String toString() {
@@ -243,7 +249,7 @@ abstract mixin class _$ChatsCollectionCopyWith<$Res> implements $ChatsCollection
   factory _$ChatsCollectionCopyWith(_ChatsCollection value, $Res Function(_ChatsCollection) _then) = __$ChatsCollectionCopyWithImpl;
 @override @useResult
 $Res call({
- Iterable<Chat> chats, bool fromCache
+ List<Chat> chats, bool fromCache
 });
 
 
@@ -262,8 +268,8 @@ class __$ChatsCollectionCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? chats = null,Object? fromCache = null,}) {
   return _then(_ChatsCollection(
-chats: null == chats ? _self.chats : chats // ignore: cast_nullable_to_non_nullable
-as Iterable<Chat>,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
+chats: null == chats ? _self._chats : chats // ignore: cast_nullable_to_non_nullable
+as List<Chat>,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

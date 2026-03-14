@@ -35,7 +35,7 @@ abstract class MessageDto with _$MessageDto {
 
   factory MessageDto.fromJson(Map<String, dynamic> json, {bool fromCache = false}) =>
       MessageDto(
-        id: json['id'] as int,
+        id: (json['message_id'] as int?) ?? json['id'] as int,
         chatId: json['chat_id'] as int,
         senderId: json['sender_id'] as int,
         isCurrentUser: json['is_current_user'] == null && json['user'] == null

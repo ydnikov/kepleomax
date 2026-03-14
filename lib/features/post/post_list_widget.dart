@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/post.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
@@ -23,7 +24,7 @@ class PostListWidget extends StatelessWidget {
     return BlocConsumer<PostListBloc, PostListState>(
       /// don't need buildWhen
       listener: (context, state) {
-        if (state is PostListStateMessage) {
+        if (state is PostListStateMessage && !flavor.isRelease) {
           context.showSnackBar(
             text: state.message,
             color: state.isError ? KlmColors.errorRed : KlmColors.success,

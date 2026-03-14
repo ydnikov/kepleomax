@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
@@ -9,7 +7,6 @@ part 'chats_dtos.g.dart';
 
 @JsonSerializable()
 class ChatResponse {
-
   ChatResponse({required this.data, required this.message});
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) =>
@@ -22,7 +19,6 @@ class ChatResponse {
 
 @JsonSerializable()
 class ChatsResponse {
-
   ChatsResponse({required this.data, required this.message});
 
   factory ChatsResponse.fromJson(Map<String, dynamic> json) =>
@@ -35,7 +31,6 @@ class ChatsResponse {
 
 @JsonSerializable()
 class ChatDto extends Equatable {
-
   const ChatDto({
     required this.id,
     required this.otherUser,
@@ -48,13 +43,10 @@ class ChatDto extends Equatable {
   /// json['other_user'] should be map\<String, dynamic>
   factory ChatDto.fromLocalJson(Map<String, dynamic> json) => ChatDto(
     id: json['id'] as int,
-    otherUser: UserDto.fromJson(json['other_user'] as Map<String, dynamic>),
-    lastMessage: json['last_message'] == null
+    otherUser: UserDto.fromJson(json),
+    lastMessage: json['message_id'] == null
         ? null
-        : MessageDto.fromJson(
-            jsonDecode(json['last_message'] as String) as Map<String, dynamic>,
-            fromCache: true,
-          ),
+        : MessageDto.fromJson(json, fromCache: true),
     unreadCount: json['unread_count'] as int,
   );
   final int id;

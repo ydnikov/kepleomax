@@ -16,7 +16,7 @@ class UserDto extends Equatable {
   });
 
   factory UserDto.fromJson(Map<String, dynamic> json) => UserDto(
-    id: json['id'] as int,
+    id: (json['user_id'] as int?) ?? json['id'] as int,
     username: json['username'] as String,
     profileImage: json['profile_image'] as String?,
     isCurrent: json['is_current'] == 1

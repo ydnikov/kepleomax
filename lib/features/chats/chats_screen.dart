@@ -2,20 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
-import 'package:kepleomax/core/models/call_model.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_button.dart';
 import 'package:kepleomax/core/presentation/klm_error_widget.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
-import 'package:kepleomax/core/scopes/auth_scope.dart';
 import 'package:kepleomax/features/chats/bloc/chats_bloc.dart';
 import 'package:kepleomax/features/chats/bloc/chats_state.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
@@ -56,14 +54,14 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<ChatsBloc, ChatsState>(
       buildWhen: (oldState, newState) {
-        if (newState is ChatsStateMessage) return false;
-        if (oldState is ChatsStateBase && newState is ChatsStateBase) {
-          return oldState.data != newState.data;
-        }
-        return true;
+        if (newState is! ChatsStateBase) return false;
+
+        if (oldState is! ChatsStateBase) return true;
+
+        return oldState.data != newState.data;
       },
       listener: (context, state) {
-        if (state is ChatsStateMessage) {
+        if (state is ChatsStateMessage && !flavor.isRelease) {
           context.showSnackBar(
             text: state.message,
             color: state.isError ? KlmColors.errorRed : null,
@@ -111,9 +109,7 @@ class _Body extends StatelessWidget {
             builder: (context, constraints) {
               return RefreshIndicator(
                 onRefresh: () async {
-                  context.read<ChatsBloc>().add(
-                    const ChatsEventLoad(),
-                  );
+                  context.read<ChatsBloc>().add(const ChatsEventLoad());
                 },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -197,7 +193,8 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
               : data.isLoading
               ? 'Updating...'
               : 'Chats',
-          showLoading: (!data.isConnected || data.isLoading) && !flavor.isTesting, // TODO is it good?
+          // TODO is flavor good here?
+          showLoading: (!data.isConnected || data.isLoading) && !flavor.isTesting,
           key: const Key('chats_app_bar'),
         );
       },

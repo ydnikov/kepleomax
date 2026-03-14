@@ -6,16 +6,14 @@ import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
 
 part 'message.freezed.dart';
 
-@freezed
+@Freezed(toJson: false, fromJson: false)
 abstract class Message with _$Message {
-  /// TODO make it better
-  /// used to display line in the ui
   const factory Message({
     required int id,
     required int chatId,
     required int senderId,
-    required bool isCurrentUser,
-    required String message,
+    required MessageUserType userType,
+    required String rawMessage,
     required MessageType type,
     required bool fromCache,
     required bool isRead,
@@ -26,27 +24,14 @@ abstract class Message with _$Message {
 
   const Message._();
 
-  factory Message.loading() => Message(
-    id: -10,
-    senderId: -1,
-    isCurrentUser: false,
-    fromCache: false,
-    message: '-----------------------------------------------',
-    type: MessageType.loading,
-    chatId: -1,
-    isRead: true,
-    createdAt: DateTime(10000),
-    editedAt: null,
-  );
-
   factory Message.fromDto(MessageDto dto) {
     final type = messageTypeFromString(dto.type);
     return Message(
       id: dto.id,
       chatId: dto.chatId,
       senderId: dto.senderId,
-      isCurrentUser: dto.isCurrentUser,
-      message: dto.message,
+      userType: dto.isCurrentUser ? MessageUserType.current : MessageUserType.other,
+      rawMessage: dto.message,
       type: type,
       fromCache: dto.fromCache,
       isRead: dto.isRead,
@@ -60,13 +45,25 @@ abstract class Message with _$Message {
     );
   }
 
+  factory Message.loading() => Message(
+    id: -10,
+    senderId: -1,
+    userType: MessageUserType.system,
+    fromCache: false,
+    rawMessage: '-----------------------------------------------',
+    type: MessageType.loading,
+    chatId: -1,
+    isRead: true,
+    createdAt: DateTime(10000),
+    editedAt: null,
+  );
+
   factory Message.unreadMessages() => Message(
     id: unreadMessagesId,
     senderId: -1,
     fromCache: false,
-    // TODO true or false to work properly?
-    isCurrentUser: false,
-    message: '',
+    userType: MessageUserType.system,
+    rawMessage: '',
     type: MessageType.unreadMessages,
     chatId: -1,
     // should be true so counter of unread messages works properly
@@ -79,8 +76,8 @@ abstract class Message with _$Message {
     id: dateId,
     senderId: -1,
     fromCache: false,
-    isCurrentUser: false,
-    message: '',
+    userType: MessageUserType.system,
+    rawMessage: '',
     type: MessageType.date,
     chatId: -1,
     // should be true so counter of unread messages works properly
@@ -93,17 +90,22 @@ abstract class Message with _$Message {
   static const unreadMessagesId = -11;
   static const dateId = -12;
 
-  bool get isSystem => [
-    MessageType.loading,
-    MessageType.unreadMessages,
-    MessageType.date,
-  ].contains(type);
+  bool get isSystem => userType == MessageUserType.system;
+
+  bool get isCurrentUser => userType == MessageUserType.current;
+
+  String get message => callData == null
+      ? rawMessage
+      : callData!
+            .getCallType()
+            .toUserString();
 
   MessageDto toDto() => MessageDto(
     id: id,
     chatId: chatId,
     senderId: senderId,
-    isCurrentUser: isCurrentUser,
+    // system messages are never cached
+    isCurrentUser: userType == MessageUserType.current,
     type: messageTypeToString(type),
     message: message,
     isRead: isRead,
@@ -112,6 +114,8 @@ abstract class Message with _$Message {
     fromCache: fromCache,
   );
 }
+
+enum MessageUserType { other, current, system }
 
 enum MessageType { loading, unreadMessages, date, message, call, unknown }
 

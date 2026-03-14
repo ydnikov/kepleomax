@@ -7,6 +7,7 @@ import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 
 const loginNavigatorKey = 'LoginNavigator';
+final authScopeGlobalKey = GlobalKey();
 
 class AuthScope extends StatefulWidget {
   const AuthScope({required this.builder, super.key});
@@ -14,7 +15,7 @@ class AuthScope extends StatefulWidget {
   final Widget Function(BuildContext, int) builder;
 
   static AuthController controllerOf(BuildContext context) =>
-      _InheritedAuth.maybeOf(context)!.controller;
+      _InheritedAuth.of(context).controller;
 
   static User? userOr(BuildContext context) => controllerOf(context).user;
 
@@ -56,7 +57,7 @@ class _AuthScopeState extends State<AuthScope> {
   @override
   Widget build(BuildContext context) {
     return _InheritedAuth(
-      key: ValueKey(_controller.user?.id ?? -1),
+      key: authScopeGlobalKey,
       controller: _controller,
       child: _controller.user == null
           ? const AppNavigator(
@@ -73,8 +74,9 @@ class _InheritedAuth extends InheritedWidget {
 
   final AuthController controller;
 
-  static _InheritedAuth? maybeOf(BuildContext context) =>
-      context.getInheritedWidgetOfExactType<_InheritedAuth>();
+  static _InheritedAuth of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_InheritedAuth>()!;
+  }
 
   @override
   bool updateShouldNotify(covariant _InheritedAuth oldWidget) =>

@@ -8,9 +8,9 @@ abstract class FcmApi {
   factory FcmApi(Dio dio, String baseUrl) =>
       _FcmApi(dio, baseUrl: '$baseUrl/api/fcmToken');
 
-  @POST('/fcmToken')
+  @POST('/')
   Future<HttpResponse<void>> addFCMToken({@Query('token') required String token});
 
-  @DELETE('/fcmToken')
+  @DELETE('/')
   Future<HttpResponse<void>> deleteFCMToken({@Query('token') required String token});
 }

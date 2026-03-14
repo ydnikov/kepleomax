@@ -120,8 +120,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
   /// api calls
   @override
   Future<void> loadCachedChats() async {
-    // final now = DateTime.now().millisecondsSinceEpoch;
-    // print('KlmLog loadChatsFromCache start: ${now}');
+    // final stopWatch = Stopwatch()..start();
     final cache = await _chatsLocal.getChats();
     _emitChatsCollection(
       ChatsCollection(
@@ -129,8 +128,8 @@ class MessengerRepositoryImpl implements MessengerRepository {
         fromCache: true,
       ),
     );
-    // final newNow = DateTime.now().millisecondsSinceEpoch;
-    // print('KlmLog loadChatsFromCache end: ${newNow}, diff: ${newNow - now}');
+    // print('KlmLog loadCachedChats: ${stopWatch.elapsedMilliseconds}ms');
+    // stopWatch.stop();
   }
 
   @override
@@ -138,7 +137,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
     final chats = await _chatsApi.getChats();
     _emitChatsCollection(
       ChatsCollection(
-        chats: chats.map((chat) => Chat.fromDto(chat, fromCache: false)),
+        chats: chats.map((chat) => Chat.fromDto(chat, fromCache: false)).toList(),
         fromCache: false,
       ),
     );

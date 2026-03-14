@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
+import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
@@ -70,7 +71,7 @@ class _BodyState extends State<_Body> {
           return oldState.data != newState.data;
         },
         listener: (context, state) {
-          if (state is PeopleStateError) {
+          if (state is PeopleStateError && !flavor.isRelease) {
             context.showSnackBar(text: state.message, color: KlmColors.errorRed);
           }
         },

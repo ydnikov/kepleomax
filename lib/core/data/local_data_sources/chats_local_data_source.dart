@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -79,46 +77,32 @@ class ChatsLocalDataSourceImpl implements ChatsLocalDataSource {
 
   @override
   Future<List<ChatDto>> getChats() async {
-    final query = await _database.query('chats');
+    /// chats.* should be the last in the select. id will be id of the chat, and
+    /// there are user_id and message_id fields
+    final query = await _database.rawQuery('''
+      SELECT users.id AS user_id, messages.id as message_id, users.*, messages.*, chats.* FROM chats 
+      LEFT JOIN users ON users.id = chats.other_user_id 
+      LEFT JOIN messages ON messages.id = (SELECT id FROM messages WHERE chat_id = chats.id ORDER BY created_at DESC LIMIT 1)
+      ''');
 
     final result = <ChatDto>[];
-    for (var chatJson in query) {
-      chatJson = Map.from(chatJson);
+    await _database.transaction((ts) async {
+      for (final chatJson in query) {
+        // print('KlmLog, chatJson: $chatJson');
+        if (chatJson['username'] == null) {
+          unawaited(
+            ts.delete(
+              'chats',
+              where: 'other_user_id = ?',
+              whereArgs: [chatJson['other_user_id']],
+            ),
+          );
+          continue;
+        }
 
-      /// add otherUser
-      final otherUser = await _database.query(
-        'users',
-        where: 'id = ?',
-        whereArgs: [chatJson['other_user_id']],
-      );
-      if (otherUser.isEmpty) {
-        logger.e('otherUser in cache not found, id: ${chatJson['other_user_id']}');
-        unawaited(
-          _database.delete(
-            'chats',
-            where: 'other_user_id = ?',
-            whereArgs: [chatJson['other_user_id']],
-          ),
-        );
-        continue;
+        result.add(ChatDto.fromLocalJson(chatJson));
       }
-      chatJson['other_user_id'] = null;
-      chatJson['other_user'] = otherUser.first;
-
-      /// add lastMessage
-      final lastMessage = await _database.query(
-        'messages',
-        limit: 1,
-        where: 'chat_id = ?',
-        whereArgs: [chatJson['id']],
-        orderBy: 'created_at DESC',
-      );
-      if (lastMessage.isNotEmpty) {
-        chatJson['last_message'] = jsonEncode(lastMessage[0]);
-      }
-
-      result.add(ChatDto.fromLocalJson(chatJson));
-    }
+    });
 
     return result.sorted(
       (a, b) => (b.lastMessage?.createdAt ?? 0) - (a.lastMessage?.createdAt ?? 0),

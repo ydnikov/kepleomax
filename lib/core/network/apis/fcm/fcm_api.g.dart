@@ -29,7 +29,7 @@ class _FcmApi implements FcmApi {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/fcmToken',
+            '/',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -50,7 +50,7 @@ class _FcmApi implements FcmApi {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/fcmToken',
+            '/',
             queryParameters: queryParameters,
             data: _data,
           )

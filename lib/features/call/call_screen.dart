@@ -176,8 +176,8 @@ class _BodyState extends State<_Body> {
                         _Button(
                           data.isLocalCameraOn ? 'Stop video' : 'Start video',
                           icon: data.isLocalCameraOn
-                              ? Icons.videocam_off_outlined
-                              : Icons.videocam,
+                              ? Icons.videocam
+                              : Icons.videocam_off_outlined,
                           iconColor: Colors.blue,
                           color: Colors.white,
                           onPressed: () {

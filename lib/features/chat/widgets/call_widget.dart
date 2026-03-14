@@ -17,7 +17,8 @@ class _CallWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final call = message.callData!;
-    final callType = call.getCallType(AuthScope.userOf(context).id);
+    final callType = call.getCallType();
+
     return InkWell(
       onTap: () {
         if (!message.isCurrentUser) return;

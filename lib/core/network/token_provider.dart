@@ -61,7 +61,10 @@ class TokenProviderImpl implements TokenProvider {
       return accessToken;
     }
 
-    final now = await NTPTime.now();
+    final now = await NTPTime.now().onError((e, st) {
+      logger.e(e, stackTrace: st);
+      return DateTime.now();
+    });
     final isExpired = now.isAfter(JwtDecoder.getExpirationDate(accessToken));
 
     if (!isExpired) {

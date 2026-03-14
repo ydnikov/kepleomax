@@ -23,7 +23,7 @@ extension _OnReadMessagesExtension on MessengerRepositoryImpl {
           )
               : chat,
         );
-        _emitChatsCollection(ChatsCollection(chats: newList));
+        _emitChatsCollection(ChatsCollection(chats: newList.toList()));
       } else if (update.messagesIds.contains(
         _currentChatsCollection!.chats
             .firstWhereOrNull((c) => c.id == update.chatId)
@@ -35,7 +35,7 @@ extension _OnReadMessagesExtension on MessengerRepositoryImpl {
               ? chat.copyWith(lastMessage: chat.lastMessage!.copyWith(isRead: true))
               : chat,
         );
-        _emitChatsCollection(ChatsCollection(chats: newList));
+        _emitChatsCollection(ChatsCollection(chats: newList.toList()));
       }
     }
   }

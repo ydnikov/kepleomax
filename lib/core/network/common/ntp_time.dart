@@ -1,8 +1,6 @@
 import 'package:ntp/ntp.dart';
 
-class NTPTime {
-  NTPTime._();
-
+abstract class NTPTime {
   static int? offset;
 
   static Future<DateTime> now() async {

@@ -138,10 +138,7 @@ class _MessageTextWidgetState extends State<_MessageTextWidget> {
                       context.screenSize.width * (widget.chat.isLoading ? 0.8 : 0.3),
                 ),
                 child: Text(
-                  widget.chat.lastMessage!.callData
-                          ?.getCallType(AuthScope.userOf(context).id)
-                          .toUserString() ??
-                      widget.chat.lastMessage!.message,
+                  widget.chat.lastMessage!.message,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textTheme.bodyLarge?.copyWith(
