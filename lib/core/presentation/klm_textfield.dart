@@ -22,6 +22,7 @@ class KlmTextField extends StatefulWidget {
     this.backgroundColor = Colors.white,
     this.borderColor = KlmColors.inactiveColor,
     this.hintColor = Colors.grey,
+    this.onFocusLost,
     super.key,
   });
 
@@ -42,6 +43,7 @@ class KlmTextField extends StatefulWidget {
   final Color backgroundColor;
   final Color borderColor;
   final Color hintColor;
+  final VoidCallback? onFocusLost;
 
   @override
   State<KlmTextField> createState() => _KlmTextFieldState();
@@ -49,6 +51,16 @@ class KlmTextField extends StatefulWidget {
 
 class _KlmTextFieldState extends State<KlmTextField> {
   final _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    _focusNode.addListener(() {
+      if (widget.onFocusLost != null && !_focusNode.hasFocus) {
+        widget.onFocusLost!();
+      }
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {

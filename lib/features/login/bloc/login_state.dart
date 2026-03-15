@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:kepleomax/features/login/bloc/login_bloc.dart';
 
 part 'login_state.freezed.dart';
 
@@ -8,18 +7,18 @@ abstract class LoginState {}
 
 @freezed
 abstract class LoginStateBase with _$LoginStateBase implements LoginState {
-  const factory LoginStateBase({required LoginData data, @Default(false) bool updateControllers}) = _LoginStateBase;
+  const factory LoginStateBase({
+    required LoginData data,
+    @Default(false) bool updateControllers,
+  }) = _LoginStateBase;
 
-  factory LoginStateBase.initial() => LoginStateBase(
-    data: LoginData.initial(),
-  );
+  factory LoginStateBase.initial() => LoginStateBase(data: LoginData.initial());
 }
 
 @freezed
 abstract class LoginStateError with _$LoginStateError implements LoginState {
   const factory LoginStateError({required String message}) = _LoginStateError;
 }
-
 
 /// data
 @freezed
@@ -30,66 +29,25 @@ abstract class LoginData with _$LoginData {
     required String confirmPassword,
     required bool isButtonPressed,
     required bool isLoading,
-    required LoginScreenState screenState,
+    required LoginStage stage,
   }) = _LoginData;
 
-  factory LoginData.initial() => LoginData(
+  factory LoginData.initial() => const LoginData(
     email: '',
     password: '',
     confirmPassword: '',
     isButtonPressed: false,
     isLoading: false,
-    screenState: LoginScreenState.login(),
+    stage: LoginStage.signIn,
   );
 }
 
 /// state object
-abstract class LoginScreenState {
-  LoginEvent event();
-  LoginScreenState subButtonNextState();
-  String buttonText();
-  String subButtonText();
+enum LoginStage {
+  signIn,
+  signUp;
 
-  static LoginScreenLogin login() => LoginScreenLogin();
-  static LoginScreenRegister register() => LoginScreenRegister();
-}
+  bool get isSignIn => this == LoginStage.signIn;
 
-class LoginScreenLogin implements LoginScreenState {
-  factory LoginScreenLogin() {
-    return _singleton;
-  }
-  LoginScreenLogin._internal();
-  static final LoginScreenLogin _singleton = LoginScreenLogin._internal();
-
-  @override
-  LoginEvent event() => const LoginEventLogin();
-
-  @override
-  String buttonText() => 'Login';
-
-  @override
-  String subButtonText() => 'or register a new account';
-
-  @override
-  LoginScreenState subButtonNextState() => LoginScreenState.register();
-}
-
-class LoginScreenRegister implements LoginScreenState {
-  factory LoginScreenRegister() {
-    return _singleton;
-  }
-  LoginScreenRegister._internal();
-  static final LoginScreenRegister _singleton = LoginScreenRegister._internal();
-
-  @override
-  LoginEvent event() => const LoginEventRegister();
-
-  @override
-  String buttonText() => 'Register';
-
-  @override
-  String subButtonText() => 'or login into existing account';
-
-  @override
-  LoginScreenState subButtonNextState() => LoginScreenState.login();
+  bool get isSignUp => this == LoginStage.signUp;
 }
