@@ -55,7 +55,7 @@ class _CallWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  callType.toUserString(),
+                  callType.userString,
                   style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
                 ),
                 Row(

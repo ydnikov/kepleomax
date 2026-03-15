@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/rtc_models.dart';
+import 'package:kepleomax/features/call/bloc/call_state.dart';
 
 abstract class RtcWebSocket {
   /// actions
@@ -12,7 +13,7 @@ abstract class RtcWebSocket {
 
   void sendIceCandidate(RTCIceCandidate candidate, int toUserId);
 
-  void sendCameraStatus(bool isCameraOn, int toUserId);
+  void sendCameraStatus(CameraStatus status, int toUserId);
 
   void endCall(int toUserId);
 
@@ -25,7 +26,7 @@ abstract class RtcWebSocket {
 
   Stream<EndCallUpdate> get endCallStream;
 
-  Stream<bool> get remoteCameraStatusStream;
+  Stream<CameraStatus> get remoteCameraStatusStream;
 }
 
 class RtcWebSocketImpl implements RtcWebSocket {
@@ -43,7 +44,9 @@ class RtcWebSocketImpl implements RtcWebSocket {
           break;
 
         case 'webrtc_camera_status':
-          _remoteCameraStatusController.add(data['is_camera_on'] as bool);
+          _remoteCameraStatusController.add(
+            CameraStatus.fromJson(data['status'] as String),
+          );
           break;
 
         case 'webrtc_end_call':
@@ -59,7 +62,7 @@ class RtcWebSocketImpl implements RtcWebSocket {
   final _answersController = StreamController<AnswerUpdate>.broadcast();
   final _candidatesController = StreamController<CandidateUpdate>.broadcast();
   final _endCallController = StreamController<EndCallUpdate>.broadcast();
-  final _remoteCameraStatusController = StreamController<bool>.broadcast();
+  final _remoteCameraStatusController = StreamController<CameraStatus>.broadcast();
 
   @override
   void sendOffer(RTCSessionDescription offer, int toUserId) {
@@ -86,10 +89,10 @@ class RtcWebSocketImpl implements RtcWebSocket {
   }
 
   @override
-  void sendCameraStatus(bool isCameraOn, int toUserId) {
+  void sendCameraStatus(CameraStatus status, int toUserId) {
     _webSocket.emit('webrtc_send_camera_status', {
       'to_user_id': toUserId,
-      'is_camera_on': isCameraOn,
+      'status': status.jsonName,
     });
   }
 
@@ -108,7 +111,8 @@ class RtcWebSocketImpl implements RtcWebSocket {
   Stream<EndCallUpdate> get endCallStream => _endCallController.stream;
 
   @override
-  Stream<bool> get remoteCameraStatusStream => _remoteCameraStatusController.stream;
+  Stream<CameraStatus> get remoteCameraStatusStream =>
+      _remoteCameraStatusController.stream;
 
   @override
   Future<void> dispose() async {

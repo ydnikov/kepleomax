@@ -34,10 +34,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     on<_CallEventEmit>(_onEmit);
     on<_CallEventExit>(_onExit);
 
-    _remoteCameraStatusSub = _rtcWebSocket.remoteCameraStatusStream.listen((
-      isCameraOn,
-    ) {
-      _data = _data.copyWith(isRemoteCameraOn: isCameraOn);
+    _remoteCameraStatusSub = _rtcWebSocket.remoteCameraStatusStream.listen((status) {
+      _data = _data.copyWith(remoteCameraStatus: status);
       add(const _CallEventEmit());
     });
 
@@ -73,6 +71,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   RTCVideoRenderer? _localRenderer;
   RTCVideoRenderer? _remoteRenderer;
   late CallData _data = CallData.initial();
+
+  // /// used to restore state after turn on (cause off doesn't contains it was front or back)
+  // CameraStatus _lastLocalCameraStatus = CameraStatus.back;
 
   Future<void> _onInit(CallEventInit event, Emitter<CallState> emit) async {
     _data = _data.copyWith(otherUser: event.otherUser);
@@ -187,11 +188,24 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   void _onToggleCamera(CallEventToggleCamera event, Emitter<CallState> emit) {
-    _localRenderer!.srcObject!.getVideoTracks().forEach((track) {
-      track.enabled = !track.enabled;
-    });
-    _rtcWebSocket.sendCameraStatus(!_data.isLocalCameraOn, _data.otherUser.id);
-    _data = _data.copyWith(isLocalCameraOn: !_data.isLocalCameraOn);
+    final isCameraOn = _localRenderer!.srcObject!.getVideoTracks()[0].enabled;
+    _localRenderer!.srcObject!.getVideoTracks()[0].enabled = !isCameraOn;
+
+    final CameraStatus newStatus;
+    if (isCameraOn) {
+      newStatus = CameraStatus.off;
+    } else {
+      newStatus =
+          _localRenderer!.srcObject!
+                  .getVideoTracks()[0]
+                  .getSettings()['facingMode'] ==
+              'environment'
+          ? CameraStatus.back
+          : CameraStatus.front;
+    }
+    _rtcWebSocket.sendCameraStatus(newStatus, _data.otherUser.id);
+    _data = _data.copyWith(localCameraStatus: newStatus);
+
     emit(CallStateBase(data: _data));
   }
 
@@ -206,10 +220,20 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     emit(CallStateBase(data: _data));
   }
 
-  void _onFlipCamera(CallEventFlipCamera event, Emitter<CallState> emit) {
-    if (!_data.isLocalCameraOn) return;
+  Future<void> _onFlipCamera(
+    CallEventFlipCamera event,
+    Emitter<CallState> emit,
+  ) async {
+    if (_data.localCameraStatus.isOff) return;
 
-    Helper.switchCamera(_localRenderer!.srcObject!.getVideoTracks()[0]);
+    final isFront = await Helper.switchCamera(
+      _localRenderer!.srcObject!.getVideoTracks()[0],
+    );
+
+    final newStatus = isFront ? CameraStatus.front : CameraStatus.back;
+    _rtcWebSocket.sendCameraStatus(newStatus, _data.otherUser.id);
+    _data = _data.copyWith(localCameraStatus: newStatus);
+    emit(CallStateBase(data: _data));
   }
 
   void _onEmit(_CallEventEmit event, Emitter<CallState> emit) {

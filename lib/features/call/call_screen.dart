@@ -72,7 +72,7 @@ class _CallScreenState extends State<CallScreen> {
           final oldData = oldState.data;
           final newData = newState.data;
           return oldData.remoteRenderer != newData.remoteRenderer ||
-              oldData.isRemoteCameraOn != newData.isRemoteCameraOn;
+              oldData.remoteCameraStatus != newData.remoteCameraStatus;
         },
         builder: (context, state) {
           return AnnotatedRegion(
@@ -85,7 +85,7 @@ class _CallScreenState extends State<CallScreen> {
               backgroundColor:
                   state is CallStateBase &&
                       state.data.remoteRenderer != null &&
-                      state.data.isRemoteCameraOn
+                      state.data.remoteCameraStatus.isOn
                   ? const Color(0xFF121212)
                   : Colors.blue,
               //appBar: _AppBar(),
@@ -125,23 +125,29 @@ class _BodyState extends State<_Body> {
 
           return Stack(
             children: [
-              if (data.remoteRenderer != null && data.isRemoteCameraOn)
-                RTCVideoView(data.remoteRenderer!),
-              if (data.localRenderer != null && data.isLocalCameraOn)
+              if (data.remoteRenderer != null && data.remoteCameraStatus.isOn)
+                RTCVideoView(
+                  data.remoteRenderer!,
+                  mirror: data.remoteCameraStatus.isFront,
+                ),
+              if (data.localRenderer != null && data.localCameraStatus.isOn)
                 Positioned(
                   right: 10,
                   bottom: 150,
                   child: SizedBox(
                     height: 160 * 1.3,
                     width: 90 * 1.3,
-                    child: RTCVideoView(data.localRenderer!),
+                    child: RTCVideoView(
+                      data.localRenderer!,
+                      mirror: data.localCameraStatus.isFront,
+                    ),
                   ),
                 ),
 
               Column(
                 children: [
                   const SizedBox(height: 6),
-                  if (data.remoteRenderer != null && data.isRemoteCameraOn)
+                  if (data.remoteRenderer != null && data.remoteCameraStatus.isOn)
                     Text(
                       data.connectionStatus.toUserString(),
                       textAlign: TextAlign.center,
@@ -151,7 +157,8 @@ class _BodyState extends State<_Body> {
                         color: Colors.grey,
                       ),
                     ),
-                  if (data.remoteRenderer == null || !data.isRemoteCameraOn) ...[
+                  if (data.remoteRenderer == null ||
+                      !data.remoteCameraStatus.isOn) ...[
                     const SizedBox(height: 80),
                     UserImage(user: data.otherUser, size: 200),
                     const SizedBox(height: 10),
@@ -175,8 +182,8 @@ class _BodyState extends State<_Body> {
                     children: [
                       if (data.isCallAccepted) ...[
                         _Button(
-                          data.isLocalCameraOn ? 'Stop video' : 'Start video',
-                          icon: data.isLocalCameraOn
+                          data.localCameraStatus.isOn ? 'Stop video' : 'Start video',
+                          icon: data.localCameraStatus.isOn
                               ? Icons.videocam
                               : Icons.videocam_off_outlined,
                           iconColor: Colors.blue,
@@ -192,7 +199,7 @@ class _BodyState extends State<_Body> {
                           icon: Icons.cameraswitch,
                           iconColor: Colors.blue,
                           color: Colors.white,
-                          enabled: data.isLocalCameraOn,
+                          enabled: data.localCameraStatus.isOn,
                           onPressed: () {
                             context.read<CallBloc>().add(
                               const CallEventFlipCamera(),

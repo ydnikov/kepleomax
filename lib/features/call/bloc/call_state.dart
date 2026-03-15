@@ -35,8 +35,8 @@ abstract class CallData with _$CallData implements CallState {
     RTCVideoRenderer? localRenderer,
     RTCVideoRenderer? remoteRenderer,
     DateTime? callStartedTime,
-    @Default(true) bool isLocalCameraOn,
-    @Default(true) bool isRemoteCameraOn,
+    @Default(CameraStatus.back) CameraStatus localCameraStatus,
+    @Default(CameraStatus.back) CameraStatus remoteCameraStatus,
     @Default(true) bool isLocalMicrophoneOn,
     @Default(false) bool isCallAccepted,
   }) = _CallData;
@@ -45,4 +45,25 @@ abstract class CallData with _$CallData implements CallState {
     otherUser: User.loading(),
     connectionStatus: RTCPeerConnectionState.RTCPeerConnectionStateClosed,
   );
+}
+
+enum CameraStatus {
+  off('off'),
+  back('back'),
+  front('front');
+
+  const CameraStatus(this.jsonName);
+
+  factory CameraStatus.fromJson(String name) =>
+      CameraStatus.values.firstWhere((s) => s.jsonName == name);
+
+  final String jsonName;
+
+  bool get isOn => this != CameraStatus.off;
+
+  bool get isOff => !isOn;
+
+  bool get isFront => this == CameraStatus.front;
+
+  bool get isBack => this == CameraStatus.back;
 }

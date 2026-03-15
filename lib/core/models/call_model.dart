@@ -55,25 +55,17 @@ abstract class CallModel with _$CallModel {
   }
 }
 
-enum CallType { outgoing, incoming, canceled, missed, active, pending }
+enum CallType {
+  outgoing('Outgoing Call'),
+  incoming('Incoming Call'),
+  canceled('Canceled Call'),
+  missed('Missed Call'),
+  active('Active Call'),
+  pending('Pending Call');
 
-extension CallTypeToString on CallType {
-  String toUserString() {
-    switch (this) {
-      case CallType.outgoing:
-        return 'Outgoing Call';
-      case CallType.incoming:
-        return 'Incoming Call';
-      case CallType.canceled:
-        return 'Canceled Call';
-      case CallType.missed:
-        return 'Missed Call';
-      case CallType.active:
-        return 'Active Call';
-      case CallType.pending:
-        return 'Pending Call';
-    }
-  }
+  const CallType(this.userString);
+
+  final String userString;
 
   IconData get arrowIcon {
     switch (this) {

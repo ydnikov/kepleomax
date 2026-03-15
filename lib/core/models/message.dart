@@ -99,7 +99,7 @@ abstract class Message with _$Message {
       ? rawMessage
       : callData!
             .getCallType()
-            .toUserString();
+            .userString;
 
   MessageDto toDto() => MessageDto(
     id: id,

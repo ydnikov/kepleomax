@@ -211,7 +211,6 @@ class MessengerRepositoryImpl implements MessengerRepository {
     required int chatId,
     required int? toMessageId,
   }) async {
-    // await Future.delayed(const Duration(milliseconds: 500));
     if (_currentMessagesCollection == null) return;
     final messages = _currentMessagesCollection!.messages;
 
