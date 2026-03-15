@@ -2,26 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/models/call_model.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
-import 'package:kepleomax/core/scopes/auth_scope.dart';
 import 'package:kepleomax/features/chat/widgets/message_menu.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 part 'call_widget.dart';
-
 part 'date_widget.dart';
-
-part 'unread_messages_widget.dart';
-
 part 'general_message_widget.dart';
+part 'unread_messages_widget.dart';
 
 class MessageWidget extends StatelessWidget {
   const MessageWidget({
@@ -63,6 +60,8 @@ class MessageWidget extends StatelessWidget {
               width: 35,
               child: InkWell(
                 onTap: () {
+                  if (message.isSystem) return;
+
                   context.findAncestorStateOfType<AppNavigatorState>();
 
                   AppNavigator.withKeyOf(
@@ -70,7 +69,11 @@ class MessageWidget extends StatelessWidget {
                     mainNavigatorKey,
                   )!.push(UserPage(userId: user.id));
                 },
-                child: UserImage(size: 35, user: user),
+                child: UserImage(
+                  size: 35,
+                  isLoading: message.type == MessageType.loading,
+                  user: user,
+                ),
               ),
             ),
             const SizedBox(width: 10),

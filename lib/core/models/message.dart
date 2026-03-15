@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kepleomax/core/models/call_model.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 part 'message.freezed.dart';
 
@@ -50,7 +51,7 @@ abstract class Message with _$Message {
     senderId: -1,
     userType: MessageUserType.system,
     fromCache: false,
-    rawMessage: '-----------------------------------------------',
+    rawMessage: BoneMock.words(8),
     type: MessageType.loading,
     chatId: -1,
     isRead: true,

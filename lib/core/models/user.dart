@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 part 'user.freezed.dart';
 
@@ -30,9 +31,9 @@ abstract class User with _$User {
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
-  factory User.loading() => const User(
+  factory User.loading() => User(
     id: -1,
-    username: '-------------',
+    username: BoneMock.name,
     profileImage: null,
     isCurrent: false,
     isOnline: false,

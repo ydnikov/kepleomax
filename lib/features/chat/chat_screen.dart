@@ -237,33 +237,38 @@ class _BodyState extends State<_Body> {
                               observer: _chatObserver,
                             ),
                             shrinkWrap: _chatObserver.isShrinkWrap,
-                            padding: EdgeInsets.only(
-                              bottom: 4,
-                              top: data.isAllMessagesLoaded ? 4 : 20,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 4),
                             reverse: true,
-                            itemCount: data.messages.length,
-                            itemBuilder: (context, i) => VisibilityDetector(
-                              /// DateTime to check visibility on every messagesList changes
-                              /// (like the change of some fromCache statuses)
-                              key: Key(
-                                'visibility_detector_$i-${DateTime.now().millisecondsSinceEpoch}',
-                              ),
-                              onVisibilityChanged: (info) =>
-                                  _onVisibilityChanged(info, data.messages[i]),
-                              child: MessageWidget(
-                                key: Key('message_${data.messages[i].id}'),
-                                onDelete: () {
-                                  _chatBloc.add(
-                                    ChatEventDeleteMessage(
-                                      messageId: data.messages[i].id,
+                            itemCount:
+                                data.messages.length +
+                                (data.isAllMessagesLoaded ? 0 : 3),
+                            itemBuilder: (context, i) => i >= data.messages.length
+                                ? MessageWidget(
+                                    message: Message.loading(),
+                                    user: data.otherUser,
+                                    onDelete: () {},
+                                  )
+                                : VisibilityDetector(
+                                    /// DateTime to check visibility on every messagesList changes
+                                    /// (like the change of some fromCache statuses)
+                                    key: Key(
+                                      'visibility_detector_$i-${DateTime.now().millisecondsSinceEpoch}',
                                     ),
-                                  );
-                                },
-                                user: data.otherUser,
-                                message: data.messages[i],
-                              ),
-                            ),
+                                    onVisibilityChanged: (info) =>
+                                        _onVisibilityChanged(info, data.messages[i]),
+                                    child: MessageWidget(
+                                      key: Key('message_${data.messages[i].id}'),
+                                      onDelete: () {
+                                        _chatBloc.add(
+                                          ChatEventDeleteMessage(
+                                            messageId: data.messages[i].id,
+                                          ),
+                                        );
+                                      },
+                                      user: data.otherUser,
+                                      message: data.messages[i],
+                                    ),
+                                  ),
                           ),
                         ),
                 ),

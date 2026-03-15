@@ -7,6 +7,7 @@ import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_cached_image.dart';
 import 'package:kepleomax/generated/images_keys.images_keys.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class UserImage extends StatelessWidget {
   const UserImage({
@@ -39,7 +40,7 @@ class UserImage extends StatelessWidget {
               width: size ?? constraints.maxWidth,
               child: ClipOval(
                 child: isLoading
-                    ? const ColoredBox(color: Colors.grey)
+                    ? const Skeletonizer(child: ColoredBox(color: Colors.grey))
                     : user?.profileImage == null || user!.profileImage!.isEmpty
                     ? const DefaultUserIcon()
                     : KlmCachedImage(
