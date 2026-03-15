@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:kepleomax/core/network/websockets/models/rtc_models.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
+import 'package:kepleomax/features/call/bloc/call_state.dart';
 import 'package:webrtc_interface/src/rtc_ice_candidate.dart';
 import 'package:webrtc_interface/src/rtc_session_description.dart';
 
@@ -16,7 +17,7 @@ class MockRtcWebSocket implements RtcWebSocket {
   void sendIceCandidate(RTCIceCandidate candidate, int toUserId) {}
 
   @override
-  void sendCameraStatus(bool isCameraOn, int toUserId) {}
+  void sendCameraStatus(CameraStatus status, int toUserId) {}
 
   @override
   void endCall(int toUserId) {}
@@ -35,8 +36,8 @@ class MockRtcWebSocket implements RtcWebSocket {
       StreamController<EndCallUpdate>.broadcast().stream;
 
   @override
-  Stream<bool> get remoteCameraStatusStream =>
-      StreamController<bool>.broadcast().stream;
+  Stream<CameraStatus> get remoteCameraStatusStream =>
+      StreamController<CameraStatus>.broadcast().stream;
 
   @override
   Future<void> dispose() async {}

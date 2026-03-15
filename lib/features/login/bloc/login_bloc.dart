@@ -18,8 +18,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
     on<LoginEvent>(
       (event, emit) => switch (event) {
-        final LoginEventLogin event => _onLogin(event, emit),
-        final LoginEventRegister event => _onRegister(event, emit),
+        final LoginEventSignIn event => _onSignIn(event, emit),
+        final LoginEventSignUp event => _onSignUp(event, emit),
         _ => () {},
       },
       transformer: sequential(),
@@ -27,7 +27,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginEventEditEmail>(_onEditEmail);
     on<LoginEventEditPassword>(_onEditPassword);
     on<LoginEventEditConfirmPassword>(_onEditConfirmPassword);
-    on<LoginEventChangeScreenState>(_onChangeScreenState);
+    on<LoginEventChangeScreenStage>(_onChangeScreenStage);
   }
 
   final AuthController _authController;
@@ -50,10 +50,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     return true;
   }
 
-  Future<void> _onLogin(LoginEventLogin event, Emitter<LoginState> emit) async {
-    _loginData = _loginData.copyWith(isButtonPressed: true);
-    emit(LoginStateBase(data: _loginData));
-
+  Future<void> _onSignIn(LoginEventSignIn event, Emitter<LoginState> emit) async {
     if (!_validateFields(needConfirm: false)) {
       logger.d('Validation fields error, _loginData: $_loginData');
       return;
@@ -78,11 +75,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  Future<void> _onRegister(
-    LoginEventRegister event,
-    Emitter<LoginState> emit,
-  ) async {
-    _loginData = _loginData.copyWith(isButtonPressed: true);
+  Future<void> _onSignUp(LoginEventSignUp event, Emitter<LoginState> emit) async {
+    _loginData = _loginData.copyWith();
     emit(LoginStateBase(data: _loginData));
 
     if (!_validateFields(needConfirm: true)) {
@@ -107,7 +101,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       } catch (e, st) {
         logger.e(e, stackTrace: st);
         _loginData = _loginData.copyWith(
-          screenState: LoginScreenState.login(),
+          stage: LoginStage.signIn,
           confirmPassword: '',
         );
 
@@ -149,14 +143,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     emit(LoginStateBase(data: _loginData));
   }
 
-  void _onChangeScreenState(
-    LoginEventChangeScreenState event,
+  void _onChangeScreenStage(
+    LoginEventChangeScreenStage event,
     Emitter<LoginState> emit,
   ) {
-    _loginData = _loginData.copyWith(
-      screenState: event.state,
-      isButtonPressed: false,
-    );
+    _loginData = _loginData.copyWith(stage: event.stage);
     emit(LoginStateBase(data: _loginData));
   }
 }
@@ -164,18 +155,18 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 /// events
 abstract class LoginEvent {}
 
-class LoginEventLogin implements LoginEvent {
-  const LoginEventLogin();
+class LoginEventSignIn implements LoginEvent {
+  const LoginEventSignIn();
 }
 
-class LoginEventRegister implements LoginEvent {
-  const LoginEventRegister();
+class LoginEventSignUp implements LoginEvent {
+  const LoginEventSignUp();
 }
 
-class LoginEventChangeScreenState implements LoginEvent {
-  const LoginEventChangeScreenState(this.state);
+class LoginEventChangeScreenStage implements LoginEvent {
+  const LoginEventChangeScreenStage(this.stage);
 
-  final LoginScreenState state;
+  final LoginStage stage;
 }
 
 class LoginEventEditEmail implements LoginEvent {
