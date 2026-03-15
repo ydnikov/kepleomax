@@ -9,9 +9,9 @@ abstract class KlmWebSocket {
 
   void connectIfNot();
 
-  void disconnect();
-
   void emit(String event, [dynamic data]);
+
+  Future<void> dispose();
 
   bool get isConnected;
 
@@ -63,7 +63,9 @@ class KlmWebSocketImpl implements KlmWebSocket {
     });
     _socket!.onDisconnect((_) {
       logger.d('WebSocketLog Disconnected');
-      _connectionController.add(false);
+      if (!_connectionController.isClosed) {
+        _connectionController.add(false);
+      }
     });
     _socket!.onReconnect((_) async {
       logger.d('WebSocketLog Reconnect');
@@ -105,8 +107,10 @@ class KlmWebSocketImpl implements KlmWebSocket {
   }
 
   @override
-  void disconnect() {
+  Future<void> dispose() async {
     logger.d('WebSocketLog! disconnect, socket != null: ${_socket != null}');
+    await _connectionController.close();
+    await _eventsController.close();
     _socket?.dispose();
   }
 

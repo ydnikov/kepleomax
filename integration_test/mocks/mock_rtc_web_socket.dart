@@ -37,4 +37,7 @@ class MockRtcWebSocket implements RtcWebSocket {
   @override
   Stream<bool> get remoteCameraStatusStream =>
       StreamController<bool>.broadcast().stream;
+
+  @override
+  Future<void> dispose() async {}
 }

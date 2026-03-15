@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
@@ -28,8 +29,15 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
       },
     );
 
-    on<ChatsEventLoad>(_onLoad);
-    on<ChatsEventLoadCache>(_onLoadCache);
+    on<ChatsEvent>(
+      (event, emit) => switch (event) {
+        final ChatsEventLoadCache event => _onLoadCache(event, emit),
+        final ChatsEventLoad event => _onLoad(event, emit),
+        _ => null,
+      },
+      transformer: sequential(),
+    );
+
     on<ChatsEventReconnect>(_onReconnect);
 
     /// local events
@@ -51,6 +59,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
     try {
       await _messengerRepository.loadCachedChats();
     } catch (e, st) {
+      if (isClosed) return;
       add(_ChatsEventEmitError(error: e, stackTrace: st));
     }
   }
@@ -71,6 +80,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
     try {
       await _messengerRepository.loadChats();
     } catch (e, st) {
+      if (isClosed) return;
       add(_ChatsEventEmitError(error: e, stackTrace: st));
     }
   }

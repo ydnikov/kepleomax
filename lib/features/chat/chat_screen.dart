@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_detector/focus_detector.dart';
+import 'package:kepleomax/core/data/connection_repository.dart';
+import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
@@ -14,6 +16,7 @@ import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
+import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
@@ -56,9 +59,9 @@ class _ChatScreenState extends State<ChatScreen> {
     final dp = Dependencies.of(context);
     _chatBloc = ChatBloc(
       chatsRepository: dp.chatsRepositoryBuilder(),
-      messengerRepository: dp.messengerRepository,
-      connectionRepository: dp.connectionRepository,
-      messengerWebSocket: dp.messengerWebSocket,
+      messengerRepository: dp.read<MessengerRepository>(),
+      connectionRepository: dp.read<ConnectionRepository>(),
+      messengerWebSocket: dp.read<MessengerWebSocket>(),
       chatId: widget.chatId,
     )..add(ChatEventInit(chatId: widget.chatId, otherUser: widget.otherUser));
     super.initState();

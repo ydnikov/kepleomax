@@ -16,6 +16,8 @@ import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
+import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
+import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/deleted_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/new_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart';
@@ -24,7 +26,7 @@ import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:mockito/mockito.dart';
 import 'package:retrofit/dio.dart';
 
-import 'initialize_tests_dependencies.dart';
+import 'di/initialize_tests_dependencies.dart';
 import 'mocks/mock_klm_web_socket.dart';
 import 'mocks/mock_messages_web_socket.dart';
 import 'mocks/mockito_mocks.mocks.dart';
@@ -47,8 +49,6 @@ void main() {
 
     setUp(() async {
       dp = await initializeTestsDependencies();
-      ws = dp.messengerWebSocket as MockMessengerWebSocket;
-      baseWs = dp.klmWebSocket as MockKlmWebSocket;
       await dp.authController.setUser(User.testing());
     });
 
@@ -56,10 +56,16 @@ void main() {
       await LocalDatabaseManager.reset();
     });
 
+    Future<void> _pumpAppWidgetAndSetupDi(WidgetTester tester) async {
+      await tester.pumpWidget(dp.inject(child: const App()));
+      ws = dp.read<MessengerWebSocket>() as MockMessengerWebSocket;
+      baseWs = dp.read<KlmWebSocket>() as MockKlmWebSocket;
+    }
+
     Future<void> restartApp(WidgetTester tester) async {
       baseWs.setIsConnected(false);
       await tester.pumpWidget(const SizedBox());
-      await tester.pumpWidget(dp.inject(child: const App()));
+      await _pumpAppWidgetAndSetupDi(tester);
       baseWs.setIsConnected(true);
       await tester.pumpAndSettle();
     }
@@ -109,7 +115,7 @@ void main() {
         getMessagesMustReturn(messages, chatId: chats[openChatAtIndex].id, asyncControl: getMessagesAsyncControl);
       }
 
-      await tester.pumpWidget(dp.inject(child: const App()));
+      await _pumpAppWidgetAndSetupDi(tester);
       baseWs.setIsConnected(true);
       await tester.pumpAndSettle();
 
@@ -133,7 +139,7 @@ void main() {
       }
     }
 
-    testWidgets('connection_test', (tester) async {
+    testWidgets('connection_test', timeout: const Timeout(Duration(seconds: 3)), (tester) async {
       /// after setup app will be connected to the ws, because the app must be connected to open the chat
       await setupApp(tester, [chatDto0], [messageDto0, messageDto1, messageDto2, messageDto3, messageDto4], getMessagesAsyncControl: true);
 
@@ -514,7 +520,10 @@ void main() {
       tester.checkChatsOrder([]);
       await tester.pump(const Duration(milliseconds: 100));
 
-      ws.addMessage(const MessageDto(id: 13, chatId: 7, senderId: 10, isCurrentUser: false, message: 'MSG_0', type: 'message', isRead: false, createdAt: 1000, editedAt: null, fromCache: false), createdChatInfo: CreatedChatInfo(chatId: 7, usersIds: [0, 10]));
+      ws.addMessage(
+        const MessageDto(id: 13, chatId: 7, senderId: 10, isCurrentUser: false, message: 'MSG_0', type: 'message', isRead: false, createdAt: 1000, editedAt: null, fromCache: false),
+        createdChatInfo: CreatedChatInfo(chatId: 7, usersIds: [0, 10]),
+      );
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([13]);
     });

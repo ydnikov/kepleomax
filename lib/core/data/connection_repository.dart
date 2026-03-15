@@ -4,9 +4,9 @@ import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 
 /// TODO rename, maybe baseWsRepository
 abstract class ConnectionRepository {
-  void initSocket();
+  Future<void> connect();
 
-  void disconnect();
+  Future<void> dispose();
 
   void reconnect({bool onlyIfDisconnected = false});
 
@@ -29,14 +29,14 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
 
   /// callbacks
   @override
-  void initSocket() => _webSocket.init();
+  Future<void> connect() => _webSocket.init();
 
   @override
-  void disconnect() => _webSocket.disconnect();
+  Future<void> dispose() => _webSocket.dispose();
 
   @override
-  void reconnect({bool onlyIfDisconnected = false}) =>
-      onlyIfDisconnected ? _webSocket.connectIfNot() : _webSocket.init();
+  Future<void> reconnect({bool onlyIfDisconnected = false}) async =>
+      onlyIfDisconnected ? _webSocket.connectIfNot() : await _webSocket.init();
 
   /// emits
   @override

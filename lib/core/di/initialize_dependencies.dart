@@ -180,12 +180,12 @@ List<_InitializationStep> _steps = [
 
   _InitializationStep(DiStep.webSockets, (dp) async {
     dp
-      ..klmWebSocket = KlmWebSocketImpl(
-        baseUrl: flavor.baseUrl,
-        tokenProvider: dp.tokenProvider,
-      )
-      ..messengerWebSocket = MessengerWebSocketImpl(klmWebSocket: dp.klmWebSocket)
-      ..rtcWebSocket = RtcWebSocketImpl(klmWebSocket: dp.klmWebSocket);
+      ..klmWebSocketBuilder = (() =>
+          KlmWebSocketImpl(baseUrl: flavor.baseUrl, tokenProvider: dp.tokenProvider))
+      ..messengerWebSocketBuilder = (() =>
+          MessengerWebSocketImpl(klmWebSocket: dp.read<KlmWebSocket>()))
+      ..rtcWebSocketBuilder = (() =>
+          RtcWebSocketImpl(klmWebSocket: dp.read<KlmWebSocket>()));
   }),
 
   _InitializationStep(DiStep.repositories, (dp) async {
@@ -194,11 +194,10 @@ List<_InitializationStep> _steps = [
         filesApiDataSource: dp.filesApiDataSource,
       )
       ..postRepository = PostRepositoryImpl(postApi: dp.postApi)
-      ..connectionRepository = ConnectionRepositoryImpl(
-        klmWebSocket: dp.klmWebSocket,
-      )
-      ..messengerRepository = MessengerRepositoryImpl(
-        webSocket: dp.messengerWebSocket,
+      ..connectionRepositoryBuilder = (() =>
+          ConnectionRepositoryImpl(klmWebSocket: dp.read<KlmWebSocket>()))
+      ..messengerRepositoryBuilder = (() => MessengerRepositoryImpl(
+        messengerWebSocket: dp.read<MessengerWebSocket>(),
         messagesApiDataSource: MessagesApiDataSourceImpl(
           messagesApi: dp.messagesApi,
         ),
@@ -207,7 +206,7 @@ List<_InitializationStep> _steps = [
         chatsLocalDataSource: dp.chatsLocalDataSource,
         usersLocalDataSource: dp.usersLocalDataSource,
         combiner: CombineCacheAndApi(dp.messagesLocalDataSource),
-      )
+      ))
       ..peopleRepositoryBuilder = (() => PeopleRepositoryImpl(
         userApiDataSource: dp.usersApiDataSource,
         usersLocalDataSource: dp.usersLocalDataSource,
@@ -217,7 +216,7 @@ List<_InitializationStep> _steps = [
         chatsLocalDataSource: dp.chatsLocalDataSource,
       ))
       ..callsRepositoryBuilder = (() => CallsRepositoryImpl(
-        rtcWebSocket: dp.rtcWebSocket,
+        rtcWebSocket: dp.read<RtcWebSocket>(),
         peerConnectionController: PeerConnectionControllerImpl(
           prefs: dp.sharedPrefs,
         ),

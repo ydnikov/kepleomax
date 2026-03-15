@@ -45,6 +45,8 @@ abstract class MessengerRepository {
 
   Future<void> loadMoreMessages({required int chatId, required int? toMessageId});
 
+  Future<void> dispose();
+
   /// ws streams
   Stream<MessagesCollection> get messagesUpdatesStream;
 
@@ -55,25 +57,27 @@ abstract class MessengerRepository {
 
 class MessengerRepositoryImpl implements MessengerRepository {
   MessengerRepositoryImpl({
-    required MessengerWebSocket webSocket,
+    required MessengerWebSocket messengerWebSocket,
     required ChatsApiDataSource chatsApiDataSource,
     required MessagesApiDataSource messagesApiDataSource,
     required MessagesLocalDataSource messagesLocalDataSource,
     required ChatsLocalDataSource chatsLocalDataSource,
     required UsersLocalDataSource usersLocalDataSource,
     required CombineCacheAndApi combiner,
-  }) : _webSocket = webSocket,
+  }) : _webSocket = messengerWebSocket,
        _chatsApi = chatsApiDataSource,
        _messagesApi = messagesApiDataSource,
        _chatsLocal = chatsLocalDataSource,
        _messagesLocal = messagesLocalDataSource,
        _usersLocal = usersLocalDataSource,
        _combiner = combiner {
-    _webSocket.newMessageUpdatesStream.listen(_onNewMessageUpdate);
-    _webSocket.readMessagesStream.listen(_onReadMessages);
-    _webSocket.deletedMessageStream.listen(_onDeletedMessage);
-    _webSocket.onlineUpdatesStream.listen(_onOnlineUpdate);
-    _webSocket.typingUpdatesStream.listen(_onTypingUpdate);
+    _subs.addAll([
+      _webSocket.newMessageUpdatesStream.listen(_onNewMessageUpdate),
+      _webSocket.readMessagesStream.listen(_onReadMessages),
+      _webSocket.deletedMessageStream.listen(_onDeletedMessage),
+      _webSocket.onlineUpdatesStream.listen(_onOnlineUpdate),
+      _webSocket.typingUpdatesStream.listen(_onTypingUpdate),
+    ]);
   }
 
   final MessengerWebSocket _webSocket;
@@ -90,6 +94,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
   /// uses when chatId == -1 (it's a new chat with new user)
   int? _currentChatOtherUserId;
   int _currentChatId = -1;
+  final List<StreamSubscription<void>> _subs = [];
 
   final _messagesUpdatesController =
       StreamController<MessagesCollection>.broadcast();
@@ -252,6 +257,16 @@ class MessengerRepositoryImpl implements MessengerRepository {
         allMessagesLoaded: newLimit > api.length,
       ),
     );
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _webSocket.dispose();
+    await _messagesUpdatesController.close();
+    await _chatsUpdatesController.close();
+    for (final sub in _subs) {
+      await sub.cancel();
+    }
   }
 
   /// streams

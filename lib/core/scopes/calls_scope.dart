@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:focus_detector/focus_detector.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
+import 'package:kepleomax/core/di/dependencies_multi_provider.dart';
+import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/services/calls_service.dart';
 
 class CallsScope extends StatefulWidget {
@@ -14,11 +16,13 @@ class CallsScope extends StatefulWidget {
 
 class _CallsScopeState extends State<CallsScope> {
   late final Dependencies _dp;
+  late final RtcWebSocket _rtcWebSocket;
 
   @override
   void initState() {
     _dp = Dependencies.of(context);
-    CallsService.instance.subscribeOnEvents(_dp.rtcWebSocket, _dp.userRepository);
+    _rtcWebSocket = _dp.rtcWebSocketBuilder();
+    CallsService.instance.subscribeOnEvents(_rtcWebSocket, _dp.userRepository);
 
     super.initState();
   }
@@ -26,6 +30,7 @@ class _CallsScopeState extends State<CallsScope> {
   @override
   void dispose() {
     CallsService.instance.unsubscribeFromEvents();
+    _rtcWebSocket.dispose();
 
     super.dispose();
   }
@@ -36,10 +41,13 @@ class _CallsScopeState extends State<CallsScope> {
 
   @override
   Widget build(BuildContext context) {
-    return FocusDetector(
-      onForegroundGained: _onResume,
-      onVisibilityGained: _onResume,
-      child: widget.child,
+    return DependenciesMultiProvider(
+      providers: {RtcWebSocket: _rtcWebSocket},
+      child: FocusDetector(
+        onForegroundGained: _onResume,
+        onVisibilityGained: _onResume,
+        child: widget.child,
+      ),
     );
   }
 }

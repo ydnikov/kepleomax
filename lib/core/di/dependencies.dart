@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -15,6 +17,7 @@ import 'package:kepleomax/core/data/local_data_sources/messages_local_data_sourc
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
+import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
 import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_api.dart';
@@ -38,6 +41,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Dependencies {
+  /// storages
   late final AuthController authController;
   late final TokenProvider tokenProvider;
   late final SharedPreferences sharedPrefs;
@@ -46,6 +50,7 @@ class Dependencies {
   late final Database database;
   late final AppSettings appSettings;
 
+  /// apis
   late final Dio dio;
   late final AuthApi authApi;
   late final UsersApi userApi;
@@ -57,14 +62,17 @@ class Dependencies {
   late final ChatsApi chatsApi;
   late final CallsApi callsApi;
 
-  late final KlmWebSocket klmWebSocket;
-  late final MessengerWebSocket messengerWebSocket;
-  late final RtcWebSocket rtcWebSocket;
+  /// webSockets
+  late final KlmWebSocket Function() klmWebSocketBuilder;
+  late final MessengerWebSocket Function() messengerWebSocketBuilder;
+  late final RtcWebSocket Function() rtcWebSocketBuilder;
 
+  /// local dataSources
   late final UsersLocalDataSource usersLocalDataSource;
   late final MessagesLocalDataSource messagesLocalDataSource;
   late final ChatsLocalDataSource chatsLocalDataSource;
 
+  /// api dataSources
   late final UsersApiDataSource usersApiDataSource;
   late final ProfileApiDataSource profileApiDataSource;
   late final FilesApiDataSource filesApiDataSource;
@@ -72,15 +80,54 @@ class Dependencies {
   late final ChatsApiDataSource chatsApiDataSource;
   late final MessagesApiDataSource messagesApiDataSource;
 
-  /// TODO every repository should be builder, but it requires a lot of refactoring
+  /// singleton repositories (with no state)
   late final UserRepository userRepository;
   late final PostRepository postRepository;
   late final FilesRepository filesRepository;
-  late final ConnectionRepository connectionRepository;
-  late final MessengerRepository messengerRepository;
+
+  /// one place use repositories
   late final PeopleRepository Function() peopleRepositoryBuilder;
   late final ChatsRepository Function() chatsRepositoryBuilder;
   late final CallsRepository Function() callsRepositoryBuilder;
+
+  /// multi place use repositories
+  late final ConnectionRepository Function() connectionRepositoryBuilder;
+  late final MessengerRepository Function() messengerRepositoryBuilder;
+
+  final _map = HashMap<Type, Object>();
+
+  T read<T>() {
+    if (_map[T] == null) {
+      throw Exception('$T has not been initialized in the dependencies');
+    }
+    return _map[T] as T;
+  }
+
+  void provide<T extends Object>(T value) => _map[T] = value;
+
+  void provideAll(Map<Type, Object> values) => _map.addAll(values);
+
+  void remove<T>() {
+    if (!_map.containsKey(T)) {
+      logger.w(
+        "Attempt to remove the $T from dependencies, but it doesn't contain it",
+      );
+      return;
+    }
+    _map.remove(T);
+  }
+
+  void removeAll(List<Type> types) {
+    for (final type in types) {
+      if (!_map.containsKey(type)) {
+        logger.w(
+          "Attempt to remove the $type from dependencies, but it doesn't contain it",
+        );
+        return;
+      }
+      _map.remove(type);
+    }
+  }
 
   Widget inject({required Widget child}) =>
       InheritedDependencies(dependencies: this, child: child);

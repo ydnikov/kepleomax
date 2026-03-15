@@ -9,6 +9,10 @@ import 'package:kepleomax/core/network/websockets/models/read_messages_update.da
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
 
 class MockMessengerWebSocket implements MessengerWebSocket {
+  MockMessengerWebSocket() {
+    print('MockMessagesWebSocket init');
+  }
+
   /// testing stuff
   int? _nextSendMessageId;
   final _readMessagesBeforeTimeWasCalls = <(int, DateTime)>[];
@@ -132,4 +136,9 @@ class MockMessengerWebSocket implements MessengerWebSocket {
 
   @override
   void typingActivityDetected({required int chatId}) {}
+
+  @override
+  Future<void> dispose() async {
+    print('MockMessagesWebSocket dispose');
+  }
 }

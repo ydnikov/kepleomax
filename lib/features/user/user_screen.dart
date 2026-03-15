@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
+import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_button.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
@@ -27,7 +29,6 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 part 'widgets/primary_button.dart';
-
 part 'widgets/user_scroll_listeners.dart';
 
 const int _appBarUsernameFullShownOffset = 130;
@@ -59,12 +60,15 @@ class _UserScreenState extends State<UserScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<UserBloc>(
-      create: (context) => UserBloc(
-        userRepository: Dependencies.of(context).userRepository,
-        connectionRepository: Dependencies.of(context).connectionRepository,
-        messengerWebSocket: Dependencies.of(context).messengerWebSocket,
-        userId: widget.userId,
-      )..add(const UserEventLoad()),
+      create: (context) {
+        final dp = Dependencies.of(context);
+        return UserBloc(
+          userRepository: dp.userRepository,
+          connectionRepository: dp.read<ConnectionRepository>(),
+          messengerWebSocket: dp.read<MessengerWebSocket>(),
+          userId: widget.userId,
+        )..add(const UserEventLoad());
+      },
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: _AppBar(

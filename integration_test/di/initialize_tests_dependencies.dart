@@ -29,6 +29,8 @@ import 'package:kepleomax/core/network/apis/files/files_api.dart';
 import 'package:kepleomax/core/network/apis/posts/post_api.dart';
 import 'package:kepleomax/core/network/apis/profile/profile_api.dart';
 import 'package:kepleomax/core/network/middlewares/auth_interceptor.dart';
+import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
+import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
 import 'package:kepleomax/core/settings/app_settings.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/features/post/data/post_repository.dart';
@@ -37,13 +39,13 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-import 'mocks/fake_fcm_api.dart';
-import 'mocks/fake_user_api.dart';
-import 'mocks/mock_klm_web_socket.dart';
-import 'mocks/mock_messages_web_socket.dart';
-import 'mocks/mock_rtc_web_socket.dart';
-import 'mocks/mock_token_provider.dart';
-import 'mocks/mockito_mocks.mocks.dart';
+import '../mocks/fake_fcm_api.dart';
+import '../mocks/fake_user_api.dart';
+import '../mocks/mock_klm_web_socket.dart';
+import '../mocks/mock_messages_web_socket.dart';
+import '../mocks/mock_rtc_web_socket.dart';
+import '../mocks/mock_token_provider.dart';
+import '../mocks/mockito_mocks.mocks.dart';
 
 Future<Dependencies> initializeTestsDependencies({bool useMocks = false}) async {
   final dp = Dependencies();
@@ -164,9 +166,9 @@ List<_InitializationStep> _steps = [
 
   _InitializationStep('web_socket', (dp) async {
     dp
-      ..klmWebSocket = MockKlmWebSocket()
-      ..messengerWebSocket = MockMessengerWebSocket()
-      ..rtcWebSocket = MockRtcWebSocket();
+      ..klmWebSocketBuilder = MockKlmWebSocket.new
+      ..messengerWebSocketBuilder = MockMessengerWebSocket.new
+      ..rtcWebSocketBuilder = MockRtcWebSocket.new;
   }),
 
   _InitializationStep('repositories', (dp) async {
@@ -177,11 +179,10 @@ List<_InitializationStep> _steps = [
         filesApiDataSource: dp.filesApiDataSource,
       )
       ..postRepository = PostRepositoryImpl(postApi: dp.postApi)
-      ..connectionRepository = ConnectionRepositoryImpl(
-        klmWebSocket: dp.klmWebSocket,
-      )
-      ..messengerRepository = MessengerRepositoryImpl(
-        webSocket: dp.messengerWebSocket,
+      ..connectionRepositoryBuilder = (() =>
+          ConnectionRepositoryImpl(klmWebSocket: dp.read<KlmWebSocket>()))
+      ..messengerRepositoryBuilder = (() => MessengerRepositoryImpl(
+        messengerWebSocket: dp.read<MessengerWebSocket>(),
         messagesApiDataSource: MessagesApiDataSourceImpl(
           messagesApi: dp.messagesApi,
         ),
@@ -190,11 +191,11 @@ List<_InitializationStep> _steps = [
         chatsLocalDataSource: dp.chatsLocalDataSource,
         usersLocalDataSource: dp.usersLocalDataSource,
         combiner: CombineCacheAndApi(dp.messagesLocalDataSource),
-      )
-      ..chatsRepositoryBuilder = () => ChatsRepositoryImpl(
+      ))
+      ..chatsRepositoryBuilder = (() => ChatsRepositoryImpl(
         chatsApiDataSource: chatsApiDataSource,
         chatsLocalDataSource: dp.chatsLocalDataSource,
-      );
+      ));
   }),
 
   _InitializationStep('firebase', (_) async {

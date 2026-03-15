@@ -16,6 +16,8 @@ abstract class RtcWebSocket {
 
   void endCall(int toUserId);
 
+  Future<void> dispose();
+
   /// streams
   Stream<AnswerUpdate> get answersStream;
 
@@ -29,7 +31,7 @@ abstract class RtcWebSocket {
 class RtcWebSocketImpl implements RtcWebSocket {
   RtcWebSocketImpl({required KlmWebSocket klmWebSocket})
     : _webSocket = klmWebSocket {
-    _webSocket.eventsStream.listen((event) {
+    _eventsSub = _webSocket.eventsStream.listen((event) {
       final data = event.$2 as Map<String, dynamic>;
       switch (event.$1) {
         case 'webrtc_answer':
@@ -51,6 +53,7 @@ class RtcWebSocketImpl implements RtcWebSocket {
     });
   }
 
+  late final StreamSubscription<void> _eventsSub;
   final KlmWebSocket _webSocket;
 
   final _answersController = StreamController<AnswerUpdate>.broadcast();
@@ -106,4 +109,13 @@ class RtcWebSocketImpl implements RtcWebSocket {
 
   @override
   Stream<bool> get remoteCameraStatusStream => _remoteCameraStatusController.stream;
+
+  @override
+  Future<void> dispose() async {
+    await _eventsSub.cancel();
+    await _answersController.close();
+    await _candidatesController.close();
+    await _endCallController.close();
+    await _remoteCameraStatusController.close();
+  }
 }

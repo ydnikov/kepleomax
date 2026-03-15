@@ -28,7 +28,7 @@ void main() {
       messagesApi = MockMessagesApiDataSource();
 
       repository = MessengerRepositoryImpl(
-        webSocket: FakeMessagesWebSocket(),
+        messengerWebSocket: FakeMessagesWebSocket(),
         chatsApiDataSource: MockChatsApiDataSource(),
         messagesApiDataSource: messagesApi,
         messagesLocalDataSource: messagesLocal,

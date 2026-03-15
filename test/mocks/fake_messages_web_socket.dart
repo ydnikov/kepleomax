@@ -46,4 +46,7 @@ class FakeMessagesWebSocket implements MessengerWebSocket {
   @override
   Stream<TypingActivityUpdate> get typingUpdatesStream =>
       StreamController<TypingActivityUpdate>.broadcast().stream;
+
+  @override
+  Future<void> dispose() async {}
 }

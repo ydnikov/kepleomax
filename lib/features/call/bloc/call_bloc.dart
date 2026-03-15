@@ -14,9 +14,9 @@ import 'package:kepleomax/features/call/data/calls_repository.dart';
 class CallBloc extends Bloc<CallEvent, CallState> {
   CallBloc({
     required CallsRepository callsRepository,
-    required RtcWebSocket webRtcWebSocket,
+    required RtcWebSocket rtcWebSocket,
   }) : _callsRepository = callsRepository,
-       _rtcWebSocket = webRtcWebSocket,
+       _rtcWebSocket = rtcWebSocket,
        super(CallStateBase.initial()) {
     // on<CallEvent>(
     //   (event, emit) => switch (event) {

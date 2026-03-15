@@ -53,6 +53,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       (isConnected) => add(_ChatEventConnectingChanged(isConnected)),
     );
     _onlineUpdatesSub = _messagesWebSocket.onlineUpdatesStream.listen((update) {
+      if (update.userId != _data.otherUser.id) return;
       add(_ChatEventOnlineStatusUpdate(update));
     });
     _typingUpdatesSub = _messagesWebSocket.typingUpdatesStream.listen((update) {
@@ -376,21 +377,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  void _onOnlineStatusUpdate(
-    _ChatEventOnlineStatusUpdate event,
-    Emitter<ChatState> emit,
-  ) {
-    if (_data.otherUser.id != event.update.userId) return;
-
-    _data = _data.copyWith(
-      otherUser: _data.otherUser.copyWith(
-        isOnline: event.update.isOnline,
-        lastActivityTime: event.update.lastActivityTime,
-      ),
-    );
-    emit(ChatStateBase(data: _data));
-  }
-
   void _onEmitError(_ChatEventEmitError event, Emitter<ChatState> emit) {
     logger.e(event.error, stackTrace: event.stackTrace);
     emit(
@@ -409,6 +395,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   void _onEmitUnreadCount(_ChatEventEmitUnreadCount event, Emitter<ChatState> emit) {
     _data = _data.copyWith(unreadCount: event.newCount);
+    emit(ChatStateBase(data: _data));
+  }
+
+  void _onOnlineStatusUpdate(
+      _ChatEventOnlineStatusUpdate event,
+      Emitter<ChatState> emit,
+      ) {
+    _data = _data.copyWith(
+      otherUser: _data.otherUser.copyWith(
+        isOnline: event.update.isOnline,
+        lastActivityTime: event.update.lastActivityTime,
+      ),
+    );
     emit(ChatStateBase(data: _data));
   }
 

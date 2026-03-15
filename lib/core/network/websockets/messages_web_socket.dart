@@ -31,12 +31,15 @@ abstract class MessengerWebSocket {
   Stream<OnlineStatusUpdate> get onlineUpdatesStream;
 
   Stream<TypingActivityUpdate> get typingUpdatesStream;
+
+  /// other
+  Future<void> dispose();
 }
 
 class MessengerWebSocketImpl implements MessengerWebSocket {
   MessengerWebSocketImpl({required KlmWebSocket klmWebSocket})
     : _klmWebSocket = klmWebSocket {
-    _klmWebSocket.eventsStream.listen((event) {
+    _eventsSub = _klmWebSocket.eventsStream.listen((event) {
       final data = event.$2;
       switch (event.$1) {
         case 'new_message': _onNewMessage(NewMessageUpdate.fromJson(data as Map<String, dynamic>));
@@ -52,6 +55,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
   }
 
   final KlmWebSocket _klmWebSocket;
+  late final StreamSubscription<void> _eventsSub;
 
   /// streams controllers
   final StreamController<NewMessageUpdate> _messagesController =
@@ -147,5 +151,10 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
   @override
   void typingActivityDetected({required int chatId}) {
     _klmWebSocket.emit('typing_activity_detected', {'chat_id': chatId});
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _eventsSub.cancel();
   }
 }

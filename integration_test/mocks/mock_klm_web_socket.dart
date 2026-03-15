@@ -18,10 +18,10 @@ class MockKlmWebSocket implements KlmWebSocket {
   void connectIfNot() {}
 
   @override
-  Stream<bool> get connectionStateStream => _connectionController.stream;
+  Future<void> init() async {}
 
   @override
-  void disconnect() {}
+  Future<void> dispose() async {}
 
   @override
   void emit(String event, [data]) {}
@@ -30,7 +30,7 @@ class MockKlmWebSocket implements KlmWebSocket {
   Stream<(String, dynamic)> get eventsStream => _eventsController.stream;
 
   @override
-  Future<void> init() async {}
+  Stream<bool> get connectionStateStream => _connectionController.stream;
 
   @override
   bool get isConnected => _isConnected;

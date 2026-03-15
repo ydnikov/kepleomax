@@ -37,7 +37,7 @@ class CallsNotificationsService {
 
     await FlutterCallkitIncoming.endCall(callId);
 
-    unawaited(_stopIgnoringEvents());
+    unawaited(_waitAndStopIgnoringEvents());
   }
 
   Future<void> showMissedCall({required UserDto otherUser}) async {
@@ -47,7 +47,7 @@ class CallsNotificationsService {
     final params = _generateCallKitParams(otherUser);
     await FlutterCallkitIncoming.showMissCallNotification(params);
 
-    unawaited(_stopIgnoringEvents());
+    unawaited(_waitAndStopIgnoringEvents());
   }
 
   Future<void> _startIgnoringEvents() async {
@@ -55,8 +55,10 @@ class CallsNotificationsService {
     await _prefs!.setBool(_ignoreEventsKey, true);
   }
 
-  Future<void> _stopIgnoringEvents() async {
+  Future<void> _waitAndStopIgnoringEvents() async {
     _prefs ??= await SharedPreferences.getInstance();
+
+    /// TODO what is it?
     await Future<void>.delayed(_ignoreEventsDuration).then((_) async {
       await _prefs!.setBool(_ignoreEventsKey, false);
     });

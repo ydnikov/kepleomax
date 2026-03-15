@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
+import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
 import 'package:kepleomax/features/call/bloc/call_bloc.dart';
 import 'package:kepleomax/features/call/bloc/call_state.dart';
@@ -35,7 +36,7 @@ class _CallScreenState extends State<CallScreen> {
     final dp = Dependencies.of(context);
     _callBloc =
         CallBloc(
-          webRtcWebSocket: dp.rtcWebSocket,
+          rtcWebSocket: dp.read<RtcWebSocket>(),
           callsRepository: dp.callsRepositoryBuilder(),
         )..add(
           CallEventInit(
