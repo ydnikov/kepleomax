@@ -18,15 +18,13 @@ abstract class PostApi {
   Future<HttpResponse<PostsResponseDto>> getPostsByUserId({
     @Query('userId') required int userId,
     @Query('limit') required int limit,
-    @Query('offset') required int offset,
-    @Query('cursor') required int cursor,
+    @Query('cursor') int? cursor,
   });
 
   @GET('/')
   Future<HttpResponse<PostsResponseDto>> getPosts({
     @Query('limit') required int limit,
-    @Query('offset') required int offset,
-    @Query('cursor') required int cursor,
+    @Query('cursor') int? cursor,
   });
 
   @DELETE('/')

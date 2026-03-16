@@ -89,7 +89,7 @@ class TokenProviderImpl implements TokenProvider {
         logger.i('try to refresh accessToken');
         final response = await _dio.post<Map<String, dynamic>>(
           '${flavor.baseUrl}/api/auth/refresh',
-          data: {'refreshToken': refreshToken},
+          data: {'refresh_token': refreshToken},
         );
 
         if (response.statusCode == 401 ||

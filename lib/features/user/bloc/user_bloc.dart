@@ -19,7 +19,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     required int userId,
   }) : _userRepository = userRepository,
        _connectionRepository = connectionRepository,
-        _messengerWebSocket = messengerWebSocket,
+       _messengerWebSocket = messengerWebSocket,
        _userId = userId,
        super(UserStateBase.initial()) {
     on<UserEvent>(
@@ -72,7 +72,13 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     UserEventUpdateProfile event,
     Emitter<UserState> emit,
   ) async {
-    if (event.newProfile == _data.profile) {
+    final oldProfile = _data.profile;
+    final newProfile = event.newProfile;
+    /// can't check using oldProfile == newProfile cause during editing
+    /// user.lastActivityTime and user.isOnline can change
+    if (oldProfile?.description == newProfile.description &&
+        oldProfile?.user.username == newProfile.user.username &&
+        oldProfile?.user.profileImage == newProfile.user.profileImage) {
       return;
     }
 

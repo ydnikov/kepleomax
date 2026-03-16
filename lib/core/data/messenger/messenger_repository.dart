@@ -227,7 +227,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
     final api = await _messagesApi.getMessages(
       chatId: chatId,
       limit: newLimit,
-      cursor: messages.lastWhere((e) => !e.fromCache).id,
+      cursor: messages.lastWhereOrNull((e) => !e.fromCache)?.id,
     );
     if (_currentChatId != chatId) return;
 

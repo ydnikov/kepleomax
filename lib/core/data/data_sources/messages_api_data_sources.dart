@@ -5,7 +5,7 @@ abstract class MessagesApiDataSource {
   Future<List<MessageDto>> getMessages({
     required int chatId,
     required int limit,
-    int cursor,
+    int? cursor,
   });
 }
 

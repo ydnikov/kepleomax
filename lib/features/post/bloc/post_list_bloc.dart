@@ -1,12 +1,11 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/app_constants.dart';
-import 'package:kepleomax/features/post/data/post_repository.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/post.dart';
-import 'package:kepleomax/core/network/common/ntp_time.dart';
 import 'package:kepleomax/core/presentation/user_error_message.dart';
 import 'package:kepleomax/features/post/bloc/post_list_state.dart';
+import 'package:kepleomax/features/post/data/post_repository.dart';
 
 class PostListBloc extends Bloc<PostListEvent, PostListState> {
   PostListBloc({required PostRepository postRepository, required int? userId})
@@ -28,7 +27,6 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
 
   late PostListData _data = PostListData.initial();
   final int? _userId;
-  int _loadTime = 0;
 
   int _lastTimeLoadCalled = 0;
 
@@ -44,8 +42,7 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
     emit(const PostListStateLoading());
 
     try {
-      _loadTime = (await NTPTime.now()).millisecondsSinceEpoch;
-      final posts = await _getPosts(offset: 0, cursor: _loadTime);
+      final posts = await _getPosts();
 
       _data = _data.copyWith(
         posts: posts,
@@ -70,10 +67,7 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
 
     final oldPosts = _data.posts;
     try {
-      final newPosts = await _getPosts(
-        offset: oldPosts.length,
-        cursor: _loadTime,
-      );
+      final newPosts = await _getPosts(cursor: _data.posts.lastOrNull?.id);
 
       _data = _data.copyWith(
         isAllPostsLoaded: newPosts.length < AppConstants.postsPagingLimit,
@@ -114,21 +108,16 @@ class PostListBloc extends Bloc<PostListEvent, PostListState> {
     }
   }
 
-  Future<List<Post>> _getPosts({
-    required int offset,
-    required int cursor,
-  }) async {
+  Future<List<Post>> _getPosts({int? cursor}) async {
     if (_userId == null) {
       return _postRepository.getPosts(
         limit: AppConstants.postsPagingLimit,
-        offset: offset,
         cursor: cursor,
       );
     } else {
       return _postRepository.getPostsByUserId(
         userId: _userId,
         limit: AppConstants.postsPagingLimit,
-        offset: offset,
         cursor: cursor,
       );
     }

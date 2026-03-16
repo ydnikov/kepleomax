@@ -54,16 +54,15 @@ class _PostApi implements PostApi {
   Future<HttpResponse<PostsResponseDto>> getPostsByUserId({
     required int userId,
     required int limit,
-    required int offset,
-    required int cursor,
+    int? cursor,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'userId': userId,
       r'limit': limit,
-      r'offset': offset,
       r'cursor': cursor,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<HttpResponse<PostsResponseDto>>(
@@ -91,15 +90,14 @@ class _PostApi implements PostApi {
   @override
   Future<HttpResponse<PostsResponseDto>> getPosts({
     required int limit,
-    required int offset,
-    required int cursor,
+    int? cursor,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'limit': limit,
-      r'offset': offset,
       r'cursor': cursor,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<HttpResponse<PostsResponseDto>>(

@@ -5,15 +5,13 @@ import 'package:kepleomax/core/network/apis/posts/post_dtos.dart';
 abstract class PostRepository {
   Future<List<Post>> getPosts({
     required int limit,
-    required int offset,
-    required int cursor,
+    int? cursor,
   });
 
   Future<List<Post>> getPostsByUserId({
     required int userId,
     required int limit,
-    required int offset,
-    required int cursor,
+    int? cursor,
   });
 
   Future<Post> createNewPost({
@@ -38,12 +36,10 @@ class PostRepositoryImpl implements PostRepository {
   @override
   Future<List<Post>> getPosts({
     required int limit,
-    required int offset,
-    required int cursor,
+    int? cursor,
   }) async {
     final res = await _postApi.getPosts(
       limit: limit,
-      offset: offset,
       cursor: cursor,
     );
 
@@ -60,13 +56,11 @@ class PostRepositoryImpl implements PostRepository {
   Future<List<Post>> getPostsByUserId({
     required int userId,
     required int limit,
-    required int offset,
-    required int cursor,
+    int? cursor,
   }) async {
     final res = await _postApi.getPostsByUserId(
       userId: userId,
       limit: limit,
-      offset: offset,
       cursor: cursor,
     );
 
