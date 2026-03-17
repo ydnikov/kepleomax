@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
@@ -35,7 +34,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
         final ChatsEventLoad event => _onLoad(event, emit),
         _ => null,
       },
-      transformer: sequential(),
+      //transformer: sequential(),
     );
 
     on<ChatsEventReconnect>(_onReconnect);

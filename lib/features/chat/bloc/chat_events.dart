@@ -52,9 +52,9 @@ class ChatEventReadMessagesBeforeTime implements ChatEvent {
 }
 
 class ChatEventEditText implements ChatEvent {
-  ChatEventEditText({required this.value});
+  ChatEventEditText({required this.text});
 
-  final String value;
+  final String text;
 }
 
 class _ChatEventConnectingChanged implements ChatEvent {

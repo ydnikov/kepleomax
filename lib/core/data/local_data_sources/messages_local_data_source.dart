@@ -21,7 +21,6 @@ abstract class MessagesLocalDataSource {
 }
 
 class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
-
   MessagesLocalDataSourceImpl({required Database database}) : _database = database;
   final Database _database;
 
@@ -64,7 +63,7 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
       await _database.update(
         'messages',
         {'is_read': 1},
-        where: r'id = ?',
+        where: 'id = ?',
         whereArgs: [id],
       );
     }

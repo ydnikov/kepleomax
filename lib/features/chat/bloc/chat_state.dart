@@ -21,16 +21,22 @@ abstract class ChatStateError with _$ChatStateError implements ChatState {
 @freezed
 abstract class ChatStateMessage with _$ChatStateMessage implements ChatState {
   const factory ChatStateMessage({required String message, required bool isError}) =
-  _ChatStateMessage;
+      _ChatStateMessage;
+}
+
+@freezed
+abstract class ChatStateUpdateTextField
+    with _$ChatStateUpdateTextField
+    implements ChatState {
+  const factory ChatStateUpdateTextField(String message) =
+      _ChatStateUpdateTextField;
 }
 
 @freezed
 abstract class ChatData with _$ChatData implements ChatState {
   const factory ChatData({
     required int chatId,
-
-    /// if user in chat was null, this user will be used
-    required User otherUser,
+    required User otherUser, // if user in chat was null, this user will be used
     required List<Message> messages,
     required int unreadCount,
     required bool isAllMessagesLoaded,
@@ -40,15 +46,14 @@ abstract class ChatData with _$ChatData implements ChatState {
     @Default(false) bool isConnected,
   }) = _ChatData;
 
-  factory ChatData.initial() =>
-      ChatData(
-        chatId: -1,
-        otherUser: User.loading(),
-        unreadCount: 0,
-        messages: [],
-        isAllMessagesLoaded: false,
-        unreadMessagesValue: UnreadMessagesValue.initial(),
-      );
+  factory ChatData.initial() => ChatData(
+    chatId: -1,
+    otherUser: User.loading(),
+    unreadCount: 0,
+    messages: [],
+    isAllMessagesLoaded: false,
+    unreadMessagesValue: UnreadMessagesValue.initial(),
+  );
 }
 
 @freezed

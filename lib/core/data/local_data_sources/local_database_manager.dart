@@ -12,7 +12,7 @@ class LocalDatabaseManager {
 
   static Future<Database> _openDatabase() => openDatabase(
     'klm_database.db',
-    version: 1,
+    version: 2,
     onCreate: (db, _) async {
       await db.execute('''
         CREATE TABLE messages (
@@ -27,6 +27,13 @@ class LocalDatabaseManager {
           edited_at BIGINT
           )''');
       await db.execute('CREATE INDEX messages_chat_id_index ON messages (chat_id)');
+
+      await db.execute('''
+        CREATE TABLE drafts (
+          chat_id INT PRIMARY KEY,
+          message VARCHAR(4000) NOT NULL,
+          created_at BIGINT NOT NULL
+        )''');
 
       await db.execute('''
         CREATE TABLE chats (

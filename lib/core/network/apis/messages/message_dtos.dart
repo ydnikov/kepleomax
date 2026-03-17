@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'message_dtos.g.dart';
 part 'message_dtos.freezed.dart';
+part 'message_dtos.g.dart';
 
 @JsonSerializable()
 class MessagesResponse {
@@ -31,6 +31,7 @@ abstract class MessageDto with _$MessageDto {
     required bool fromCache,
     @Default('message') String type,
   }) = _MessageDto;
+
   const MessageDto._();
 
   factory MessageDto.fromJson(Map<String, dynamic> json, {bool fromCache = false}) =>
@@ -41,11 +42,11 @@ abstract class MessageDto with _$MessageDto {
         isCurrentUser: json['is_current_user'] == null && json['user'] == null
             ? throw Exception('is_current_user or user should be provided')
             : json['user']?['is_current'] as bool? ??
-                  (json['is_current_user'] == 1
-                      ? true
-                      : json['is_current_user'] == 0
-                      ? false
-                      : json['is_current_user'] as bool),
+            (json['is_current_user'] == 1
+                ? true
+                : json['is_current_user'] == 0
+                ? false
+                : json['is_current_user'] as bool),
         message: json['message'] as String,
         type: json['type'] as String,
         isRead: json['is_read'] == 1
@@ -58,27 +59,40 @@ abstract class MessageDto with _$MessageDto {
         fromCache: fromCache,
       );
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'chat_id': chatId,
-    'sender_id': senderId,
-    'is_current_user': isCurrentUser,
-    'message': message,
-    'type': type,
-    'is_read': isRead,
-    'created_at': createdAt,
-    'edited_at': editedAt,
-  };
+  factory MessageDto.fromDraft({required String message, required int chatId}) =>
+      MessageDto(id: chatId,
+          chatId: chatId,
+          senderId: -1,
+          isCurrentUser: true,
+          message: message,
+          isRead: true,
+          createdAt: 8640000000000000,
+          editedAt: null,
+          fromCache: true);
 
-  Map<String, dynamic> toLocalJson() => {
-    'id': id,
-    'chat_id': chatId,
-    'sender_id': senderId,
-    'is_current_user': isCurrentUser ? 1 : 0,
-    'message': message,
-    'type': type,
-    'is_read': isRead ? 1 : 0,
-    'created_at': createdAt,
-    'edited_at': editedAt,
-  };
+  Map<String, dynamic> toJson() =>
+      {
+        'id': id,
+        'chat_id': chatId,
+        'sender_id': senderId,
+        'is_current_user': isCurrentUser,
+        'message': message,
+        'type': type,
+        'is_read': isRead,
+        'created_at': createdAt,
+        'edited_at': editedAt,
+      };
+
+  Map<String, dynamic> toLocalJson() =>
+      {
+        'id': id,
+        'chat_id': chatId,
+        'sender_id': senderId,
+        'is_current_user': isCurrentUser ? 1 : 0,
+        'message': message,
+        'type': type,
+        'is_read': isRead ? 1 : 0,
+        'created_at': createdAt,
+        'edited_at': editedAt,
+      };
 }

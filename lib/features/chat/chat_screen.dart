@@ -126,6 +126,7 @@ class _BodyState extends State<_Body> {
   late final ChatBloc _chatBloc;
   late final ListObserverController _observerController;
   late final ChatScrollObserver _chatObserver;
+  final _textController = TextEditingController();
 
   /// callbacks
   @override
@@ -146,6 +147,7 @@ class _BodyState extends State<_Body> {
 
   @override
   void dispose() {
+    _textController.dispose();
     widget.scrollController.removeListener(_onScrollListener);
     super.dispose();
   }
@@ -190,6 +192,9 @@ class _BodyState extends State<_Body> {
             text: state.message,
             color: state.isError ? KlmColors.errorRed : Colors.green,
           );
+        }
+        if (state is ChatStateUpdateTextField) {
+          _textController.text = state.message;
         }
       },
       builder: (context, state) {
@@ -287,9 +292,10 @@ class _BodyState extends State<_Body> {
                   }
                 },
                 onEdit: (message) {
-                  _chatBloc.add(ChatEventEditText(value: message));
+                  _chatBloc.add(ChatEventEditText(text: message));
                 },
                 isLoading: data.isLoading,
+                controller: _textController,
                 key: const Key('chat_bottom'),
               ),
             ],

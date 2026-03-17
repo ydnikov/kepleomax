@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
 import 'package:kepleomax/core/data/data_sources/messages_api_data_sources.dart';
 import 'package:kepleomax/core/data/local_data_sources/chats_local_data_source.dart';
+import 'package:kepleomax/core/data/local_data_sources/drafts_local_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/messages_local_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart';
 import 'package:kepleomax/core/data/messenger/combine_cache_and_api.dart';
@@ -12,6 +14,7 @@ import 'package:kepleomax/core/data/models/chats_collection.dart';
 import 'package:kepleomax/core/data/models/messages_collection.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/message.dart';
+import 'package:kepleomax/core/models/message_draft.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
 import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/deleted_message_update.dart';
@@ -40,10 +43,14 @@ abstract class MessengerRepository {
 
   Future<void> loadMessages({required int chatId, bool withCache = true});
 
+  Future<void> loadMoreMessages({required int chatId, required int? toMessageId});
+
+  Future<void> safeDraft({required String message, required int chatId});
+
+  Future<String?> getDraft({required int chatId});
+
   /// subscribes on messages from that userId, uses when chatId == -1
   void listenToMessagesWithOtherUserId({required int? otherUserId});
-
-  Future<void> loadMoreMessages({required int chatId, required int? toMessageId});
 
   Future<void> dispose();
 
@@ -61,6 +68,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
     required ChatsApiDataSource chatsApiDataSource,
     required MessagesApiDataSource messagesApiDataSource,
     required MessagesLocalDataSource messagesLocalDataSource,
+    required DraftsLocalDataSource draftsLocalDataSource,
     required ChatsLocalDataSource chatsLocalDataSource,
     required UsersLocalDataSource usersLocalDataSource,
     required CombineCacheAndApi combiner,
@@ -69,6 +77,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
        _messagesApi = messagesApiDataSource,
        _chatsLocal = chatsLocalDataSource,
        _messagesLocal = messagesLocalDataSource,
+       _draftsLocal = draftsLocalDataSource,
        _usersLocal = usersLocalDataSource,
        _combiner = combiner {
     _subs.addAll([
@@ -86,6 +95,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
   final MessagesApiDataSource _messagesApi;
 
   final MessagesLocalDataSource _messagesLocal;
+  final DraftsLocalDataSource _draftsLocal;
   final ChatsLocalDataSource _chatsLocal;
   final UsersLocalDataSource _usersLocal;
 
@@ -140,12 +150,29 @@ class MessengerRepositoryImpl implements MessengerRepository {
   @override
   Future<void> loadChats() async {
     final chats = await _chatsApi.getChats();
-    _emitChatsCollection(
-      ChatsCollection(
-        chats: chats.map((chat) => Chat.fromDto(chat, fromCache: false)).toList(),
-        fromCache: false,
-      ),
-    );
+
+    /// calculate drafts
+    final cacheChats = _currentChatsCollection?.fromCache == true
+        ? _currentChatsCollection!.chats
+        : (await _chatsLocal.getChats())
+              .map((chat) => Chat.fromDto(chat, fromCache: true))
+              .toList();
+
+    final cacheChatsHashMap = HashMap<int, Chat>();
+    for (final cacheChat in cacheChats) {
+      cacheChatsHashMap[cacheChat.id] = cacheChat;
+    }
+    final newList = <Chat>[];
+    for (var chat in chats) {
+      final cacheChat = cacheChatsHashMap[chat.id];
+      if (cacheChat?.draft != null) {
+        chat = chat.copyWithNewDraft(cacheChat!.draft);
+      }
+      newList.add(Chat.fromDto(chat, fromCache: false));
+    }
+
+    _emitChatsCollection(ChatsCollection(chats: newList, fromCache: false));
+
     _webSocket.subscribeOnOnlineStatusUpdates(
       usersIds: chats.map((c) => c.otherUser.id),
     );
@@ -257,6 +284,35 @@ class MessengerRepositoryImpl implements MessengerRepository {
       ),
     );
   }
+
+  @override
+  Future<void> safeDraft({required String message, required int chatId}) async {
+    if (message.isEmpty) {
+      await _draftsLocal.deleteByChatId(chatId);
+    } else {
+      await _draftsLocal.insert(text: message, chatId: chatId);
+    }
+
+    if (_currentChatsCollection != null) {
+      final newChats = _currentChatsCollection!.chats.toList();
+      final index = newChats.indexWhere((chat) => chat.id == chatId);
+      if (index == -1) return;
+      newChats[index] = newChats[index].copyWith(
+        draft: message.isEmpty
+            ? null
+            : MessageDraft(
+                message: message,
+                chatId: chatId,
+                createdAt: DateTime.now().millisecondsSinceEpoch,
+              ),
+      );
+      _emitChatsCollection(ChatsCollection(chats: newChats));
+    }
+  }
+
+  @override
+  Future<String?> getDraft({required int chatId}) =>
+      _draftsLocal.getByChatId(chatId);
 
   @override
   Future<void> dispose() async {

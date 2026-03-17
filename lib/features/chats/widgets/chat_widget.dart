@@ -11,7 +11,7 @@ class ChatWidget extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       height: 70,
       child: InkWell(
-        onTap: chat.isLoading
+        onTap: chat.isLoadingChat
             ? null
             : () {
                 AppNavigator.withKeyOf(
@@ -44,9 +44,10 @@ class ChatWidget extends StatelessWidget {
                         fontSize: 20,
                       ),
                     ),
-                    if (chat.lastMessage != null) ...[
+                    if (chat.lastMessage != null || chat.draft != null) ...[
                       const SizedBox(height: 4),
                       FittedBox(
+                        /// TODO is this key needed?
                         key: ValueKey(
                           chat.lastTypingActivityTime?.millisecondsSinceEpoch,
                         ),
@@ -98,6 +99,8 @@ class _MessageTextWidgetState extends State<_MessageTextWidget> {
 
   bool get _isTypingRightNow => widget.chat.isTypingRightNow;
 
+  bool get _isDraft => widget.chat.draft != null;
+
   @override
   void initState() {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -127,7 +130,12 @@ class _MessageTextWidgetState extends State<_MessageTextWidget> {
           )
         : Row(
             children: [
-              if (widget.chat.lastMessage!.isCurrentUser)
+              if (_isDraft)
+                Text(
+                  'Draft: ',
+                  style: context.textTheme.bodyLarge?.copyWith(color: Colors.red),
+                )
+              else if (widget.chat.lastMessage!.isCurrentUser)
                 Text(
                   'You: ',
                   style: context.textTheme.bodyLarge?.copyWith(color: Colors.grey),
@@ -135,10 +143,11 @@ class _MessageTextWidgetState extends State<_MessageTextWidget> {
               ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth:
-                      context.screenSize.width * (widget.chat.isLoading ? 0.8 : 0.3),
+                      context.screenSize.width *
+                      (widget.chat.isLoadingChat ? 0.8 : 0.3),
                 ),
                 child: Text(
-                  widget.chat.lastMessage!.message,
+                  widget.chat.draft?.message ?? widget.chat.lastMessage!.message,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textTheme.bodyLarge?.copyWith(
@@ -148,7 +157,7 @@ class _MessageTextWidgetState extends State<_MessageTextWidget> {
                 ),
               ),
               const SizedBox(width: 4),
-              if (!widget.chat.isLoading)
+              if (!widget.chat.isLoadingChat && !_isDraft)
                 Text(
                   ' • ${ParseTime.toShortPassTime(widget.chat.lastMessage!.createdAt)}',
                   style: context.textTheme.bodyLarge?.copyWith(color: Colors.grey),

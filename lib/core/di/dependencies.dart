@@ -13,6 +13,7 @@ import 'package:kepleomax/core/data/data_sources/profile_api_data_source.dart';
 import 'package:kepleomax/core/data/data_sources/users_api_data_source.dart';
 import 'package:kepleomax/core/data/files_repository.dart';
 import 'package:kepleomax/core/data/local_data_sources/chats_local_data_source.dart';
+import 'package:kepleomax/core/data/local_data_sources/drafts_local_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/messages_local_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
@@ -68,8 +69,9 @@ class Dependencies {
   late final RtcWebSocket Function() rtcWebSocketBuilder;
 
   /// local dataSources
-  late final UsersLocalDataSource usersLocalDataSource;
   late final MessagesLocalDataSource messagesLocalDataSource;
+  late final DraftsLocalDataSource draftsLocalDataSource;
+  late final UsersLocalDataSource usersLocalDataSource;
   late final ChatsLocalDataSource chatsLocalDataSource;
 
   /// api dataSources
