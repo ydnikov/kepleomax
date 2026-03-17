@@ -122,8 +122,8 @@ void main() {
       if (chats.isNotEmpty) {
         await tester.tap(find.byKey(Key('chat_${chats[openChatAtIndex].id}')));
         if (getMessagesAsyncControl) {
-          /// 50 millis to end page opening animation. Settle doesn't work cause loadingIndictor
-          await tester.pump(const Duration(milliseconds: 50));
+          /// 100 millis to end page opening animation. Settle doesn't work cause loadingIndictor
+          await tester.pump(const Duration(milliseconds: 100));
         } else {
           await tester.pumpAndSettle();
         }

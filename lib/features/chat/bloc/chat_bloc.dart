@@ -66,6 +66,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       (event, emit) => switch (event) {
         final ChatEventLoad event => _onLoad(event, emit),
 
+        /// TODO can it be called before _onLoad()?
         /// needs here, because we don't have to read messages before they are loaded
         final ChatEventReadMessagesBeforeTime event => _onReadMessagesBeforeTime(
           event,
@@ -215,6 +216,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       /// TODO now it works because we always open the chat at the very bottom
       NotificationService.instance.closeWithChatId(chatId);
       _connectionRepository.listenOnlineStatusUpdate(userId: _data.otherUser.id);
+
+      final draft = await _messengerRepository.getDraft(chatId: chatId);
+      if (draft != null) {
+        emit(ChatStateUpdateTextField(draft));
+        emit(ChatStateBase(data: _data));
+      }
+
       await _messengerRepository.loadMessages(
         chatId: chatId,
         withCache: event.withCache,
@@ -255,6 +263,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   void _onSendMessage(ChatEventSendMessage event, Emitter<ChatState> emit) {
+    _messengerRepository.safeDraft(message: '', chatId: _data.chatId);
+
     _messagesWebSocket.sendMessage(
       message: event.value,
       recipientId: _data.otherUser.id,
@@ -268,14 +278,16 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   int _lastTimeActivityWasSent = 0;
 
   void _onEditText(ChatEventEditText event, Emitter<ChatState> emit) {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    if (_lastTimeActivityWasSent + 1000 > now) {
-      return;
-    }
-    _lastTimeActivityWasSent = now;
+    print('KlmLog chatBloc onEditText: ${event.text}');
+    _messengerRepository.safeDraft(message: event.text, chatId: _data.chatId);
 
-    if (event.value.isNotEmpty) {
-      _messagesWebSocket.typingActivityDetected(chatId: _data.chatId);
+    /// sent typingActivity
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (_lastTimeActivityWasSent + 1000 < now) {
+      if (event.text.isNotEmpty) {
+        _messagesWebSocket.typingActivityDetected(chatId: _data.chatId);
+      }
+      _lastTimeActivityWasSent = now;
     }
   }
 
@@ -399,9 +411,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   void _onOnlineStatusUpdate(
-      _ChatEventOnlineStatusUpdate event,
-      Emitter<ChatState> emit,
-      ) {
+    _ChatEventOnlineStatusUpdate event,
+    Emitter<ChatState> emit,
+  ) {
     _data = _data.copyWith(
       otherUser: _data.otherUser.copyWith(
         isOnline: event.update.isOnline,

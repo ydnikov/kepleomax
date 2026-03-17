@@ -11,6 +11,7 @@ import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
 import 'package:mockito/mockito.dart';
 
+import 'mocks/fake_drafts_local_data_source.dart';
 import 'mocks/fake_messages_web_socket.dart';
 import 'mocks/mock_messages_local_data_source.dart';
 import 'mocks/mockito_mocks.mocks.dart';
@@ -32,6 +33,7 @@ void main() {
         chatsApiDataSource: MockChatsApiDataSource(),
         messagesApiDataSource: messagesApi,
         messagesLocalDataSource: messagesLocal,
+        draftsLocalDataSource: FakeDraftsLocalDataSource(),
         chatsLocalDataSource: MockChatsLocalDataSource(),
         usersLocalDataSource: MockUsersLocalDataSource(),
         combiner: CombineCacheAndApi(messagesLocal),

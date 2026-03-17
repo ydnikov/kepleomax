@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/models/message.dart';
+import 'package:kepleomax/core/models/message_draft.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
 
@@ -14,6 +15,7 @@ abstract class Chat with _$Chat {
     required Message? lastMessage,
     required bool fromCache,
     required int unreadCount,
+    MessageDraft? draft,
     DateTime? lastTypingActivityTime,
   }) = _Chat;
 
@@ -23,6 +25,7 @@ abstract class Chat with _$Chat {
     id: dto.id,
     otherUser: User.fromDto(dto.otherUser),
     lastMessage: dto.lastMessage == null ? null : Message.fromDto(dto.lastMessage!),
+    draft: dto.draft,
     fromCache: fromCache,
     unreadCount: dto.unreadCount,
   );
@@ -43,12 +46,13 @@ abstract class Chat with _$Chat {
               AppConstants.showTypingAfterActivity.inMilliseconds >
           DateTime.now().millisecondsSinceEpoch;
 
-  bool get isLoading => id == _loadingChatId;
+  bool get isLoadingChat => id == _loadingChatId;
 
   ChatDto toDto() => ChatDto(
     id: id,
     otherUser: otherUser.toDto(),
     lastMessage: lastMessage?.toDto(),
+    draft: draft,
     unreadCount: unreadCount,
   );
 }

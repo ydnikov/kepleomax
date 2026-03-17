@@ -80,15 +80,23 @@ class ChatsLocalDataSourceImpl implements ChatsLocalDataSource {
     /// chats.* should be the last in the select. id will be id of the chat, and
     /// there are user_id and message_id fields
     final query = await _database.rawQuery('''
-      SELECT users.id AS user_id, messages.id as message_id, users.*, messages.*, chats.* FROM chats 
-      LEFT JOIN users ON users.id = chats.other_user_id 
-      LEFT JOIN messages ON messages.id = (SELECT id FROM messages WHERE chat_id = chats.id ORDER BY created_at DESC LIMIT 1)
+      SELECT 
+        users.id AS user_id, 
+        messages.id as message_id, 
+        users.*, 
+        messages.*, 
+        chats.*, 
+        drafts.message AS draft_message,
+        drafts.created_at AS draft_created_at
+      FROM chats 
+        LEFT JOIN users ON users.id = chats.other_user_id 
+        LEFT JOIN messages ON messages.id = (SELECT id FROM messages WHERE chat_id = chats.id ORDER BY created_at DESC LIMIT 1)
+        LEFT JOIN drafts ON drafts.chat_id = chats.id
       ''');
 
     final result = <ChatDto>[];
     await _database.transaction((ts) async {
       for (final chatJson in query) {
-        // print('KlmLog, chatJson: $chatJson');
         if (chatJson['username'] == null) {
           unawaited(
             ts.delete(

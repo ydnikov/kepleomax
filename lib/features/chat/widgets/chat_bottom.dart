@@ -2,12 +2,14 @@ part of '../chat_screen.dart';
 
 class _ChatBottom extends StatefulWidget {
   const _ChatBottom({
+    required this.controller,
     required this.onSend,
     required this.onEdit,
     required this.isLoading,
     super.key,
   });
 
+  final TextEditingController controller;
   final ValueChanged<String>? onSend;
   final ValueChanged<String>? onEdit;
   final bool isLoading;
@@ -17,19 +19,15 @@ class _ChatBottom extends StatefulWidget {
 }
 
 class _ChatBottomState extends State<_ChatBottom> {
-  final _controller = TextEditingController();
-
   @override
   void initState() {
-    _controller.addListener(() {
-      setState(() {});
-    });
+    widget.controller.addListener(_setState);
     super.initState();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    widget.controller.removeListener(_setState);
     super.dispose();
   }
 
@@ -55,7 +53,7 @@ class _ChatBottomState extends State<_ChatBottom> {
             Expanded(
               child: KlmTextField(
                 key: const Key('message_input_field'),
-                controller: _controller,
+                controller: widget.controller,
                 hint: 'Message',
                 onChanged: widget.onEdit,
                 multiline: true,
@@ -72,9 +70,11 @@ class _ChatBottomState extends State<_ChatBottom> {
             const SizedBox(width: 3),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 100),
-              child: _controller.text.isNotEmpty && !widget.isLoading
+              child: widget.controller.text.isNotEmpty
                   ? _SendMessageButton(
-                      onPressed: widget.onSend == null ? null : _sendButtonOnPress,
+                      onPressed: widget.onSend == null || widget.isLoading
+                          ? null
+                          : _sendButtonAction,
                     )
                   : _VoiceMessageButton(onPressed: () {}),
             ),
@@ -84,11 +84,12 @@ class _ChatBottomState extends State<_ChatBottom> {
     );
   }
 
-  void _sendButtonOnPress() {
-    if (_controller.text.isEmpty || widget.isLoading) return;
-    widget.onSend!(_controller.text.trim());
-    _controller.clear();
-    setState(() {});
+  void _setState() => setState(() {});
+
+  void _sendButtonAction() {
+    if (widget.controller.text.isEmpty || widget.isLoading) return;
+    widget.onSend!(widget.controller.text.trim());
+    widget.controller.clear();
   }
 }
 
@@ -101,7 +102,9 @@ class _SendMessageButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       key: const Key('send_message_button'),
-      onPressed: onPressed,
+      onPressed: () {
+        onPressed!();
+      },
       style: IconButton.styleFrom(backgroundColor: KlmColors.primaryColor),
       icon: const Icon(Icons.arrow_upward, color: Colors.white),
     );

@@ -9,6 +9,7 @@ import 'package:kepleomax/core/data/data_sources/fcm_api_data_source.dart';
 import 'package:kepleomax/core/data/data_sources/files_api_data_source.dart';
 import 'package:kepleomax/core/data/data_sources/profile_api_data_source.dart';
 import 'package:kepleomax/core/data/data_sources/users_api_data_source.dart';
+import 'package:kepleomax/core/data/local_data_sources/drafts_local_data_source.dart';
 import 'package:kepleomax/core/network/apis/fcm/fcm_api.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
@@ -78,12 +79,13 @@ List<_InitializationStep> _steps = [
     final db = await LocalDatabaseManager.getDatabase();
     dp
       ..database = db
+      ..messagesLocalDataSource = MessagesLocalDataSourceImpl(database: db)
+      ..draftsLocalDataSource = DraftsLocalDataSourceImpl(database: db)
+      ..chatsLocalDataSource = ChatsLocalDataSourceImpl(database: db)
       ..usersLocalDataSource = UsersLocalDataSourceImpl(
         database: db,
         prefs: dp.sharedPrefs,
-      )
-      ..messagesLocalDataSource = MessagesLocalDataSourceImpl(database: db)
-      ..chatsLocalDataSource = ChatsLocalDataSourceImpl(database: db);
+      );
   }),
 
   _InitializationStep(DiStep.dio, (dp) async {
@@ -201,8 +203,9 @@ List<_InitializationStep> _steps = [
         messagesApiDataSource: MessagesApiDataSourceImpl(
           messagesApi: dp.messagesApi,
         ),
-        chatsApiDataSource: dp.chatsApiDataSource,
         messagesLocalDataSource: dp.messagesLocalDataSource,
+        draftsLocalDataSource: dp.draftsLocalDataSource,
+        chatsApiDataSource: dp.chatsApiDataSource,
         chatsLocalDataSource: dp.chatsLocalDataSource,
         usersLocalDataSource: dp.usersLocalDataSource,
         combiner: CombineCacheAndApi(dp.messagesLocalDataSource),

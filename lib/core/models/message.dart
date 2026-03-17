@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kepleomax/core/models/call_model.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
@@ -26,7 +27,7 @@ abstract class Message with _$Message {
   const Message._();
 
   factory Message.fromDto(MessageDto dto) {
-    final type = messageTypeFromString(dto.type);
+    final type = MessageType.fromString(dto.type);
     return Message(
       id: dto.id,
       chatId: dto.chatId,
@@ -95,11 +96,8 @@ abstract class Message with _$Message {
 
   bool get isCurrentUser => userType == MessageUserType.current;
 
-  String get message => callData == null
-      ? rawMessage
-      : callData!
-            .getCallType()
-            .userString;
+  String get message =>
+      callData == null ? rawMessage : callData!.getCallType().userString;
 
   MessageDto toDto() => MessageDto(
     id: id,
@@ -107,7 +105,7 @@ abstract class Message with _$Message {
     senderId: senderId,
     // system messages are never cached
     isCurrentUser: userType == MessageUserType.current,
-    type: messageTypeToString(type),
+    type: type.value,
     message: message,
     isRead: isRead,
     createdAt: createdAt.millisecondsSinceEpoch,
@@ -118,38 +116,20 @@ abstract class Message with _$Message {
 
 enum MessageUserType { other, current, system }
 
-enum MessageType { loading, unreadMessages, date, message, call, unknown }
+enum MessageType {
+  loading('loading'),
+  unreadMessages('unread_messages'),
+  date('date'),
+  message('message'),
+  call('call'),
+  draft('draft'),
+  unknown('unknown');
 
-MessageType messageTypeFromString(String value) {
-  switch (value) {
-    case 'loading':
-      return MessageType.loading;
-    case 'unread_messages':
-      return MessageType.unreadMessages;
-    case 'date':
-      return MessageType.date;
-    case 'message':
-      return MessageType.message;
-    case 'call':
-      return MessageType.call;
-    default:
-      return MessageType.unknown;
-  }
-}
+  const MessageType(this.value);
 
-String messageTypeToString(MessageType type) {
-  switch (type) {
-    case MessageType.loading:
-      return 'loading';
-    case MessageType.unreadMessages:
-      return 'unread_messages';
-    case MessageType.date:
-      return 'date';
-    case MessageType.message:
-      return 'message';
-    case MessageType.call:
-      return 'call';
-    default:
-      return 'unknown';
-  }
+  factory MessageType.fromString(String value) =>
+      MessageType.values.firstWhereOrNull((el) => el.value == value) ??
+      MessageType.unknown;
+
+  final String value;
 }

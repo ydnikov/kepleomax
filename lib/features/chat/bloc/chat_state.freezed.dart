@@ -804,10 +804,267 @@ as bool,
 }
 
 /// @nodoc
+mixin _$ChatStateUpdateTextField {
+
+ String get message;
+/// Create a copy of ChatStateUpdateTextField
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ChatStateUpdateTextFieldCopyWith<ChatStateUpdateTextField> get copyWith => _$ChatStateUpdateTextFieldCopyWithImpl<ChatStateUpdateTextField>(this as ChatStateUpdateTextField, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatStateUpdateTextField&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message);
+
+@override
+String toString() {
+  return 'ChatStateUpdateTextField(message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ChatStateUpdateTextFieldCopyWith<$Res>  {
+  factory $ChatStateUpdateTextFieldCopyWith(ChatStateUpdateTextField value, $Res Function(ChatStateUpdateTextField) _then) = _$ChatStateUpdateTextFieldCopyWithImpl;
+@useResult
+$Res call({
+ String message
+});
+
+
+
+
+}
+/// @nodoc
+class _$ChatStateUpdateTextFieldCopyWithImpl<$Res>
+    implements $ChatStateUpdateTextFieldCopyWith<$Res> {
+  _$ChatStateUpdateTextFieldCopyWithImpl(this._self, this._then);
+
+  final ChatStateUpdateTextField _self;
+  final $Res Function(ChatStateUpdateTextField) _then;
+
+/// Create a copy of ChatStateUpdateTextField
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? message = null,}) {
+  return _then(_self.copyWith(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ChatStateUpdateTextField].
+extension ChatStateUpdateTextFieldPatterns on ChatStateUpdateTextField {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ChatStateUpdateTextField value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ChatStateUpdateTextField() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ChatStateUpdateTextField value)  $default,){
+final _that = this;
+switch (_that) {
+case _ChatStateUpdateTextField():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ChatStateUpdateTextField value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ChatStateUpdateTextField() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String message)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ChatStateUpdateTextField() when $default != null:
+return $default(_that.message);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String message)  $default,) {final _that = this;
+switch (_that) {
+case _ChatStateUpdateTextField():
+return $default(_that.message);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String message)?  $default,) {final _that = this;
+switch (_that) {
+case _ChatStateUpdateTextField() when $default != null:
+return $default(_that.message);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _ChatStateUpdateTextField implements ChatStateUpdateTextField {
+  const _ChatStateUpdateTextField(this.message);
+  
+
+@override final  String message;
+
+/// Create a copy of ChatStateUpdateTextField
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ChatStateUpdateTextFieldCopyWith<_ChatStateUpdateTextField> get copyWith => __$ChatStateUpdateTextFieldCopyWithImpl<_ChatStateUpdateTextField>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatStateUpdateTextField&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message);
+
+@override
+String toString() {
+  return 'ChatStateUpdateTextField(message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ChatStateUpdateTextFieldCopyWith<$Res> implements $ChatStateUpdateTextFieldCopyWith<$Res> {
+  factory _$ChatStateUpdateTextFieldCopyWith(_ChatStateUpdateTextField value, $Res Function(_ChatStateUpdateTextField) _then) = __$ChatStateUpdateTextFieldCopyWithImpl;
+@override @useResult
+$Res call({
+ String message
+});
+
+
+
+
+}
+/// @nodoc
+class __$ChatStateUpdateTextFieldCopyWithImpl<$Res>
+    implements _$ChatStateUpdateTextFieldCopyWith<$Res> {
+  __$ChatStateUpdateTextFieldCopyWithImpl(this._self, this._then);
+
+  final _ChatStateUpdateTextField _self;
+  final $Res Function(_ChatStateUpdateTextField) _then;
+
+/// Create a copy of ChatStateUpdateTextField
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
+  return _then(_ChatStateUpdateTextField(
+null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$ChatData {
 
- int get chatId;/// if user in chat was null, this user will be used
- User get otherUser; List<Message> get messages; int get unreadCount; bool get isAllMessagesLoaded; UnreadMessagesValue get unreadMessagesValue; bool get isTyping; bool get isLoading; bool get isConnected;
+ int get chatId; User get otherUser;// if user in chat was null, this user will be used
+ List<Message> get messages; int get unreadCount; bool get isAllMessagesLoaded; UnreadMessagesValue get unreadMessagesValue; bool get isTyping; bool get isLoading; bool get isConnected;
 /// Create a copy of ChatData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1029,9 +1286,10 @@ class _ChatData implements ChatData {
   
 
 @override final  int chatId;
-/// if user in chat was null, this user will be used
 @override final  User otherUser;
+// if user in chat was null, this user will be used
  final  List<Message> _messages;
+// if user in chat was null, this user will be used
 @override List<Message> get messages {
   if (_messages is EqualUnmodifiableListView) return _messages;
   // ignore: implicit_dynamic_type

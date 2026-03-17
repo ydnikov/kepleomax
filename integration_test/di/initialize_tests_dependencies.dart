@@ -39,6 +39,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../test/mocks/fake_drafts_local_data_source.dart';
 import '../mocks/fake_fcm_api.dart';
 import '../mocks/fake_user_api.dart';
 import '../mocks/mock_klm_web_socket.dart';
@@ -80,7 +81,8 @@ List<_InitializationStep> _steps = [
         prefs: dp.sharedPrefs,
       )
       ..messagesLocalDataSource = MessagesLocalDataSourceImpl(database: db)
-      ..chatsLocalDataSource = ChatsLocalDataSourceImpl(database: db);
+      ..chatsLocalDataSource = ChatsLocalDataSourceImpl(database: db)
+      ..draftsLocalDataSource = FakeDraftsLocalDataSource();
   }),
 
   _InitializationStep('dioLogger, dio', (dp) async {
@@ -186,6 +188,7 @@ List<_InitializationStep> _steps = [
         messagesApiDataSource: MessagesApiDataSourceImpl(
           messagesApi: dp.messagesApi,
         ),
+        draftsLocalDataSource: dp.draftsLocalDataSource,
         chatsApiDataSource: chatsApiDataSource,
         messagesLocalDataSource: dp.messagesLocalDataSource,
         chatsLocalDataSource: dp.chatsLocalDataSource,

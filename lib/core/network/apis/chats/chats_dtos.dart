@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:kepleomax/core/models/message_draft.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
 
@@ -36,6 +37,7 @@ class ChatDto extends Equatable {
     required this.otherUser,
     required this.lastMessage,
     required this.unreadCount,
+    this.draft,
   });
 
   factory ChatDto.fromJson(Map<String, dynamic> json) => _$ChatDtoFromJson(json);
@@ -48,7 +50,23 @@ class ChatDto extends Equatable {
         ? null
         : MessageDto.fromJson(json, fromCache: true),
     unreadCount: json['unread_count'] as int,
+    draft: json['draft_message'] == null
+        ? null
+        : MessageDraft(
+            message: json['draft_message'] as String,
+            chatId: json['id'] as int,
+            createdAt: json['draft_created_at'] as int,
+          ),
   );
+
+  ChatDto copyWithNewDraft(MessageDraft? draft) => ChatDto(
+    id: id,
+    otherUser: otherUser,
+    lastMessage: lastMessage,
+    unreadCount: unreadCount,
+    draft: draft,
+  );
+
   final int id;
   @JsonKey(name: 'other_user')
   final UserDto otherUser;
@@ -56,6 +74,8 @@ class ChatDto extends Equatable {
   final MessageDto? lastMessage;
   @JsonKey(name: 'unread_count')
   final int unreadCount;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final MessageDraft? draft;
 
   Map<String, dynamic> toLocalJson() => {
     'id': id,
