@@ -41,7 +41,11 @@ abstract class MessengerRepository {
 
   Future<void> loadChats();
 
-  Future<void> loadMessages({required int chatId, bool withCache = true});
+  Future<void> loadMessages({
+    required int chatId,
+    bool withCache = true,
+    bool loadCacheInTwoSteps = false,
+  });
 
   Future<void> loadMoreMessages({required int chatId, required int? toMessageId});
 
@@ -72,15 +76,14 @@ class MessengerRepositoryImpl implements MessengerRepository {
     required ChatsLocalDataSource chatsLocalDataSource,
     required UsersLocalDataSource usersLocalDataSource,
     required CombineCacheAndApi combiner,
-  })
-      : _webSocket = messengerWebSocket,
-        _chatsApi = chatsApiDataSource,
-        _messagesApi = messagesApiDataSource,
-        _chatsLocal = chatsLocalDataSource,
-        _messagesLocal = messagesLocalDataSource,
-        _draftsLocal = draftsLocalDataSource,
-        _usersLocal = usersLocalDataSource,
-        _combiner = combiner {
+  }) : _webSocket = messengerWebSocket,
+       _chatsApi = chatsApiDataSource,
+       _messagesApi = messagesApiDataSource,
+       _chatsLocal = chatsLocalDataSource,
+       _messagesLocal = messagesLocalDataSource,
+       _draftsLocal = draftsLocalDataSource,
+       _usersLocal = usersLocalDataSource,
+       _combiner = combiner {
     _subs.addAll([
       _webSocket.newMessageUpdatesStream.listen(_onNewMessageUpdate),
       _webSocket.readMessagesStream.listen(_onReadMessages),
@@ -108,7 +111,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
   final List<StreamSubscription<void>> _subs = [];
 
   final _messagesUpdatesController =
-  StreamController<MessagesCollection>.broadcast();
+      StreamController<MessagesCollection>.broadcast();
   final _chatsUpdatesController = StreamController<ChatsCollection>.broadcast();
   MessagesCollection? _currentMessagesCollection;
   ChatsCollection? _currentChatsCollection;
@@ -156,8 +159,8 @@ class MessengerRepositoryImpl implements MessengerRepository {
     final cacheChats = _currentChatsCollection?.fromCache == true
         ? _currentChatsCollection!.chats
         : (await _chatsLocal.getChats())
-        .map((chat) => Chat.fromDto(chat, fromCache: true))
-        .toList();
+              .map((chat) => Chat.fromDto(chat, fromCache: true))
+              .toList();
 
     final cacheChatsHashMap = HashMap<int, Chat>();
     for (final cacheChat in cacheChats) {
@@ -194,7 +197,11 @@ class MessengerRepositoryImpl implements MessengerRepository {
   }
 
   @override
-  Future<void> loadMessages({required int chatId, bool withCache = true}) async {
+  Future<void> loadMessages({
+    required int chatId,
+    bool withCache = true,
+    bool loadCacheInTwoSteps = false,
+  }) async {
     /// TODO maybe reset messagesCollection here?
     /// _currentChatOtherUserId != null means it's a new chat. If delete this line, provided
     /// chatId may broke something check the integration test: "open_deleted_chat_from_notification_test"
@@ -204,29 +211,19 @@ class MessengerRepositoryImpl implements MessengerRepository {
 
     /// start loading api
     final apiMessagesDtosCompleter = Completer<List<MessageDto>>();
-    unawaited(_messagesApi.getMessages(
-      chatId: chatId,
-      limit: AppConstants.msgPagingLimit,
-    ).then(apiMessagesDtosCompleter.complete));
+    unawaited(
+      _messagesApi
+          .getMessages(chatId: chatId, limit: AppConstants.msgPagingLimit)
+          .then(apiMessagesDtosCompleter.complete),
+    );
 
     /// emit data from cache
     List<MessageDto> cache = [];
     if (withCache) {
-      cache = await _messagesLocal.getMessagesByChatId(chatId, limit: 50);
-      if (_currentChatOtherUserId != null || _currentChatId != chatId) return;
-      _emitMessagesCollection(
-        MessagesCollection(
-          messages: cache.map(Message.fromDto),
-          chatId: chatId,
-          maintainLoading: true,
-        ),
-      );
-      final cacheAll = await _messagesLocal.getMessagesByChatId(
+      cache = await _messagesLocal.getMessagesByChatId(
         chatId,
-        offset: cache.length,
-        limit: 500,
+        limit: loadCacheInTwoSteps ? 50 : 500,
       );
-      cache.addAll(cacheAll);
       if (_currentChatOtherUserId != null || _currentChatId != chatId) return;
       _emitMessagesCollection(
         MessagesCollection(
@@ -235,6 +232,22 @@ class MessengerRepositoryImpl implements MessengerRepository {
           maintainLoading: true,
         ),
       );
+      if (loadCacheInTwoSteps) {
+        final cacheAll = await _messagesLocal.getMessagesByChatId(
+          chatId,
+          offset: cache.length,
+          limit: 500,
+        );
+        cache = [...cache, ...cacheAll];
+        if (_currentChatOtherUserId != null || _currentChatId != chatId) return;
+        _emitMessagesCollection(
+          MessagesCollection(
+            messages: cache.map(Message.fromDto),
+            chatId: chatId,
+            maintainLoading: true,
+          ),
+        );
+      }
     }
 
     /// emit data from api
@@ -243,12 +256,12 @@ class MessengerRepositoryImpl implements MessengerRepository {
     final newList = _combiner.combineLoad(cache, apiMessagesDtos);
 
     _emitMessagesCollection(
-    MessagesCollection(
-    messages: newList.map(Message.fromDto),
-    chatId: chatId,
-    allMessagesLoaded: newList.length < AppConstants.msgPagingLimit,
-    maintainLoading: false,
-    ),
+      MessagesCollection(
+        messages: newList.map(Message.fromDto),
+        chatId: chatId,
+        allMessagesLoaded: newList.length < AppConstants.msgPagingLimit,
+        maintainLoading: false,
+      ),
     );
   }
 
@@ -266,16 +279,14 @@ class MessengerRepositoryImpl implements MessengerRepository {
     final messagesFromCache = messages.where((m) => m.fromCache).toList();
     final limitCorrection = toMessageId == null
         ? messagesFromCache.length
-        : messagesFromCache.indexWhere((m) => m.id == toMessageId);
+        : (messagesFromCache.indexWhere((m) => m.id == toMessageId) + 1);
     final newLimit = limitCorrection == -1
         ? AppConstants.msgPagingLimit
         : limitCorrection + AppConstants.msgPagingLimit;
     final api = await _messagesApi.getMessages(
       chatId: chatId,
       limit: newLimit,
-      cursor: messages
-          .lastWhereOrNull((e) => !e.fromCache)
-          ?.id,
+      cursor: messages.lastWhereOrNull((e) => !e.fromCache)?.id,
     );
     if (_currentChatId != chatId) return;
 
@@ -322,12 +333,10 @@ class MessengerRepositoryImpl implements MessengerRepository {
         draft: message.isEmpty
             ? null
             : MessageDraft(
-          message: message,
-          chatId: chatId,
-          createdAt: DateTime
-              .now()
-              .millisecondsSinceEpoch,
-        ),
+                message: message,
+                chatId: chatId,
+                createdAt: DateTime.now().millisecondsSinceEpoch,
+              ),
       );
       _emitChatsCollection(ChatsCollection(chats: newChats));
     }

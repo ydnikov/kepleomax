@@ -60,8 +60,11 @@ class MockMessagesLocalDataSource implements MessagesLocalDataSource {
   }
 
   @override
-  Future<List<MessageDto>> getMessagesByChatId(int chatId) async =>
-      _getMessagesReturnValue;
+  Future<List<MessageDto>> getMessagesByChatId(
+    int chatId, {
+    int offset = 0,
+    int limit = 9999,
+  }) async => _getMessagesReturnValue;
 
   @override
   Future<void> readMessages(ReadMessagesUpdate data) async {}

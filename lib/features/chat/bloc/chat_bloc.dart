@@ -226,6 +226,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       await _messengerRepository.loadMessages(
         chatId: chatId,
         withCache: event.withCache,
+        loadCacheInTwoSteps: true,
       );
     } catch (e, st) {
       _data = _data.copyWith(isLoading: false);
