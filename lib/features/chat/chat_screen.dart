@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_detector/focus_detector.dart';
+import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
@@ -246,7 +247,10 @@ class _BodyState extends State<_Body> {
                             reverse: true,
                             itemCount:
                                 data.messages.length +
-                                (data.isAllMessagesLoaded || flavor.isTesting
+                                (data.isAllMessagesLoaded ||
+                                        data.messages.length <
+                                            AppConstants.msgPagingLimit ||
+                                        flavor.isTesting
                                     ? 0
                                     : 3),
                             itemBuilder: (context, i) => i >= data.messages.length

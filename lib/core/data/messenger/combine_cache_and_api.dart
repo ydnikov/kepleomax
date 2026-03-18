@@ -104,9 +104,9 @@ class _Any_NOut extends _Combiner {
     List<MessageDto> api, {
     int? limit,
   }) {
-    _local
-      ..deleteAllWithIds(cache.map((m) => m.id))
-      ..insertAll(api);
+    _local.deleteAllWithIds(cache.map((m) => m.id)).whenComplete(() {
+      _local.insertAll(api);
+    });
     return api;
   }
 }
@@ -121,15 +121,17 @@ class _Any_In extends _Combiner {
     int? limit,
   }) {
     if (api.length < (limit ?? AppConstants.msgPagingLimit)) {
-      _local
-        ..deleteAllWithIds(cache.map((m) => m.id))
-        ..insertAll(api);
+      _local.deleteAllWithIds(cache.map((m) => m.id)).whenComplete(() {
+        _local.insertAll(api);
+      });
       return api;
     }
 
     _local
-      ..deleteAllWithIds(cache.where((m) => m.id < api.last.id).map((m) => m.id))
-      ..insertAll(api);
+        .deleteAllWithIds(cache.where((m) => m.id >= api.last.id).map((m) => m.id))
+        .whenComplete(() {
+          _local.insertAll(api);
+        });
 
     final newList = <MessageDto>[
       ...api,

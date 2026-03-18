@@ -106,7 +106,7 @@ abstract class Message with _$Message {
     // system messages are never cached
     isCurrentUser: userType == MessageUserType.current,
     type: type.value,
-    message: message,
+    message: rawMessage,
     isRead: isRead,
     createdAt: createdAt.millisecondsSinceEpoch,
     editedAt: editedAt?.millisecondsSinceEpoch,

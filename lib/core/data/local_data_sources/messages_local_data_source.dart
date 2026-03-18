@@ -3,7 +3,7 @@ import 'package:kepleomax/core/network/websockets/models/read_messages_update.da
 import 'package:sqflite/sqflite.dart';
 
 abstract class MessagesLocalDataSource {
-  Future<List<MessageDto>> getMessagesByChatId(int chatId);
+  Future<List<MessageDto>> getMessagesByChatId(int chatId, {int offset, int limit});
 
   Future<void> insert(MessageDto message);
 
@@ -25,11 +25,13 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
   final Database _database;
 
   @override
-  Future<List<MessageDto>> getMessagesByChatId(int chatId) async {
+  Future<List<MessageDto>> getMessagesByChatId(int chatId, {int offset = 0, int limit = 150}) async {
     final query = await _database.query(
       'messages',
       where: 'chat_id = ?',
       whereArgs: [chatId],
+      limit: limit,
+      offset: offset,
       orderBy: 'created_at DESC',
     );
     return query.map((m) => MessageDto.fromJson(m, fromCache: true)).toList();
@@ -46,8 +48,9 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
 
   @override
   Future<void> insertAll(Iterable<MessageDto> messages) async {
+    final list = messages.toList();
     await _database.transaction((transaction) async {
-      for (final message in messages) {
+      for (final message in list) {
         await transaction.insert(
           'messages',
           message.toLocalJson(),
@@ -76,13 +79,15 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
 
   @override
   Future<void> deleteById(int id) async {
+    print('KlmLog deleteMessage: $id');
     await _database.delete('messages', where: 'id = ?', whereArgs: [id]);
   }
 
   @override
   Future<void> deleteAllWithIds(Iterable<int> ids) async {
+    final list = ids.toList();
     await _database.transaction((transaction) async {
-      for (final id in ids) {
+      for (final id in list) {
         await transaction.delete('messages', where: 'id = ?', whereArgs: [id]);
       }
     });
@@ -90,6 +95,7 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
 
   @override
   Future<void> deleteAllByChatId(int chatId) async {
+    print('KlmLog deleteMessagesByChatId: $chatId');
     await _database.delete('messages', where: 'chat_id = ?', whereArgs: [chatId]);
   }
 }
