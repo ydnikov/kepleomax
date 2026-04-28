@@ -1,5 +1,7 @@
 import 'dart:async';
 
+decline from the notification is not working
+
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/rtc_models.dart';
@@ -14,8 +16,6 @@ abstract class RtcWebSocket {
   void sendIceCandidate(RTCIceCandidate candidate, int toUserId);
 
   void sendCameraStatus(CameraStatus status, int toUserId);
-
-  void endCall(int toUserId);
 
   Future<void> dispose();
 
@@ -94,11 +94,6 @@ class RtcWebSocketImpl implements RtcWebSocket {
       'to_user_id': toUserId,
       'status': status.jsonName,
     });
-  }
-
-  @override
-  void endCall(int toUserId) {
-    _webSocket.emit('webrtc_end_call', {'to_user_id': toUserId});
   }
 
   @override

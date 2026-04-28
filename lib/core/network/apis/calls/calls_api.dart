@@ -9,5 +9,5 @@ abstract class CallsApi {
       _CallsApi(dio, baseUrl: '$baseUrl/api/calls');
 
   @GET('/declineCall')
-  Future<void> declineCall({@Query('otherUserId') required int otherUserId});
+  Future<void> endCall({@Query('otherUserId') required int otherUserId});
 }

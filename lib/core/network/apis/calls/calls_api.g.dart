@@ -20,7 +20,7 @@ class _CallsApi implements CallsApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<void> declineCall({required int otherUserId}) async {
+  Future<void> endCall({required int otherUserId}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'otherUserId': otherUserId};
     final _headers = <String, dynamic>{};

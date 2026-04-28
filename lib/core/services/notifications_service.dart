@@ -237,5 +237,5 @@ Future<void> sendDeclineApiCall(int otherUserId) async {
       DiStep.apis,
     ],
   );
-  await dp.callsApi.declineCall(otherUserId: otherUserId);
+  await dp.callsApi.endCall(otherUserId: otherUserId);
 }

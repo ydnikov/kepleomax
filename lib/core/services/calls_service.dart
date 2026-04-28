@@ -6,6 +6,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/extensions/rtc_session_description_extension.dart';
+import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/services/calls_notifications_service.dart';
 import 'package:kepleomax/features/call/data/peer_connection_controller.dart';
@@ -26,11 +27,12 @@ class CallsService {
 
   late UserRepository _userRepository;
   late RtcWebSocket _webSocket;
+  late CallsApi _callsApi;
 
   /// main methods
   Future<void> _incomingCall(int otherUserId, RTCSessionDescription? offer) async {
     if (await PeerConnectionControllerImpl.activeCallOtherUserId != null) {
-      _webSocket.endCall(otherUserId);
+      unawaited(_callsApi.endCall(otherUserId: otherUserId));
       await CallsNotificationsService.instance.hideNotification(
         otherUserId.toString(),
       );
@@ -80,8 +82,7 @@ class CallsService {
   Future<void> endCall(int otherUserId) async {
     print('KlmLog endCall, byCurrentUser: $_callEndedByCurrentUser');
     if (_callEndedByCurrentUser) {
-      /// TODO replace with api call?
-      _webSocket.endCall(otherUserId);
+      unawaited(_callsApi.endCall(otherUserId: otherUserId));
     } else {
       _callEndedByCurrentUser = true; // reset to default
     }
@@ -97,9 +98,14 @@ class CallsService {
   Stream<void> get acceptCallStream => _acceptCallController.stream;
 
   /// other
-  void subscribeOnEvents(RtcWebSocket webSocket, UserRepository userRepository) {
+  void subscribeOnEvents({
+    required RtcWebSocket rtsWebSocket,
+    required UserRepository userRepository,
+    required CallsApi callsApi,
+  }) {
     _userRepository = userRepository;
-    _webSocket = webSocket;
+    _webSocket = rtsWebSocket;
+    _callsApi = callsApi;
 
     _callEndsSub = _webSocket.endCallStream.listen((update) {
       _callEnded();

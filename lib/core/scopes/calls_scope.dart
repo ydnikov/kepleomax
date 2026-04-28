@@ -22,7 +22,11 @@ class _CallsScopeState extends State<CallsScope> {
   void initState() {
     _dp = Dependencies.of(context);
     _rtcWebSocket = _dp.rtcWebSocketBuilder();
-    CallsService.instance.subscribeOnEvents(_rtcWebSocket, _dp.userRepository);
+    CallsService.instance.subscribeOnEvents(
+      rtsWebSocket: _rtcWebSocket,
+      userRepository: _dp.userRepository,
+      callsApi: _dp.callsApi,
+    );
 
     super.initState();
   }
