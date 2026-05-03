@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 
-import 'package:kepleomax/core/presentation/klm_button.dart' show KlmButton;
+import 'package:kepleomax/core/presentation/klm_text_button.dart' show KlmTextButton;
 
 class KlmErrorWidget extends StatelessWidget {
   const KlmErrorWidget({required this.errorMessage, this.onRetry, super.key});
@@ -27,7 +27,7 @@ class KlmErrorWidget extends StatelessWidget {
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 10),
-              KlmButton(onPressed: onRetry, text: 'Retry', width: 120),
+              KlmTextButton(onPressed: onRetry, text: 'Retry', width: 120),
             ],
           ],
         ),

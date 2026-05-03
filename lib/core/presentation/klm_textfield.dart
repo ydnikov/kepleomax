@@ -7,6 +7,7 @@ class KlmTextField extends StatefulWidget {
   const KlmTextField({
     required this.controller,
     required this.onChanged,
+    this.focusNode,
     this.label,
     this.hint,
     this.isPassword = false,
@@ -27,6 +28,7 @@ class KlmTextField extends StatefulWidget {
   });
 
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String? label;
   final String? hint;
   final bool isPassword;
@@ -50,10 +52,13 @@ class KlmTextField extends StatefulWidget {
 }
 
 class _KlmTextFieldState extends State<KlmTextField> {
-  final _focusNode = FocusNode();
+  late final FocusNode _focusNode;
+  late bool _obscureText;
 
   @override
   void initState() {
+    _obscureText = widget.isPassword;
+    _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(() {
       if (widget.onFocusLost != null && !_focusNode.hasFocus) {
         widget.onFocusLost!();
@@ -64,7 +69,9 @@ class _KlmTextFieldState extends State<KlmTextField> {
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 
@@ -94,7 +101,7 @@ class _KlmTextFieldState extends State<KlmTextField> {
           TextFormField(
             controller: widget.controller,
             focusNode: _focusNode,
-            obscureText: widget.isPassword,
+            obscureText: _obscureText,
             maxLines: widget.multiline ? null : 1,
             maxLength: widget.maxLength ?? 50,
             keyboardType:
@@ -115,6 +122,25 @@ class _KlmTextFieldState extends State<KlmTextField> {
               ),
               suffix: widget.readOnly
                   ? null
+                  : widget.isPassword
+                  ? SizedBox(
+                      height: 17,
+                      width: 17,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                        child: Icon(
+                          _obscureText
+                              ? Icons.remove_red_eye
+                              : Icons.remove_red_eye_outlined,
+                          color: Colors.black,
+                          size: 17,
+                        ),
+                      ),
+                    )
                   : widget.controller.text.isNotEmpty
                   ? SizedBox(
                       height: 17,

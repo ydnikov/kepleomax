@@ -17,6 +17,8 @@ class KlmAppBar extends AppBar {
     super.key,
   }) : super(
          leading: InkWell(
+           highlightColor: Colors.transparent,
+           splashColor: Colors.transparent,
            onTap: () {
              AppNavigator.of(
                context,

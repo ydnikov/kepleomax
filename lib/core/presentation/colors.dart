@@ -9,4 +9,5 @@ class KlmColors {
   static const success = Colors.green;
   static const readMessage = Colors.indigoAccent;
   static const currentUserBg = Color.fromARGB(255, 213, 255, 255);
+  static Color link = Colors.blue.shade800;
 }

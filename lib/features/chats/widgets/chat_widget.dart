@@ -45,7 +45,6 @@ class ChatWidget extends StatelessWidget {
                       ),
                     ),
                     if (chat.lastMessage != null || chat.draft != null) ...[
-                      const SizedBox(height: 4),
                       FittedBox(
                         /// TODO is this key needed?
                         key: ValueKey(
@@ -160,7 +159,10 @@ class _MessageTextWidgetState extends State<_MessageTextWidget> {
               if (!widget.chat.isLoadingChat && !_isDraft)
                 Text(
                   ' • ${ParseTime.toShortPassTime(widget.chat.lastMessage!.createdAt)}',
-                  style: context.textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                  style: context.textTheme.bodyLarge?.copyWith(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
                 ),
             ],
           );

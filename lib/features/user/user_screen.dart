@@ -12,7 +12,7 @@ import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
-import 'package:kepleomax/core/presentation/klm_button.dart';
+import 'package:kepleomax/core/presentation/klm_text_button.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/photos_preview/photos_preview_screen.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
@@ -229,7 +229,7 @@ class _Body extends StatelessWidget {
                   ],
                   const SizedBox(height: 16),
                   if (!data.isLoading && data.profile == null) ...[
-                    KlmButton(
+                    KlmTextButton(
                       onPressed: () {
                         context.read<UserBloc>().add(const UserEventLoad());
                         context.read<PostListBloc>().add(const PostListEventLoad());

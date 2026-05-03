@@ -10,7 +10,7 @@ import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
-import 'package:kepleomax/core/presentation/klm_button.dart';
+import 'package:kepleomax/core/presentation/klm_text_button.dart';
 import 'package:kepleomax/core/presentation/klm_error_widget.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
@@ -127,7 +127,7 @@ class _Body extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        KlmButton(
+                        KlmTextButton(
                           key: const Key('find_people_button'),
                           onPressed: () {
                             AppNavigator.of(context)!.push(const PeoplePage());

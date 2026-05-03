@@ -399,8 +399,9 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                           !data.isConnected ? 'Connecting...' : 'Updating...',
                           key: const Key('chat_app_bar_status_text'),
                           style: context.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey.shade600,
                           ),
                         ),
                       if (!data.isLoading && data.isConnected)

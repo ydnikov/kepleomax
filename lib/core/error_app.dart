@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
-import 'package:kepleomax/core/presentation/klm_button.dart';
+import 'package:kepleomax/core/presentation/klm_text_button.dart';
 
 class ErrorApp extends StatelessWidget {
   const ErrorApp({required this.error, super.key});
@@ -29,7 +29,7 @@ class ErrorApp extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  KlmButton(
+                  KlmTextButton(
                     onPressed: () {
                       SystemNavigator.pop();
                     },

@@ -20,6 +20,7 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^9.1.1
   flutter_callkit_incoming: ^3.0.0
+  flutter_keyboard_visibility: ^6.0.0
   flutter_linkify: ^6.0.0
   flutter_local_notifications: ^19.5.0
   flutter_secure_storage: ^9.2.4

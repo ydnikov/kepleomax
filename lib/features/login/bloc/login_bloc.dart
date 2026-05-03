@@ -9,6 +9,8 @@ import 'package:kepleomax/features/login/bloc/login_state.dart';
 const String? Function(String) loginEmailValidator = UiValidator.emailValidator;
 const String? Function(String) loginPasswordValidator =
     UiValidator.passwordValidator;
+const String? Function({required String confirmPassword, required String password})
+loginConfirmPasswordValidator = UiValidator.confirmPasswordValidator;
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({required AuthController authController})
@@ -39,7 +41,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         loginPasswordValidator(_loginData.password) != null) {
       return false;
     } else if (needConfirm &&
-        UiValidator.confirmPasswordValidator(
+        loginConfirmPasswordValidator(
               password: _loginData.password,
               confirmPassword: _loginData.confirmPassword,
             ) !=
