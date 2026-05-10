@@ -116,6 +116,7 @@ class NotificationService {
 
     /// check type
     final type = message.data['type'] as String?;
+    print('KlmLog newNotification, type: $type');
     if (type == null) return;
 
     switch (type) {
@@ -201,7 +202,7 @@ class NotificationService {
 
 @pragma('vm:entry-point')
 Future<void> onBackgroundMessage(RemoteMessage message) async {
-  print('KlmLog onBackgroundMessage, type: ${message.data['type']}');
+  // print('KlmLog onBackgroundMessage, type: ${message.data['type']}');
 
   await Firebase.initializeApp();
   await NotificationService.instance.setupFlutterNotifications();
@@ -211,11 +212,15 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
     Future(() async {
       if (CallsNotificationsService.instance.ignoreEvents) return;
 
-      /// elementAt(0) will be Event.actionCallIncoming
+      /// ONLY IF ISOLATE IN BACKGROUND WORKING elementAt(0) will be Event.actionCallIncoming
       final event = await FlutterCallkitIncoming.onEvent
-          .elementAt(1)
+          .skipWhile((event) => event?.event == Event.actionCallIncoming)
+          .first
           .timeout(AppConstants.callingTimeout);
 
+      print(
+        'KlmLog secondEvent: ${event?.event}, ignoreEvents: ${CallsNotificationsService.instance.ignoreEvents}',
+      );
       if (CallsNotificationsService.instance.ignoreEvents) return;
       if (event?.event == Event.actionCallDecline) {
         await sendDeclineApiCall(event!.body['extra']['other_user_id'] as int);

@@ -40,6 +40,7 @@ class CallsNotificationsService {
     unawaited(_waitAndStopIgnoringEvents());
   }
 
+  @Deprecated('Now missed call is made via new_message notification')
   Future<void> showMissedCall({required UserDto otherUser}) async {
     await _startIgnoringEvents();
 
@@ -52,16 +53,15 @@ class CallsNotificationsService {
 
   Future<void> _startIgnoringEvents() async {
     _prefs ??= await SharedPreferences.getInstance();
+
     await _prefs!.setBool(_ignoreEventsKey, true);
   }
 
   Future<void> _waitAndStopIgnoringEvents() async {
     _prefs ??= await SharedPreferences.getInstance();
 
-    /// TODO what is it?
-    await Future<void>.delayed(_ignoreEventsDuration).then((_) async {
-      await _prefs!.setBool(_ignoreEventsKey, false);
-    });
+    await Future<void>.delayed(_ignoreEventsDuration);
+    await _prefs!.setBool(_ignoreEventsKey, false);
   }
 
   CallKitParams _generateCallKitParams(
@@ -87,7 +87,7 @@ class CallsNotificationsService {
     ),
     duration: AppConstants.callingTimeout.inMilliseconds,
     extra: offer == null
-        ? <String, dynamic>{'other_user_id': otherUser.id}
+        ? {'other_user_id': otherUser.id}
         : {
             'other_user_id': otherUser.id,
             'offer_sdp': offer.sdp,

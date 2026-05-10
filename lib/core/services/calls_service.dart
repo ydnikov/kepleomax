@@ -83,14 +83,14 @@ class CallsService {
     print('KlmLog endCall, byCurrentUser: $_callEndedByCurrentUser');
     if (_callEndedByCurrentUser) {
       unawaited(_callsApi.endCall(otherUserId: otherUserId));
+      await CallsNotificationsService.instance.hideNotification(
+        otherUserId.toString(),
+      );
     } else {
       _callEndedByCurrentUser = true; // reset to default
     }
 
     _cachedOffer = null;
-    await CallsNotificationsService.instance.hideNotification(
-      otherUserId.toString(),
-    );
   }
 
   RTCSessionDescription? get cachedOffer => _cachedOffer;
