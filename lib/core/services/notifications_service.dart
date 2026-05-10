@@ -178,6 +178,12 @@ class NotificationService {
           ),
         );
         break;
+
+      case 'cancel_call':
+        await CallsNotificationsService.instance.hideNotification(
+          message.data['other_user_id'] as String,
+        );
+        break;
     }
   }
 
