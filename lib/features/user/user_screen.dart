@@ -76,13 +76,16 @@ class _UserScreenState extends State<UserScreen> {
           userId: widget.userId,
           key: const Key('user_app_bar'),
         ),
-        body: _ScrollControllerListeners(
-          controller: _scrollController,
-          userId: widget.userId,
-          child: _Body(
-            scrollController: _scrollController,
-            scrollPadding: MediaQuery.of(context).viewPadding.top,
-            key: const Key('user_screen_body'),
+        body: SafeArea(
+          top: false,
+          child: _ScrollControllerListeners(
+            controller: _scrollController,
+            userId: widget.userId,
+            child: _Body(
+              scrollController: _scrollController,
+              scrollPadding: MediaQuery.of(context).viewPadding.top,
+              key: const Key('user_screen_body'),
+            ),
           ),
         ),
       ),
