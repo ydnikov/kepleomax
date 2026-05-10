@@ -23,6 +23,7 @@ import 'package:kepleomax/core/network/websockets/models/online_status_update.da
 import 'package:kepleomax/core/network/websockets/models/read_messages_update.dart';
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
 import 'package:kepleomax/core/services/notifications_service.dart';
+import 'package:kepleomax/core/utils/stateful_stream.dart';
 
 part 'on_delete_message.dart';
 
@@ -110,11 +111,14 @@ class MessengerRepositoryImpl implements MessengerRepository {
   int _currentChatId = -1;
   final List<StreamSubscription<void>> _subs = [];
 
-  final _messagesUpdatesController =
-      StreamController<MessagesCollection>.broadcast();
-  final _chatsUpdatesController = StreamController<ChatsCollection>.broadcast();
-  MessagesCollection? _currentMessagesCollection;
-  ChatsCollection? _currentChatsCollection;
+  final _messagesUpdatesController = StatefulStreamController<MessagesCollection>();
+  final _chatsUpdatesController = StatefulStreamController<ChatsCollection>();
+
+  MessagesCollection? get _currentMessagesCollection =>
+      _messagesUpdatesController.currentValue;
+
+  ChatsCollection? get _currentChatsCollection =>
+      _chatsUpdatesController.currentValue;
 
   @override
   ChatsCollection? get currentChatsCollection => _currentChatsCollection;
@@ -122,18 +126,15 @@ class MessengerRepositoryImpl implements MessengerRepository {
   /// emitters
   void _emitMessagesCollection(MessagesCollection collection) {
     _messagesUpdatesController.add(collection);
-    _currentMessagesCollection = collection;
   }
 
   void _emitMessages(Iterable<Message> messages) {
     final collection = _currentMessagesCollection!.copyWith(messages: messages);
     _messagesUpdatesController.add(collection);
-    _currentMessagesCollection = collection;
   }
 
   void _emitChatsCollection(ChatsCollection collection) {
     _chatsUpdatesController.add(collection);
-    _currentChatsCollection = collection;
   }
 
   /// api calls
