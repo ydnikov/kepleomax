@@ -10,6 +10,7 @@ class Flavor {
     required this.imageUrl,
     required this.type,
     required this.constants,
+    required this.versionName,
   }) : assert(baseUrl.isNotEmpty, "baseUrl can't be empty"),
        assert(imageUrl.isNotEmpty, "imageUrl can't be empty");
 
@@ -18,6 +19,7 @@ class Flavor {
     imageUrl: 'http://10.0.2.2:13000/api/files/',
     type: FlavorType.release,
     constants: AppConstantsType.release(),
+    versionName: ''
   );
 
   factory Flavor.devPublic() => Flavor(
@@ -25,6 +27,7 @@ class Flavor {
     imageUrl: 'http://34.118.78.192:13000/api/files/',
     type: FlavorType.develop,
     constants: AppConstantsType.develop(),
+    versionName: 'dev-pub'
   );
 
   factory Flavor.devLocal() => Flavor(
@@ -32,6 +35,7 @@ class Flavor {
     imageUrl: 'http://192.168.0.104:13000/api/files/',
     type: FlavorType.develop,
     constants: AppConstantsType.develop(),
+    versionName: 'dev-local'
   );
 
   factory Flavor.testing() => Flavor(
@@ -39,12 +43,14 @@ class Flavor {
     imageUrl: '_no_urls_in_tests_',
     type: FlavorType.testing,
     constants: AppConstantsType.testing(),
+    versionName: 'testing'
   );
 
   final String baseUrl;
   final String imageUrl;
   final FlavorType type;
   final AppConstantsType constants;
+  final String versionName;
 
   bool get isDevelop => type == FlavorType.develop;
 

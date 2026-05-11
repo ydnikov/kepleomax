@@ -5,6 +5,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
+import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/klm_text_button.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
@@ -346,7 +347,7 @@ class _VersionWidget extends StatelessWidget {
               ? const SizedBox()
               : Center(
                   child: Text(
-                    'v.${sn.data!.version}',
+                    'v.${sn.data!.version}${flavor.versionName.isEmpty ? '' : '-${flavor.versionName}'}',
                     style: context.textTheme.bodyMedium?.copyWith(
                       fontSize: 10,
                       color: Colors.grey,

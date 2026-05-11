@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
+import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/settings/app_settings.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,10 +16,18 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late AppSettings _settings;
+  String? _version;
 
   @override
   void initState() {
     _settings = Dependencies.of(context).appSettings;
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) {
+        setState(() {
+          _version = info.version;
+        });
+      }
+    });
     super.initState();
   }
 
@@ -55,6 +66,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const Divider(),
+            const Spacer(),
+            if (_version != null)
+              Center(
+                child: Text(
+                  'v$_version${flavor.versionName.isEmpty ? '' : '-${flavor.versionName}'}',
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
