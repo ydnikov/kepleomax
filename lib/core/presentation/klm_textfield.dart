@@ -120,9 +120,7 @@ class _KlmTextFieldState extends State<KlmTextField> {
                 color: Colors.grey,
                 fontWeight: FontWeight.w300,
               ),
-              suffix: widget.readOnly
-                  ? null
-                  : widget.isPassword
+              suffix: widget.isPassword
                   ? SizedBox(
                       height: 17,
                       width: 17,
@@ -141,6 +139,8 @@ class _KlmTextFieldState extends State<KlmTextField> {
                         ),
                       ),
                     )
+                  : widget.readOnly
+                  ? null
                   : widget.controller.text.isNotEmpty
                   ? SizedBox(
                       height: 17,

@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class EllipsisTextWidget extends StatefulWidget {
-  EllipsisTextWidget(
+  const EllipsisTextWidget(
     this.text, {
     this.style,
     this.ellipsis = true,
     this.textKey,
+    super.key,
   });
 
   final String text;
@@ -43,9 +44,8 @@ class _EllipsisTextWidgetState extends State<EllipsisTextWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Text(_text, style: widget.style, key: widget.textKey);
-  }
+  Widget build(BuildContext context) =>
+      Text(_text, style: widget.style, key: widget.textKey);
 
   String get _text {
     if (!widget.ellipsis) return widget.text;

@@ -169,10 +169,18 @@ class NotificationService {
         }
 
       case 'incoming_call':
+        final sentAt = int.parse(message.data['sent_at'] as String);
+        print('KlmLog sentAt: $sentAt');
+
+        if (DateTime.now().millisecondsSinceEpoch - sentAt >=
+            AppConstants.callingTimeout.inMilliseconds)
+          break;
+
         await CallsNotificationsService.instance.showIncomingCall(
           otherUser: UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
           ),
+          startedAt: DateTime.fromMillisecondsSinceEpoch(sentAt),
           offer: RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
             message.data,
           ),

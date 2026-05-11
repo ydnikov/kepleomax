@@ -34,7 +34,7 @@ class MenuScreen extends StatelessWidget {
             icon: Icons.people_alt_outlined,
             backgroundColor: Colors.orange,
             onTap: () {
-              Fluttertoast.showToast(msg: 'Not today');
+              Fluttertoast.showToast(msg: 'Not working');
             },
             key: const Key('communities_menu_item'),
           ),
@@ -43,7 +43,7 @@ class MenuScreen extends StatelessWidget {
             icon: Icons.music_note,
             backgroundColor: Colors.pinkAccent.shade200,
             onTap: () {
-              Fluttertoast.showToast(msg: "Don't want to code this");
+              Fluttertoast.showToast(msg: 'Not working');
             },
             key: const Key('music_menu_item'),
           ),
@@ -52,7 +52,7 @@ class MenuScreen extends StatelessWidget {
             icon: Icons.play_arrow,
             backgroundColor: Colors.blue.shade700,
             onTap: () {
-              Fluttertoast.showToast(msg: 'Sorry');
+              Fluttertoast.showToast(msg: 'Not working');
             },
             key: const Key('videos_menu_item'),
           ),
@@ -60,7 +60,9 @@ class MenuScreen extends StatelessWidget {
             title: 'Games',
             icon: Icons.gamepad,
             backgroundColor: Colors.green,
-            onTap: () {},
+            onTap: () {
+              Fluttertoast.showToast(msg: 'Not working');
+            },
             key: const Key('games_menu_item'),
           ),
           _MenuItem(

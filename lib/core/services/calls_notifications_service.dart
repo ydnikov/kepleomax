@@ -24,11 +24,16 @@ class CallsNotificationsService {
 
   Future<void> showIncomingCall({
     required UserDto otherUser,
+    required DateTime startedAt,
     RTCSessionDescription? offer,
   }) async {
     _prefs ??= await SharedPreferences.getInstance();
 
-    final params = _generateCallKitParams(otherUser, offer: offer);
+    final params = _generateCallKitParams(
+      otherUser,
+      startedAt: startedAt,
+      offer: offer,
+    );
     await FlutterCallkitIncoming.showCallkitIncoming(params);
   }
 
@@ -40,16 +45,16 @@ class CallsNotificationsService {
     unawaited(_waitAndStopIgnoringEvents());
   }
 
-  @Deprecated('Now missed call is made via new_message notification')
-  Future<void> showMissedCall({required UserDto otherUser}) async {
-    await _startIgnoringEvents();
-
-    await FlutterCallkitIncoming.endCall(otherUser.id.toString());
-    final params = _generateCallKitParams(otherUser);
-    await FlutterCallkitIncoming.showMissCallNotification(params);
-
-    unawaited(_waitAndStopIgnoringEvents());
-  }
+  // @Deprecated('Now missed call is made via new_message notification')
+  // Future<void> showMissedCall({required UserDto otherUser}) async {
+  //   await _startIgnoringEvents();
+  //
+  //   await FlutterCallkitIncoming.endCall(otherUser.id.toString());
+  //   final params = _generateCallKitParams(otherUser);
+  //   await FlutterCallkitIncoming.showMissCallNotification(params);
+  //
+  //   unawaited(_waitAndStopIgnoringEvents());
+  // }
 
   Future<void> _startIgnoringEvents() async {
     _prefs ??= await SharedPreferences.getInstance();
@@ -66,6 +71,7 @@ class CallsNotificationsService {
 
   CallKitParams _generateCallKitParams(
     UserDto otherUser, {
+    required DateTime startedAt,
     RTCSessionDescription? offer,
   }) => CallKitParams(
     id: otherUser.id.toString(),
@@ -85,7 +91,9 @@ class CallsNotificationsService {
       showNotification: false,
       isShowCallback: false,
     ),
-    duration: AppConstants.callingTimeout.inMilliseconds,
+    duration:
+        AppConstants.callingTimeout.inMilliseconds -
+        (DateTime.now().millisecondsSinceEpoch - startedAt.millisecondsSinceEpoch),
     extra: offer == null
         ? {'other_user_id': otherUser.id}
         : {

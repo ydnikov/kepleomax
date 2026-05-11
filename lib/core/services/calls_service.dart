@@ -54,6 +54,7 @@ class CallsService {
   bool _callEndedByCurrentUser = true;
 
   void _callEnded() {
+    print('KlmLogCall callEnded');
     _callEndedByCurrentUser = false;
 
     /// it closes the page and CallBloc will call endCall()
@@ -69,7 +70,7 @@ class CallsService {
   }
 
   Future<void> endCall(int otherUserId) async {
-    print('KlmLog endCall, byCurrentUser: $_callEndedByCurrentUser');
+    print('KlmLogCall endCall, byCurrentUser: $_callEndedByCurrentUser');
     if (_callEndedByCurrentUser) {
       unawaited(_callsApi.endCall(otherUserId: otherUserId));
       await CallsNotificationsService.instance.hideNotification(
@@ -105,7 +106,7 @@ class CallsService {
 
   Future<void> _handleCallKitEvent(CallEvent? event) async {
     print(
-      'KlmLog event: ${event?.event}, ignore: ${CallsNotificationsService.instance.ignoreEvents}',
+      'KlmLogCall event: ${event?.event}, ignore: ${CallsNotificationsService.instance.ignoreEvents}',
     );
     if (event?.event == null || CallsNotificationsService.instance.ignoreEvents)
       return;

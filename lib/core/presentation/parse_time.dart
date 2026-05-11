@@ -104,7 +104,8 @@ class ParseTime {
     final nowMillis = now.millisecondsSinceEpoch ~/ 1000;
 
     if (lastActivityMillis + Duration.secondsPerDay > nowMillis) {
-      return 'last seen at ${DateFormat.Hm().format(lastActivityTime)}';
+      final isYesterday = lastActivityTime.day != now.day;
+      return 'last seen${isYesterday ? ' yesterday' : ''} at ${DateFormat.Hm().format(lastActivityTime)}';
     } else if (lastActivityTime.year == now.year) {
       return 'last seen ${DateFormat('dd MMM').format(lastActivityTime)} at ${DateFormat.Hm().format(lastActivityTime)}';
     } else if (lastActivityTime.year > 2010) {

@@ -405,7 +405,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                           ),
                         ),
                       if (!data.isLoading && data.isConnected)
-                        _UserStatusWidget(data: data),
+                        FittedBox(child: _UserStatusWidget(data: data)),
                     ],
                   ),
                 ),
