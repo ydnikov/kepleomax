@@ -9,7 +9,11 @@ abstract class RtcWebSocket {
   /// actions
   void sendOffer(RTCSessionDescription offer, int toUserId);
 
-  void sendAnswer(RTCSessionDescription answer, int toUserId);
+  void sendAnswer(
+    RTCSessionDescription answer, {
+    required String callId,
+    required String? fcmToken,
+  });
 
   void sendIceCandidate(RTCIceCandidate candidate, int toUserId);
 
@@ -71,10 +75,15 @@ class RtcWebSocketImpl implements RtcWebSocket {
   }
 
   @override
-  void sendAnswer(RTCSessionDescription answer, int toUserId) {
+  void sendAnswer(
+    RTCSessionDescription answer, {
+    required String callId,
+    required String? fcmToken,
+  }) {
     _webSocket.emit('webrtc_send_answer', {
-      'to_user_id': toUserId,
+      'call_id': callId,
       'answer': answer.toMap(),
+      'fcm_token': fcmToken,
     });
   }
 
@@ -86,6 +95,7 @@ class RtcWebSocketImpl implements RtcWebSocket {
     });
   }
 
+  // TODO maybe send callId here?
   @override
   void sendCameraStatus(CameraStatus status, int toUserId) {
     _webSocket.emit('webrtc_send_camera_status', {

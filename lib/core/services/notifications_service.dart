@@ -15,6 +15,7 @@ import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
 import 'package:kepleomax/core/services/calls_notifications_service.dart';
+import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 
 class NotificationService {
@@ -125,7 +126,7 @@ class NotificationService {
         {
           if (type == 'new_missed_call') {
             await CallsNotificationsService.instance.hideNotification(
-              jsonDecode(message.data['other_user'] as String)['id'].toString(),
+              message.data['call_id'] as String,
             );
           }
 
@@ -170,13 +171,13 @@ class NotificationService {
 
       case 'incoming_call':
         final sentAt = int.parse(message.data['sent_at'] as String);
-        print('KlmLog sentAt: $sentAt');
 
         if (DateTime.now().millisecondsSinceEpoch - sentAt >=
             AppConstants.callingTimeout.inMilliseconds)
           break;
 
         await CallsNotificationsService.instance.showIncomingCall(
+          id: message.data['id'] as String,
           otherUser: UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
           ),
@@ -187,10 +188,14 @@ class NotificationService {
         );
         break;
 
-      case 'cancel_call':
+      case 'stop_call':
         await CallsNotificationsService.instance.hideNotification(
-          message.data['other_user_id'] as String,
+          message.data['call_id'] as String,
         );
+        if (message.data['only_hide_notification'] != 'true') {
+          print('KlmLog only_hide_notification == false');
+          CallsService.instance.callEnded();
+        }
         break;
     }
   }
@@ -226,7 +231,7 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
     Future(() async {
       if (CallsNotificationsService.instance.ignoreEvents) return;
 
-      /// ONLY IF ISOLATE IN BACKGROUND WORKING elementAt(0) will be Event.actionCallIncoming
+      /// ONLY IF ISOLATE IN THE BACKGROUND - elementAt(0) will be Event.actionCallIncoming
       final event = await FlutterCallkitIncoming.onEvent
           .skipWhile((event) => event?.event == Event.actionCallIncoming)
           .first
@@ -237,14 +242,14 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
       );
       if (CallsNotificationsService.instance.ignoreEvents) return;
       if (event?.event == Event.actionCallDecline) {
-        await sendDeclineApiCall(event!.body['extra']['other_user_id'] as int);
+        await sendDeclineApiCall(event!.body['extra']['id'] as String);
       }
     }).ignore();
   }
 }
 
 @pragma('vm:entry-point')
-Future<void> sendDeclineApiCall(int otherUserId) async {
+Future<void> sendDeclineApiCall(String callId) async {
   final dp = await initializeDependencies(
     onlySteps: [
       DiStep.storages,
@@ -256,5 +261,6 @@ Future<void> sendDeclineApiCall(int otherUserId) async {
       DiStep.apis,
     ],
   );
-  await dp.callsApi.endCall(otherUserId: otherUserId);
+  print('KlnLog declineCall from background');
+  await dp.callsApi.endCall(id: callId, fcmToken: null); // TODO null is right?
 }

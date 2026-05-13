@@ -23,13 +23,13 @@ class CallsNotificationsService {
   bool get ignoreEvents => _prefs?.getBool(_ignoreEventsKey) ?? false;
 
   Future<void> showIncomingCall({
+    required String id,
     required UserDto otherUser,
     required DateTime startedAt,
     RTCSessionDescription? offer,
   }) async {
-    _prefs ??= await SharedPreferences.getInstance();
-
     final params = _generateCallKitParams(
+      id,
       otherUser,
       startedAt: startedAt,
       offer: offer,
@@ -70,11 +70,12 @@ class CallsNotificationsService {
   }
 
   CallKitParams _generateCallKitParams(
+    String id,
     UserDto otherUser, {
     required DateTime startedAt,
     RTCSessionDescription? offer,
   }) => CallKitParams(
-    id: otherUser.id.toString(),
+    id: id,
     nameCaller: otherUser.username,
     appName: 'KepLeoMax',
     avatar: otherUser.profileImage,
@@ -95,8 +96,9 @@ class CallsNotificationsService {
         AppConstants.callingTimeout.inMilliseconds -
         (DateTime.now().millisecondsSinceEpoch - startedAt.millisecondsSinceEpoch),
     extra: offer == null
-        ? {'other_user_id': otherUser.id}
+        ? {'id': id, 'other_user_id': otherUser.id}
         : {
+            'id': id,
             'other_user_id': otherUser.id,
             'offer_sdp': offer.sdp,
             'offer_type': offer.type,

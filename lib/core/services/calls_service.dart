@@ -1,15 +1,14 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
-import 'package:kepleomax/core/extensions/rtc_session_description_extension.dart';
 import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
+import 'package:kepleomax/core/network/websockets/models/rtc_models.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/services/calls_notifications_service.dart';
-import 'package:kepleomax/features/call/data/peer_connection_controller.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 
 class CallsService {
@@ -22,68 +21,66 @@ class CallsService {
   StreamSubscription<void>? _offersSub;
   StreamSubscription<void>? _callEndsSub;
   StreamSubscription<void>? _eventsSub;
-  RTCSessionDescription? _cachedOffer;
+  OfferUpdate? _cachedOffer;
   final _acceptCallController = StreamController<void>.broadcast();
 
   late UserRepository _userRepository;
   late RtcWebSocket _webSocket;
   late CallsApi _callsApi;
 
-  /// main methods
-  Future<void> _incomingCallNavigate(
-    int otherUserId,
-    RTCSessionDescription offer,
-  ) async {
-    if (await PeerConnectionControllerImpl.activeCallOtherUserId != null) {
-      unawaited(_callsApi.endCall(otherUserId: otherUserId));
-      await CallsNotificationsService.instance.hideNotification(
-        otherUserId.toString(),
-      );
-      return;
-    }
-
-    _cachedOffer = offer;
-
-    /// TODO getUserFromCacheOrApi
-    final otherUser = await _userRepository.getUser(userId: otherUserId);
-    mainNavigatorGlobalKey.currentState!.push(
-      CallPage(otherUser: otherUser, doCall: false, offer: offer),
-    );
-  }
-
   bool _callEndedByCurrentUser = true;
 
-  void _callEnded() {
-    print('KlmLogCall callEnded');
-    _callEndedByCurrentUser = false;
+  OfferUpdate? get cachedOffer => _cachedOffer;
 
-    /// it closes the page and CallBloc will call endCall()
-    mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
-  }
+  /// main methods
+  Future<void> _incomingCallNavigate(OfferUpdate offerUpdate) async {
+    print('KlmLog incomingCallNavigate');
+    // if (await PeerConnectionControllerImpl.activeCallOtherUserId != null) {
+    //   print('KlmLog activeCallOtherUserId != null, declineCall');
+    //   unawaited(_callsApi.endCall(id: offerUpdate.callId));
+    //   await CallsNotificationsService.instance.hideNotification(offerUpdate.callId);
+    //   return;
+    // }
 
-  Future<void> acceptCall(int otherUserId) async {
-    _cachedOffer = null;
+    _cachedOffer = offerUpdate;
 
-    await CallsNotificationsService.instance.hideNotification(
-      otherUserId.toString(),
+    /// TODO getUserFromCacheOrApi
+    final otherUser = await _userRepository.getUser(userId: offerUpdate.otherUserId);
+    mainNavigatorGlobalKey.currentState!.push(
+      CallPage(otherUser: otherUser, doCall: false, offer: offerUpdate.offer),
     );
   }
 
-  Future<void> endCall(int otherUserId) async {
-    print('KlmLogCall endCall, byCurrentUser: $_callEndedByCurrentUser');
+  void callEnded() {
+    print('KlmLog callEnded');
+    if (mainNavigatorGlobalKey.currentState!.lastIs<CallPage>()) {
+      _callEndedByCurrentUser = false;
+      mainNavigatorGlobalKey.currentState!.pop();
+    }
+
+    // /// it closes the page and CallBloc will call endCall()
+    // mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
+  }
+
+  Future<void> acceptCall() async {
+    print('KlmLog acceptCall');
+    await CallsNotificationsService.instance.hideNotification(cachedOffer!.callId);
+
+    _cachedOffer = null;
+  }
+
+  Future<void> endCall(String callId) async {
+    print('KlmLog endCall, byCurrentUser: $_callEndedByCurrentUser');
     if (_callEndedByCurrentUser) {
-      unawaited(_callsApi.endCall(otherUserId: otherUserId));
-      await CallsNotificationsService.instance.hideNotification(
-        otherUserId.toString(),
-      );
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      unawaited(_callsApi.endCall(id: callId, fcmToken: fcmToken));
+      await CallsNotificationsService.instance.hideNotification(callId);
     } else {
       _callEndedByCurrentUser = true; // reset to default
     }
 
     _cachedOffer = null;
   }
-
-  RTCSessionDescription? get cachedOffer => _cachedOffer;
 
   Stream<void> get acceptCallStream => _acceptCallController.stream;
 
@@ -98,7 +95,7 @@ class CallsService {
     _callsApi = callsApi;
 
     _callEndsSub = _webSocket.endCallStream.listen((update) {
-      _callEnded();
+      callEnded();
     });
 
     _eventsSub = FlutterCallkitIncoming.onEvent.listen(_handleCallKitEvent);
@@ -106,7 +103,7 @@ class CallsService {
 
   Future<void> _handleCallKitEvent(CallEvent? event) async {
     print(
-      'KlmLogCall event: ${event?.event}, ignore: ${CallsNotificationsService.instance.ignoreEvents}',
+      'KlmLog event: ${event?.event}, ignore: ${CallsNotificationsService.instance.ignoreEvents}',
     );
     if (event?.event == null || CallsNotificationsService.instance.ignoreEvents)
       return;
@@ -114,18 +111,12 @@ class CallsService {
     switch (event!.event) {
       case Event.actionCallIncoming:
         final extra = event.body['extra'] as Map<dynamic, dynamic>;
-        final offer = RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
-          extra,
-        );
-        await _incomingCallNavigate(extra['other_user_id'] as int, offer);
+        await _incomingCallNavigate(OfferUpdate.fromJson(extra));
         break;
       case Event.actionCallAccept:
         final extra = event.body['extra'] as Map<dynamic, dynamic>;
-        final offer = RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
-          extra,
-        );
         if (_cachedOffer == null) {
-          await _incomingCallNavigate(extra['other_user_id'] as int, offer);
+          await _incomingCallNavigate(OfferUpdate.fromJson(extra));
         }
         _acceptCallController.add(null);
         break;
@@ -153,11 +144,8 @@ class CallsService {
       if (calls is List && calls.isNotEmpty) {
         if (calls[0]['isAccepted'] == true) {
           final extra = calls[0]['extra'] as Map<dynamic, dynamic>;
-          final offer = RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
-            extra,
-          );
           if (_cachedOffer == null) {
-            await _incomingCallNavigate(extra['other_user_id'] as int, offer);
+            await _incomingCallNavigate(OfferUpdate.fromJson(extra));
           }
           _acceptCallController.add(null);
         }

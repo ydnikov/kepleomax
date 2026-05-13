@@ -30,6 +30,7 @@ abstract class CallStateMessage with _$CallStateMessage implements CallState {
 abstract class CallData with _$CallData implements CallState {
   const factory CallData({
     required User otherUser,
+    String? callId,
     @Default(RTCPeerConnectionState.RTCPeerConnectionStateDisconnected)
     RTCPeerConnectionState connectionStatus,
     RTCVideoRenderer? localRenderer,

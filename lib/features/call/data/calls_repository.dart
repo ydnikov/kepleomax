@@ -1,9 +1,14 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app_constants.dart';
+import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
+import 'package:kepleomax/core/network/apis/calls/calls_dtos.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/features/call/data/peer_connection_controller.dart';
 
 abstract class CallsRepository {
+  Future<String> requestCall({required int otherUserId});
+
   Future<void> doCall({
     required int otherUserId,
     required RTCVideoRenderer localRenderer,
@@ -11,6 +16,7 @@ abstract class CallsRepository {
   });
 
   Future<void> acceptCall({
+    required String callId,
     required int otherUserId,
     required RTCSessionDescription offer,
     required RTCVideoRenderer localRenderer,
@@ -24,21 +30,37 @@ abstract class CallsRepository {
 
 class CallsRepositoryImpl implements CallsRepository {
   CallsRepositoryImpl({
+    required CallsApi callsApi,
     required RtcWebSocket rtcWebSocket,
     required PeerConnectionController peerConnectionController,
-  }) : _webSocket = rtcWebSocket,
+  }) : _callsApi = callsApi,
+       _webSocket = rtcWebSocket,
        _peerConnection = peerConnectionController {
     _webSocket.candidatesStream.listen((candidate) {
       _peerConnection.addIceCandidate(candidate.candidate);
     });
   }
 
+  final CallsApi _callsApi;
   final RtcWebSocket _webSocket;
   final PeerConnectionController _peerConnection;
   int? _doCallLastInstanceId;
 
   @override
-  Future<void> doCall({
+  Future<String> requestCall({required int otherUserId}) async {
+    final result = await _callsApi.newCall(otherUserId: otherUserId);
+    if (result.response.statusCode != 200) {
+      throw InitCallException(
+        result.data.message ??
+            'Failed to init the new call: ${result.response.statusCode!}',
+      );
+    }
+
+    return result.data.data!.callId;
+  }
+
+  @override
+  Future<String> doCall({
     required int otherUserId,
     required RTCVideoRenderer localRenderer,
     required RTCVideoRenderer remoteRenderer,
@@ -73,10 +95,10 @@ class CallsRepositoryImpl implements CallsRepository {
       AppConstants.callingTimeout,
     );
     if (!_peerConnection.isActive) {
-      return;
+      throw Exception('PeerConnection is no longer active');
     } else if (_doCallLastInstanceId != currentInstanceId) {
       disposeConnection().ignore();
-      return;
+      throw Exception('New call was made');
     }
 
     await _peerConnection.setLocalDescription(offer);
@@ -86,15 +108,23 @@ class CallsRepositoryImpl implements CallsRepository {
     for (final candidate in iceCandidates) {
       _webSocket.sendIceCandidate(candidate, otherUserId);
     }
+
+    return answer.callId;
   }
 
   @override
   Future<void> acceptCall({
+    required String callId,
     required int otherUserId,
     required RTCSessionDescription offer,
     required RTCVideoRenderer localRenderer,
     required RTCVideoRenderer remoteRenderer,
   }) async {
+    final status = await _callsApi.getStatusOfCall(callId: callId);
+    if (status.data.status != CallStatus.pending) {
+      throw const InitCallException('Call is already accepted');
+    }
+
     await _peerConnection.init(
       otherUserId: otherUserId,
       onTrack: (track) {
@@ -110,7 +140,8 @@ class CallsRepositoryImpl implements CallsRepository {
 
     await _peerConnection.setRemoteDescription(offer);
     final answer = await _peerConnection.createAnswer();
-    _webSocket.sendAnswer(answer, otherUserId);
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    _webSocket.sendAnswer(answer, callId: callId, fcmToken: fcmToken);
     await _peerConnection.setLocalDescription(answer);
   }
 
@@ -123,4 +154,10 @@ class CallsRepositoryImpl implements CallsRepository {
   @override
   Stream<RTCPeerConnectionState> get connectionStream =>
       _peerConnection.connectionStream;
+}
+
+class InitCallException implements Exception {
+  const InitCallException(this.message);
+
+  final String message;
 }

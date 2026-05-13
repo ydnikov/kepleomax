@@ -219,10 +219,9 @@ List<_InitializationStep> _steps = [
         chatsLocalDataSource: dp.chatsLocalDataSource,
       ))
       ..callsRepositoryBuilder = (() => CallsRepositoryImpl(
+        callsApi: dp.callsApi,
         rtcWebSocket: dp.read<RtcWebSocket>(),
-        peerConnectionController: PeerConnectionControllerImpl(
-          prefs: dp.sharedPrefs,
-        ),
+        peerConnectionController: PeerConnectionControllerImpl(),
       ));
   }),
 

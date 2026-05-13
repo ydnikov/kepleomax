@@ -1,24 +1,35 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class OfferUpdate {
-  const OfferUpdate({required this.otherUserId, required this.offer});
+  const OfferUpdate({
+    required this.callId,
+    required this.otherUserId,
+    required this.offer,
+  });
 
-  factory OfferUpdate.fromJson(Map<String, dynamic> json) => OfferUpdate(
+  factory OfferUpdate.fromJson(Map<dynamic, dynamic> json) => OfferUpdate(
+    callId: json['id'] as String,
     otherUserId: json['other_user_id'] as int,
     offer: RTCSessionDescription(
-      json['offer']['sdp'] as String?,
-      json['offer']['type'] as String?,
+      (json['offer_sdp'] as String?) ?? json['offer']['sdp'] as String?,
+      (json['offer_type'] as String?) ?? json['offer']['type'] as String?,
     ),
   );
 
+  final String callId;
   final int otherUserId;
   final RTCSessionDescription offer;
 }
 
 class AnswerUpdate {
-  const AnswerUpdate({required this.otherUserId, required this.answer});
+  const AnswerUpdate({
+    required this.callId,
+    required this.otherUserId,
+    required this.answer,
+  });
 
   factory AnswerUpdate.fromJson(Map<String, dynamic> json) => AnswerUpdate(
+    callId: json['id'] as String,
     otherUserId: json['other_user_id'] as int,
     answer: RTCSessionDescription(
       json['answer']['sdp'] as String?,
@@ -26,6 +37,7 @@ class AnswerUpdate {
     ),
   );
 
+  final String callId;
   final int otherUserId;
   final RTCSessionDescription answer;
 }

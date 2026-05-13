@@ -110,6 +110,8 @@ class AppNavigatorState extends State<AppNavigator> with WidgetsBindingObserver 
     }
   }
 
+  bool lastIs<T extends AppPage>() => state.last is T;
+
   void popAll() => change((state) {
     return [state[0]];
   });
@@ -136,7 +138,7 @@ class AppNavigatorState extends State<AppNavigator> with WidgetsBindingObserver 
 
   Future<void> showModalBottomSheet(BuildContext context, Widget bottomSheet) async {
     _isDialogOpened = true;
-    await material.showModalBottomSheet(
+    await material.showModalBottomSheet<void>(
       context: context,
       useRootNavigator: true,
       backgroundColor: Colors.white,

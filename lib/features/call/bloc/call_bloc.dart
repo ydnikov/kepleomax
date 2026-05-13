@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
@@ -76,7 +77,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   // CameraStatus _lastLocalCameraStatus = CameraStatus.back;
 
   Future<void> _onInit(CallEventInit event, Emitter<CallState> emit) async {
-    _data = _data.copyWith(otherUser: event.otherUser);
+    _data = _data.copyWith(
+      otherUser: event.otherUser,
+      callId: CallsService.instance.cachedOffer?.callId,
+    );
     emit(CallStateBase(data: _data));
 
     if (event.doCall) add(CallEventCall(otherUser: event.otherUser));
@@ -89,6 +93,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
       _data = _data.copyWith(localRenderer: _localRenderer);
       emit(CallStateBase(data: _data));
+
+      final callId = await _callsRepository.requestCall(
+        otherUserId: event.otherUser.id,
+      );
+      _data = _data.copyWith(callId: callId);
 
       await _callsRepository.doCall(
         otherUserId: event.otherUser.id,
@@ -103,6 +112,13 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         callStartedTime: DateTime.now(),
       );
       emit(CallStateBase(data: _data));
+    } on InitCallException catch (e, st) {
+      logger.e(e, stackTrace: st);
+
+      unawaited(
+        Fluttertoast.showToast(msg: e.message, toastLength: Toast.LENGTH_LONG),
+      );
+      add(const _CallEventExit());
     } catch (e, st) {
       logger.e(e, stackTrace: st);
 
@@ -137,8 +153,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       _remoteRenderer = await _setUpRemoteRenderer();
 
       await _callsRepository.acceptCall(
+        callId: _data.callId!,
         otherUserId: _data.otherUser.id,
-        offer: CallsService.instance.cachedOffer!,
+        offer: CallsService.instance.cachedOffer!.offer,
         localRenderer: _localRenderer!,
         remoteRenderer: _remoteRenderer!,
       );
@@ -151,7 +168,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       );
       emit(CallStateBase(data: _data));
 
-      unawaited(CallsService.instance.acceptCall(_data.otherUser.id));
+      unawaited(CallsService.instance.acceptCall());
     } catch (e, st) {
       logger.e(e, stackTrace: st);
 
@@ -270,7 +287,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         ..stop();
     });
 
-    CallsService.instance.endCall(_data.otherUser.id);
+    if (_data.callId != null) {
+      CallsService.instance.endCall(_data.callId!);
+    } else {
+      logger.i('close callBloc, _data.callId == null');
+    }
 
     return super.close();
   }

@@ -741,7 +741,7 @@ as bool,
 /// @nodoc
 mixin _$CallData {
 
- User get otherUser; RTCPeerConnectionState get connectionStatus; RTCVideoRenderer? get localRenderer; RTCVideoRenderer? get remoteRenderer; DateTime? get callStartedTime; CameraStatus get localCameraStatus; CameraStatus get remoteCameraStatus; bool get isLocalMicrophoneOn; bool get isCallAccepted;
+ User get otherUser; String? get callId; RTCPeerConnectionState get connectionStatus; RTCVideoRenderer? get localRenderer; RTCVideoRenderer? get remoteRenderer; DateTime? get callStartedTime; CameraStatus get localCameraStatus; CameraStatus get remoteCameraStatus; bool get isLocalMicrophoneOn; bool get isCallAccepted;
 /// Create a copy of CallData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -752,16 +752,16 @@ $CallDataCopyWith<CallData> get copyWith => _$CallDataCopyWithImpl<CallData>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallData&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.connectionStatus, connectionStatus) || other.connectionStatus == connectionStatus)&&(identical(other.localRenderer, localRenderer) || other.localRenderer == localRenderer)&&(identical(other.remoteRenderer, remoteRenderer) || other.remoteRenderer == remoteRenderer)&&(identical(other.callStartedTime, callStartedTime) || other.callStartedTime == callStartedTime)&&(identical(other.localCameraStatus, localCameraStatus) || other.localCameraStatus == localCameraStatus)&&(identical(other.remoteCameraStatus, remoteCameraStatus) || other.remoteCameraStatus == remoteCameraStatus)&&(identical(other.isLocalMicrophoneOn, isLocalMicrophoneOn) || other.isLocalMicrophoneOn == isLocalMicrophoneOn)&&(identical(other.isCallAccepted, isCallAccepted) || other.isCallAccepted == isCallAccepted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallData&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.callId, callId) || other.callId == callId)&&(identical(other.connectionStatus, connectionStatus) || other.connectionStatus == connectionStatus)&&(identical(other.localRenderer, localRenderer) || other.localRenderer == localRenderer)&&(identical(other.remoteRenderer, remoteRenderer) || other.remoteRenderer == remoteRenderer)&&(identical(other.callStartedTime, callStartedTime) || other.callStartedTime == callStartedTime)&&(identical(other.localCameraStatus, localCameraStatus) || other.localCameraStatus == localCameraStatus)&&(identical(other.remoteCameraStatus, remoteCameraStatus) || other.remoteCameraStatus == remoteCameraStatus)&&(identical(other.isLocalMicrophoneOn, isLocalMicrophoneOn) || other.isLocalMicrophoneOn == isLocalMicrophoneOn)&&(identical(other.isCallAccepted, isCallAccepted) || other.isCallAccepted == isCallAccepted));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,otherUser,connectionStatus,localRenderer,remoteRenderer,callStartedTime,localCameraStatus,remoteCameraStatus,isLocalMicrophoneOn,isCallAccepted);
+int get hashCode => Object.hash(runtimeType,otherUser,callId,connectionStatus,localRenderer,remoteRenderer,callStartedTime,localCameraStatus,remoteCameraStatus,isLocalMicrophoneOn,isCallAccepted);
 
 @override
 String toString() {
-  return 'CallData(otherUser: $otherUser, connectionStatus: $connectionStatus, localRenderer: $localRenderer, remoteRenderer: $remoteRenderer, callStartedTime: $callStartedTime, localCameraStatus: $localCameraStatus, remoteCameraStatus: $remoteCameraStatus, isLocalMicrophoneOn: $isLocalMicrophoneOn, isCallAccepted: $isCallAccepted)';
+  return 'CallData(otherUser: $otherUser, callId: $callId, connectionStatus: $connectionStatus, localRenderer: $localRenderer, remoteRenderer: $remoteRenderer, callStartedTime: $callStartedTime, localCameraStatus: $localCameraStatus, remoteCameraStatus: $remoteCameraStatus, isLocalMicrophoneOn: $isLocalMicrophoneOn, isCallAccepted: $isCallAccepted)';
 }
 
 
@@ -772,7 +772,7 @@ abstract mixin class $CallDataCopyWith<$Res>  {
   factory $CallDataCopyWith(CallData value, $Res Function(CallData) _then) = _$CallDataCopyWithImpl;
 @useResult
 $Res call({
- User otherUser, RTCPeerConnectionState connectionStatus, RTCVideoRenderer? localRenderer, RTCVideoRenderer? remoteRenderer, DateTime? callStartedTime, CameraStatus localCameraStatus, CameraStatus remoteCameraStatus, bool isLocalMicrophoneOn, bool isCallAccepted
+ User otherUser, String? callId, RTCPeerConnectionState connectionStatus, RTCVideoRenderer? localRenderer, RTCVideoRenderer? remoteRenderer, DateTime? callStartedTime, CameraStatus localCameraStatus, CameraStatus remoteCameraStatus, bool isLocalMicrophoneOn, bool isCallAccepted
 });
 
 
@@ -789,10 +789,11 @@ class _$CallDataCopyWithImpl<$Res>
 
 /// Create a copy of CallData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? otherUser = null,Object? connectionStatus = null,Object? localRenderer = freezed,Object? remoteRenderer = freezed,Object? callStartedTime = freezed,Object? localCameraStatus = null,Object? remoteCameraStatus = null,Object? isLocalMicrophoneOn = null,Object? isCallAccepted = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? otherUser = null,Object? callId = freezed,Object? connectionStatus = null,Object? localRenderer = freezed,Object? remoteRenderer = freezed,Object? callStartedTime = freezed,Object? localCameraStatus = null,Object? remoteCameraStatus = null,Object? isLocalMicrophoneOn = null,Object? isCallAccepted = null,}) {
   return _then(_self.copyWith(
 otherUser: null == otherUser ? _self.otherUser : otherUser // ignore: cast_nullable_to_non_nullable
-as User,connectionStatus: null == connectionStatus ? _self.connectionStatus : connectionStatus // ignore: cast_nullable_to_non_nullable
+as User,callId: freezed == callId ? _self.callId : callId // ignore: cast_nullable_to_non_nullable
+as String?,connectionStatus: null == connectionStatus ? _self.connectionStatus : connectionStatus // ignore: cast_nullable_to_non_nullable
 as RTCPeerConnectionState,localRenderer: freezed == localRenderer ? _self.localRenderer : localRenderer // ignore: cast_nullable_to_non_nullable
 as RTCVideoRenderer?,remoteRenderer: freezed == remoteRenderer ? _self.remoteRenderer : remoteRenderer // ignore: cast_nullable_to_non_nullable
 as RTCVideoRenderer?,callStartedTime: freezed == callStartedTime ? _self.callStartedTime : callStartedTime // ignore: cast_nullable_to_non_nullable
@@ -894,10 +895,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( User otherUser,  RTCPeerConnectionState connectionStatus,  RTCVideoRenderer? localRenderer,  RTCVideoRenderer? remoteRenderer,  DateTime? callStartedTime,  CameraStatus localCameraStatus,  CameraStatus remoteCameraStatus,  bool isLocalMicrophoneOn,  bool isCallAccepted)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( User otherUser,  String? callId,  RTCPeerConnectionState connectionStatus,  RTCVideoRenderer? localRenderer,  RTCVideoRenderer? remoteRenderer,  DateTime? callStartedTime,  CameraStatus localCameraStatus,  CameraStatus remoteCameraStatus,  bool isLocalMicrophoneOn,  bool isCallAccepted)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CallData() when $default != null:
-return $default(_that.otherUser,_that.connectionStatus,_that.localRenderer,_that.remoteRenderer,_that.callStartedTime,_that.localCameraStatus,_that.remoteCameraStatus,_that.isLocalMicrophoneOn,_that.isCallAccepted);case _:
+return $default(_that.otherUser,_that.callId,_that.connectionStatus,_that.localRenderer,_that.remoteRenderer,_that.callStartedTime,_that.localCameraStatus,_that.remoteCameraStatus,_that.isLocalMicrophoneOn,_that.isCallAccepted);case _:
   return orElse();
 
 }
@@ -915,10 +916,10 @@ return $default(_that.otherUser,_that.connectionStatus,_that.localRenderer,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( User otherUser,  RTCPeerConnectionState connectionStatus,  RTCVideoRenderer? localRenderer,  RTCVideoRenderer? remoteRenderer,  DateTime? callStartedTime,  CameraStatus localCameraStatus,  CameraStatus remoteCameraStatus,  bool isLocalMicrophoneOn,  bool isCallAccepted)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( User otherUser,  String? callId,  RTCPeerConnectionState connectionStatus,  RTCVideoRenderer? localRenderer,  RTCVideoRenderer? remoteRenderer,  DateTime? callStartedTime,  CameraStatus localCameraStatus,  CameraStatus remoteCameraStatus,  bool isLocalMicrophoneOn,  bool isCallAccepted)  $default,) {final _that = this;
 switch (_that) {
 case _CallData():
-return $default(_that.otherUser,_that.connectionStatus,_that.localRenderer,_that.remoteRenderer,_that.callStartedTime,_that.localCameraStatus,_that.remoteCameraStatus,_that.isLocalMicrophoneOn,_that.isCallAccepted);case _:
+return $default(_that.otherUser,_that.callId,_that.connectionStatus,_that.localRenderer,_that.remoteRenderer,_that.callStartedTime,_that.localCameraStatus,_that.remoteCameraStatus,_that.isLocalMicrophoneOn,_that.isCallAccepted);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -935,10 +936,10 @@ return $default(_that.otherUser,_that.connectionStatus,_that.localRenderer,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( User otherUser,  RTCPeerConnectionState connectionStatus,  RTCVideoRenderer? localRenderer,  RTCVideoRenderer? remoteRenderer,  DateTime? callStartedTime,  CameraStatus localCameraStatus,  CameraStatus remoteCameraStatus,  bool isLocalMicrophoneOn,  bool isCallAccepted)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( User otherUser,  String? callId,  RTCPeerConnectionState connectionStatus,  RTCVideoRenderer? localRenderer,  RTCVideoRenderer? remoteRenderer,  DateTime? callStartedTime,  CameraStatus localCameraStatus,  CameraStatus remoteCameraStatus,  bool isLocalMicrophoneOn,  bool isCallAccepted)?  $default,) {final _that = this;
 switch (_that) {
 case _CallData() when $default != null:
-return $default(_that.otherUser,_that.connectionStatus,_that.localRenderer,_that.remoteRenderer,_that.callStartedTime,_that.localCameraStatus,_that.remoteCameraStatus,_that.isLocalMicrophoneOn,_that.isCallAccepted);case _:
+return $default(_that.otherUser,_that.callId,_that.connectionStatus,_that.localRenderer,_that.remoteRenderer,_that.callStartedTime,_that.localCameraStatus,_that.remoteCameraStatus,_that.isLocalMicrophoneOn,_that.isCallAccepted);case _:
   return null;
 
 }
@@ -950,10 +951,11 @@ return $default(_that.otherUser,_that.connectionStatus,_that.localRenderer,_that
 
 
 class _CallData implements CallData {
-  const _CallData({required this.otherUser, this.connectionStatus = RTCPeerConnectionState.RTCPeerConnectionStateDisconnected, this.localRenderer, this.remoteRenderer, this.callStartedTime, this.localCameraStatus = CameraStatus.back, this.remoteCameraStatus = CameraStatus.back, this.isLocalMicrophoneOn = true, this.isCallAccepted = false});
+  const _CallData({required this.otherUser, this.callId, this.connectionStatus = RTCPeerConnectionState.RTCPeerConnectionStateDisconnected, this.localRenderer, this.remoteRenderer, this.callStartedTime, this.localCameraStatus = CameraStatus.back, this.remoteCameraStatus = CameraStatus.back, this.isLocalMicrophoneOn = true, this.isCallAccepted = false});
   
 
 @override final  User otherUser;
+@override final  String? callId;
 @override@JsonKey() final  RTCPeerConnectionState connectionStatus;
 @override final  RTCVideoRenderer? localRenderer;
 @override final  RTCVideoRenderer? remoteRenderer;
@@ -973,16 +975,16 @@ _$CallDataCopyWith<_CallData> get copyWith => __$CallDataCopyWithImpl<_CallData>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CallData&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.connectionStatus, connectionStatus) || other.connectionStatus == connectionStatus)&&(identical(other.localRenderer, localRenderer) || other.localRenderer == localRenderer)&&(identical(other.remoteRenderer, remoteRenderer) || other.remoteRenderer == remoteRenderer)&&(identical(other.callStartedTime, callStartedTime) || other.callStartedTime == callStartedTime)&&(identical(other.localCameraStatus, localCameraStatus) || other.localCameraStatus == localCameraStatus)&&(identical(other.remoteCameraStatus, remoteCameraStatus) || other.remoteCameraStatus == remoteCameraStatus)&&(identical(other.isLocalMicrophoneOn, isLocalMicrophoneOn) || other.isLocalMicrophoneOn == isLocalMicrophoneOn)&&(identical(other.isCallAccepted, isCallAccepted) || other.isCallAccepted == isCallAccepted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CallData&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.callId, callId) || other.callId == callId)&&(identical(other.connectionStatus, connectionStatus) || other.connectionStatus == connectionStatus)&&(identical(other.localRenderer, localRenderer) || other.localRenderer == localRenderer)&&(identical(other.remoteRenderer, remoteRenderer) || other.remoteRenderer == remoteRenderer)&&(identical(other.callStartedTime, callStartedTime) || other.callStartedTime == callStartedTime)&&(identical(other.localCameraStatus, localCameraStatus) || other.localCameraStatus == localCameraStatus)&&(identical(other.remoteCameraStatus, remoteCameraStatus) || other.remoteCameraStatus == remoteCameraStatus)&&(identical(other.isLocalMicrophoneOn, isLocalMicrophoneOn) || other.isLocalMicrophoneOn == isLocalMicrophoneOn)&&(identical(other.isCallAccepted, isCallAccepted) || other.isCallAccepted == isCallAccepted));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,otherUser,connectionStatus,localRenderer,remoteRenderer,callStartedTime,localCameraStatus,remoteCameraStatus,isLocalMicrophoneOn,isCallAccepted);
+int get hashCode => Object.hash(runtimeType,otherUser,callId,connectionStatus,localRenderer,remoteRenderer,callStartedTime,localCameraStatus,remoteCameraStatus,isLocalMicrophoneOn,isCallAccepted);
 
 @override
 String toString() {
-  return 'CallData(otherUser: $otherUser, connectionStatus: $connectionStatus, localRenderer: $localRenderer, remoteRenderer: $remoteRenderer, callStartedTime: $callStartedTime, localCameraStatus: $localCameraStatus, remoteCameraStatus: $remoteCameraStatus, isLocalMicrophoneOn: $isLocalMicrophoneOn, isCallAccepted: $isCallAccepted)';
+  return 'CallData(otherUser: $otherUser, callId: $callId, connectionStatus: $connectionStatus, localRenderer: $localRenderer, remoteRenderer: $remoteRenderer, callStartedTime: $callStartedTime, localCameraStatus: $localCameraStatus, remoteCameraStatus: $remoteCameraStatus, isLocalMicrophoneOn: $isLocalMicrophoneOn, isCallAccepted: $isCallAccepted)';
 }
 
 
@@ -993,7 +995,7 @@ abstract mixin class _$CallDataCopyWith<$Res> implements $CallDataCopyWith<$Res>
   factory _$CallDataCopyWith(_CallData value, $Res Function(_CallData) _then) = __$CallDataCopyWithImpl;
 @override @useResult
 $Res call({
- User otherUser, RTCPeerConnectionState connectionStatus, RTCVideoRenderer? localRenderer, RTCVideoRenderer? remoteRenderer, DateTime? callStartedTime, CameraStatus localCameraStatus, CameraStatus remoteCameraStatus, bool isLocalMicrophoneOn, bool isCallAccepted
+ User otherUser, String? callId, RTCPeerConnectionState connectionStatus, RTCVideoRenderer? localRenderer, RTCVideoRenderer? remoteRenderer, DateTime? callStartedTime, CameraStatus localCameraStatus, CameraStatus remoteCameraStatus, bool isLocalMicrophoneOn, bool isCallAccepted
 });
 
 
@@ -1010,10 +1012,11 @@ class __$CallDataCopyWithImpl<$Res>
 
 /// Create a copy of CallData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? otherUser = null,Object? connectionStatus = null,Object? localRenderer = freezed,Object? remoteRenderer = freezed,Object? callStartedTime = freezed,Object? localCameraStatus = null,Object? remoteCameraStatus = null,Object? isLocalMicrophoneOn = null,Object? isCallAccepted = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? otherUser = null,Object? callId = freezed,Object? connectionStatus = null,Object? localRenderer = freezed,Object? remoteRenderer = freezed,Object? callStartedTime = freezed,Object? localCameraStatus = null,Object? remoteCameraStatus = null,Object? isLocalMicrophoneOn = null,Object? isCallAccepted = null,}) {
   return _then(_CallData(
 otherUser: null == otherUser ? _self.otherUser : otherUser // ignore: cast_nullable_to_non_nullable
-as User,connectionStatus: null == connectionStatus ? _self.connectionStatus : connectionStatus // ignore: cast_nullable_to_non_nullable
+as User,callId: freezed == callId ? _self.callId : callId // ignore: cast_nullable_to_non_nullable
+as String?,connectionStatus: null == connectionStatus ? _self.connectionStatus : connectionStatus // ignore: cast_nullable_to_non_nullable
 as RTCPeerConnectionState,localRenderer: freezed == localRenderer ? _self.localRenderer : localRenderer // ignore: cast_nullable_to_non_nullable
 as RTCVideoRenderer?,remoteRenderer: freezed == remoteRenderer ? _self.remoteRenderer : remoteRenderer // ignore: cast_nullable_to_non_nullable
 as RTCVideoRenderer?,callStartedTime: freezed == callStartedTime ? _self.callStartedTime : callStartedTime // ignore: cast_nullable_to_non_nullable
