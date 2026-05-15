@@ -45,15 +45,28 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
       await dispose();
     }
 
-    final config = {
+    final config = <String, dynamic>{
       'sdpSemantics': 'unified-plan',
+      'iceTransportPolicy': 'relay',
       'iceServers': [
-        {'urls': 'stun:stun.l.google.com:19302'},
+        {
+          'urls': ['stun:stun.l.google.com:19302'],
+        },
+        {
+          'urls': [
+            'turn:178.141.12.67:3478?transport=udp',
+            'turn:178.141.12.67:3478?transport=tcp',
+            'turn:178.141.12.67:5349'],
+          'username': 'bober',
+          'credential': 'kplmx9174',
+        },
       ],
     };
     _peerConnection = await createPeerConnection(config);
+    print('KlmLog createPeerConnection done');
 
     _peerConnection!.onTrack = (track) async {
+      print('KlmLog2 onTrack');
       print('KlmLog newTrack: ${track.track.kind}');
       onTrack(track);
     };

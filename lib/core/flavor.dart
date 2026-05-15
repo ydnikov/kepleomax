@@ -15,16 +15,16 @@ class Flavor {
        assert(imageUrl.isNotEmpty, "imageUrl can't be empty");
 
   factory Flavor.release() => Flavor(
-    baseUrl: 'http://127.0.0.1:13000',
-    imageUrl: 'http://10.0.2.2:13000/api/files/',
+    baseUrl: 'http://178.141.34.87',
+    imageUrl: 'http://178.141.34.87/api/files/',
     type: FlavorType.release,
     constants: AppConstantsType.release(),
     versionName: ''
   );
 
   factory Flavor.devPublic() => Flavor(
-    baseUrl: 'http://34.118.78.192:13000',
-    imageUrl: 'http://34.118.78.192:13000/api/files/',
+    baseUrl: 'http://178.141.12.67',
+    imageUrl: 'http://178.141.12.67/api/files/',
     type: FlavorType.develop,
     constants: AppConstantsType.develop(),
     versionName: 'dev-pub'

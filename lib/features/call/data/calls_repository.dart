@@ -73,11 +73,13 @@ class CallsRepositoryImpl implements CallsRepository {
     await _peerConnection.init(
       otherUserId: otherUserId,
       onTrack: (track) {
+        print('KlmLog2 onTrack');
         if (track.track.kind == 'video') {
           remoteRenderer.srcObject = track.streams[0];
         }
       },
       onIceCandidate: (candidate) {
+        print('KlmLog2 onIceCandidate');
         if (isRemoteDescriptionSet) {
           _webSocket.sendIceCandidate(candidate, otherUserId);
         } else {
@@ -128,12 +130,15 @@ class CallsRepositoryImpl implements CallsRepository {
     await _peerConnection.init(
       otherUserId: otherUserId,
       onTrack: (track) {
+        print('KlmLog2 onTrack');
         if (track.track.kind == 'video') {
           remoteRenderer.srcObject = track.streams[0];
         }
       },
-      onIceCandidate: (candidate) =>
-          _webSocket.sendIceCandidate(candidate, otherUserId),
+      onIceCandidate: (candidate) {
+        print('KlmLog2 onIceCandidate');
+        _webSocket.sendIceCandidate(candidate, otherUserId);
+      },
     );
 
     await _peerConnection.addTracks(localRenderer.srcObject!);
