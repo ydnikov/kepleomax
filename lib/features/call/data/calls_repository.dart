@@ -37,6 +37,7 @@ class CallsRepositoryImpl implements CallsRepository {
        _webSocket = rtcWebSocket,
        _peerConnection = peerConnectionController {
     _webSocket.candidatesStream.listen((candidate) {
+      /// TODO check callId
       _peerConnection.addIceCandidate(candidate.candidate);
     });
   }
@@ -72,7 +73,6 @@ class CallsRepositoryImpl implements CallsRepository {
     final iceCandidates = <RTCIceCandidate>[];
     bool isRemoteDescriptionSet = false;
     await _peerConnection.init(
-      otherUserId: otherUserId,
       onTrack: (track) {
         if (track.track.kind == 'video') {
           remoteRenderer.srcObject = track.streams[0];
@@ -128,7 +128,6 @@ class CallsRepositoryImpl implements CallsRepository {
     }
 
     await _peerConnection.init(
-      otherUserId: otherUserId,
       onTrack: (track) {
         if (track.track.kind == 'video') {
           remoteRenderer.srcObject = track.streams[0];

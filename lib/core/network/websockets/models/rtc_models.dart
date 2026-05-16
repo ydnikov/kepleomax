@@ -44,10 +44,10 @@ class AnswerUpdate {
 }
 
 class CandidateUpdate {
-  const CandidateUpdate({required this.otherUserId, required this.candidate});
+  const CandidateUpdate({required this.callId, required this.candidate});
 
   factory CandidateUpdate.fromJson(Map<String, dynamic> json) => CandidateUpdate(
-    otherUserId: json['other_user_id'] as int,
+    callId: json['call_id'] as String,
     candidate: RTCIceCandidate(
       json['candidate']['candidate'] as String?,
       json['candidate']['sdpMid'] as String?,
@@ -55,7 +55,7 @@ class CandidateUpdate {
     ),
   );
 
-  final int otherUserId;
+  final String callId;
   final RTCIceCandidate candidate;
 }
 

@@ -4,7 +4,6 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 abstract class PeerConnectionController {
   Future<void> init({
-    required int otherUserId,
     required void Function(RTCTrackEvent) onTrack,
     required void Function(RTCIceCandidate) onIceCandidate,
   });
@@ -37,7 +36,6 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
 
   @override
   Future<void> init({
-    required int otherUserId,
     required void Function(RTCTrackEvent) onTrack,
     required void Function(RTCIceCandidate) onIceCandidate,
   }) async {
@@ -62,10 +60,8 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
       ],
     };
     _peerConnection = await createPeerConnection(config);
-    print('KlmLog createPeerConnection done');
 
     _peerConnection!.onTrack = (track) async {
-      print('KlmLog2 onTrack');
       print('KlmLog newTrack: ${track.track.kind}');
       onTrack(track);
     };

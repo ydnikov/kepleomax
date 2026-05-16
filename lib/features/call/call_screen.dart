@@ -71,8 +71,9 @@ class _CallScreenState extends State<CallScreen> {
 
           final oldData = oldState.data;
           final newData = newState.data;
-          return oldData.remoteRenderer != newData.remoteRenderer ||
-              oldData.remoteCameraStatus != newData.remoteCameraStatus;
+          return oldData.isRemoteCameraAvailable !=
+                  newData.isRemoteCameraAvailable ||
+              oldData.isLocalCameraAvailable != newData.isLocalCameraAvailable;
         },
         builder: (context, state) {
           return AnnotatedRegion(
@@ -84,8 +85,8 @@ class _CallScreenState extends State<CallScreen> {
             child: Scaffold(
               backgroundColor:
                   state is CallStateBase &&
-                      state.data.remoteRenderer != null &&
-                      state.data.remoteCameraStatus.isOn
+                      (state.data.isRemoteCameraAvailable ||
+                          state.data.isLocalCameraAvailable)
                   ? const Color(0xFF121212)
                   : Colors.blue,
               //appBar: _AppBar(),
@@ -108,6 +109,8 @@ class _Body extends StatefulWidget {
 }
 
 class _BodyState extends State<_Body> {
+  bool _camerasSwitched = false;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -117,29 +120,53 @@ class _BodyState extends State<_Body> {
 
           if (oldState is! CallStateBase) return true;
 
+          final localAvailable = newState.data.isLocalCameraAvailable;
+          final remoteAvailable = newState.data.isRemoteCameraAvailable;
+          if (localAvailable && !remoteAvailable && !_camerasSwitched) {
+            _camerasSwitched = true;
+          } else if (!localAvailable && remoteAvailable && _camerasSwitched) {
+            _camerasSwitched = false;
+          }
           return oldState.data != newState.data;
         },
         builder: (context, state) {
           if (state is! CallStateBase) return const SizedBox();
           final data = state.data;
 
-          return Stack(
-            children: [
-              if (data.remoteRenderer != null && data.remoteCameraStatus.isOn)
-                RTCVideoView(
+          final RTCVideoView? remoteView = data.isRemoteCameraAvailable
+              ? RTCVideoView(
                   data.remoteRenderer!,
                   mirror: data.remoteCameraStatus.isFront,
-                ),
-              if (data.localRenderer != null && data.localCameraStatus.isOn)
+                )
+              : null;
+
+          final RTCVideoView? localView = data.isLocalCameraAvailable
+              ? RTCVideoView(
+                  data.localRenderer!,
+                  mirror: data.localCameraStatus.isFront,
+                )
+              : null;
+
+          return Stack(
+            children: [
+              if ((!_camerasSwitched && data.isRemoteCameraAvailable) ||
+                  (_camerasSwitched && data.isLocalCameraAvailable))
+                _camerasSwitched ? localView! : remoteView!,
+              if ((!_camerasSwitched && data.isLocalCameraAvailable) ||
+                  (_camerasSwitched && data.isRemoteCameraAvailable))
                 Positioned(
                   right: 10,
                   bottom: 150,
-                  child: SizedBox(
-                    height: 160 * 1.3,
-                    width: 90 * 1.3,
-                    child: RTCVideoView(
-                      data.localRenderer!,
-                      mirror: data.localCameraStatus.isFront,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _camerasSwitched = !_camerasSwitched;
+                      });
+                    },
+                    child: SizedBox(
+                      height: 160 * 1.3,
+                      width: 90 * 1.3,
+                      child: _camerasSwitched ? remoteView : localView,
                     ),
                   ),
                 ),
@@ -147,7 +174,7 @@ class _BodyState extends State<_Body> {
               Column(
                 children: [
                   const SizedBox(height: 6),
-                  if (data.remoteRenderer != null && data.remoteCameraStatus.isOn)
+                  if (data.isRemoteCameraAvailable || data.isLocalCameraAvailable)
                     Text(
                       data.connectionStatus.toUserString(),
                       textAlign: TextAlign.center,
@@ -157,8 +184,8 @@ class _BodyState extends State<_Body> {
                         color: Colors.grey,
                       ),
                     ),
-                  if (data.remoteRenderer == null ||
-                      !data.remoteCameraStatus.isOn) ...[
+                  if (!data.isRemoteCameraAvailable &&
+                      !data.isLocalCameraAvailable) ...[
                     const SizedBox(height: 80),
                     UserImage(user: data.otherUser, size: 200),
                     const SizedBox(height: 10),

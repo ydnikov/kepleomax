@@ -42,10 +42,17 @@ abstract class CallData with _$CallData implements CallState {
     @Default(false) bool isCallAccepted,
   }) = _CallData;
 
+  const CallData._();
+
   factory CallData.initial() => CallData(
     otherUser: User.loading(),
     connectionStatus: RTCPeerConnectionState.RTCPeerConnectionStateClosed,
   );
+
+  bool get isLocalCameraAvailable => localRenderer != null && localCameraStatus.isOn;
+
+  bool get isRemoteCameraAvailable =>
+      remoteRenderer != null && remoteCameraStatus.isOn;
 }
 
 enum CameraStatus {
