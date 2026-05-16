@@ -14,6 +14,11 @@ abstract class CallsApi {
     @Query('call_id') required String callId,
   });
 
+  @GET('/accept')
+  Future<HttpResponse<void>> acceptCall({
+    @Query('call_id') required String callId,
+  });
+
   @GET('/newCall')
   Future<HttpResponse<NewCallDto>> newCall({
     @Query('other_user_id') required int otherUserId,

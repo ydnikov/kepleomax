@@ -7,7 +7,7 @@ import 'package:kepleomax/features/call/bloc/call_state.dart';
 
 abstract class RtcWebSocket {
   /// actions
-  void sendOffer(RTCSessionDescription offer, int toUserId);
+  void sendOffer(RTCSessionDescription offer, String callId);
 
   void sendAnswer(
     RTCSessionDescription answer, {
@@ -15,9 +15,9 @@ abstract class RtcWebSocket {
     required String? fcmToken,
   });
 
-  void sendIceCandidate(RTCIceCandidate candidate, int toUserId);
+  void sendIceCandidate(RTCIceCandidate candidate, String callId);
 
-  void sendCameraStatus(CameraStatus status, int toUserId);
+  void sendCameraStatus(CameraStatus status, String callId);
 
   Future<void> dispose();
 
@@ -28,7 +28,7 @@ abstract class RtcWebSocket {
 
   Stream<EndCallUpdate> get endCallStream;
 
-  Stream<CameraStatus> get remoteCameraStatusStream;
+  Stream<CameraStatusUpdate> get remoteCameraStatusStream;
 }
 
 class RtcWebSocketImpl implements RtcWebSocket {
@@ -46,9 +46,7 @@ class RtcWebSocketImpl implements RtcWebSocket {
           break;
 
         case 'webrtc_camera_status':
-          _remoteCameraStatusController.add(
-            CameraStatus.fromJson(data['status'] as String),
-          );
+          _remoteCameraStatusController.add(CameraStatusUpdate.fromJson(data));
           break;
 
         case 'webrtc_end_call':
@@ -64,12 +62,13 @@ class RtcWebSocketImpl implements RtcWebSocket {
   final _answersController = StreamController<AnswerUpdate>.broadcast();
   final _candidatesController = StreamController<CandidateUpdate>.broadcast();
   final _endCallController = StreamController<EndCallUpdate>.broadcast();
-  final _remoteCameraStatusController = StreamController<CameraStatus>.broadcast();
+  final _remoteCameraStatusController =
+      StreamController<CameraStatusUpdate>.broadcast();
 
   @override
-  void sendOffer(RTCSessionDescription offer, int toUserId) {
+  void sendOffer(RTCSessionDescription offer, String callId) {
     _webSocket.emit('webrtc_send_offer', {
-      'to_user_id': toUserId,
+      'call_id': callId,
       'offer': offer.toMap(),
     });
   }
@@ -88,18 +87,17 @@ class RtcWebSocketImpl implements RtcWebSocket {
   }
 
   @override
-  void sendIceCandidate(RTCIceCandidate candidate, int toUserId) {
+  void sendIceCandidate(RTCIceCandidate candidate, String callId) {
     _webSocket.emit('webrtc_send_ice_candidate', {
-      'to_user_id': toUserId,
+      'call_id': callId,
       'candidate': candidate.toMap(),
     });
   }
 
-  // TODO maybe send callId here?
   @override
-  void sendCameraStatus(CameraStatus status, int toUserId) {
+  void sendCameraStatus(CameraStatus status, String callId) {
     _webSocket.emit('webrtc_send_camera_status', {
-      'to_user_id': toUserId,
+      'call_id': callId,
       'status': status.jsonName,
     });
   }
@@ -114,7 +112,7 @@ class RtcWebSocketImpl implements RtcWebSocket {
   Stream<EndCallUpdate> get endCallStream => _endCallController.stream;
 
   @override
-  Stream<CameraStatus> get remoteCameraStatusStream =>
+  Stream<CameraStatusUpdate> get remoteCameraStatusStream =>
       _remoteCameraStatusController.stream;
 
   @override

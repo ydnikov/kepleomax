@@ -35,8 +35,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     on<_CallEventEmit>(_onEmit);
     on<_CallEventExit>(_onExit);
 
-    _remoteCameraStatusSub = _rtcWebSocket.remoteCameraStatusStream.listen((status) {
-      _data = _data.copyWith(remoteCameraStatus: status);
+    _remoteCameraStatusSub = _rtcWebSocket.remoteCameraStatusStream.listen((update) {
+      if (update.callId != _data.callId) return;
+      _data = _data.copyWith(remoteCameraStatus: update.status);
       add(const _CallEventEmit());
     });
 
@@ -94,12 +95,13 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       _data = _data.copyWith(localRenderer: _localRenderer);
       emit(CallStateBase(data: _data));
 
-      final callId = await _callsRepository.requestCall(
+      final callId = await _callsRepository.createCall(
         otherUserId: event.otherUser.id,
       );
       _data = _data.copyWith(callId: callId);
 
       await _callsRepository.doCall(
+        callId: callId,
         otherUserId: event.otherUser.id,
         localRenderer: _localRenderer!,
         remoteRenderer: _remoteRenderer!,
@@ -220,7 +222,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
           ? CameraStatus.back
           : CameraStatus.front;
     }
-    _rtcWebSocket.sendCameraStatus(newStatus, _data.otherUser.id);
+    _rtcWebSocket.sendCameraStatus(newStatus, _data.callId!);
     _data = _data.copyWith(localCameraStatus: newStatus);
 
     emit(CallStateBase(data: _data));
@@ -248,7 +250,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     );
 
     final newStatus = isFront ? CameraStatus.front : CameraStatus.back;
-    _rtcWebSocket.sendCameraStatus(newStatus, _data.otherUser.id);
+    _rtcWebSocket.sendCameraStatus(newStatus, _data.callId!);
     _data = _data.copyWith(localCameraStatus: newStatus);
     emit(CallStateBase(data: _data));
   }

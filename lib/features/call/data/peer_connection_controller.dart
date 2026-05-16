@@ -47,7 +47,6 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
 
     final config = <String, dynamic>{
       'sdpSemantics': 'unified-plan',
-      'iceTransportPolicy': 'relay',
       'iceServers': [
         {
           'urls': ['stun:stun.l.google.com:19302'],

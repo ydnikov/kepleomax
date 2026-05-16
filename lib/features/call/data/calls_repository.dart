@@ -2,14 +2,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
-import 'package:kepleomax/core/network/apis/calls/calls_dtos.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/features/call/data/peer_connection_controller.dart';
 
 abstract class CallsRepository {
-  Future<String> requestCall({required int otherUserId});
+  Future<String> createCall({required int otherUserId});
 
   Future<void> doCall({
+    required String callId,
     required int otherUserId,
     required RTCVideoRenderer localRenderer,
     required RTCVideoRenderer remoteRenderer,
@@ -47,7 +47,7 @@ class CallsRepositoryImpl implements CallsRepository {
   int? _doCallLastInstanceId;
 
   @override
-  Future<String> requestCall({required int otherUserId}) async {
+  Future<String> createCall({required int otherUserId}) async {
     final result = await _callsApi.newCall(otherUserId: otherUserId);
     if (result.response.statusCode != 200) {
       throw InitCallException(
@@ -61,6 +61,7 @@ class CallsRepositoryImpl implements CallsRepository {
 
   @override
   Future<String> doCall({
+    required String callId,
     required int otherUserId,
     required RTCVideoRenderer localRenderer,
     required RTCVideoRenderer remoteRenderer,
@@ -73,15 +74,13 @@ class CallsRepositoryImpl implements CallsRepository {
     await _peerConnection.init(
       otherUserId: otherUserId,
       onTrack: (track) {
-        print('KlmLog2 onTrack');
         if (track.track.kind == 'video') {
           remoteRenderer.srcObject = track.streams[0];
         }
       },
       onIceCandidate: (candidate) {
-        print('KlmLog2 onIceCandidate');
         if (isRemoteDescriptionSet) {
-          _webSocket.sendIceCandidate(candidate, otherUserId);
+          _webSocket.sendIceCandidate(candidate, callId);
         } else {
           iceCandidates.add(candidate);
         }
@@ -91,11 +90,12 @@ class CallsRepositoryImpl implements CallsRepository {
     await _peerConnection.addTracks(localRenderer.srcObject!);
 
     final offer = await _peerConnection.createOffer();
-    _webSocket.sendOffer(offer, otherUserId);
+    _webSocket.sendOffer(offer, callId);
 
-    final answer = await _webSocket.answersStream.first.timeout(
-      AppConstants.callingTimeout,
-    );
+    final answer = await _webSocket.answersStream
+        .where((update) => update.callId == callId)
+        .first
+        .timeout(AppConstants.callingTimeout);
     if (!_peerConnection.isActive) {
       throw Exception('PeerConnection is no longer active');
     } else if (_doCallLastInstanceId != currentInstanceId) {
@@ -108,7 +108,7 @@ class CallsRepositoryImpl implements CallsRepository {
     isRemoteDescriptionSet = true;
 
     for (final candidate in iceCandidates) {
-      _webSocket.sendIceCandidate(candidate, otherUserId);
+      _webSocket.sendIceCandidate(candidate, callId);
     }
 
     return answer.callId;
@@ -122,22 +122,20 @@ class CallsRepositoryImpl implements CallsRepository {
     required RTCVideoRenderer localRenderer,
     required RTCVideoRenderer remoteRenderer,
   }) async {
-    final status = await _callsApi.getStatusOfCall(callId: callId);
-    if (status.data.status != CallStatus.pending) {
-      throw const InitCallException('Call is already accepted');
+    final response = await _callsApi.acceptCall(callId: callId);
+    if (response.response.statusCode != 200) {
+      throw const InitCallException('Failed to accept the call');
     }
 
     await _peerConnection.init(
       otherUserId: otherUserId,
       onTrack: (track) {
-        print('KlmLog2 onTrack');
         if (track.track.kind == 'video') {
           remoteRenderer.srcObject = track.streams[0];
         }
       },
       onIceCandidate: (candidate) {
-        print('KlmLog2 onIceCandidate');
-        _webSocket.sendIceCandidate(candidate, otherUserId);
+        _webSocket.sendIceCandidate(candidate, callId);
       },
     );
 

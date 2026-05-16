@@ -1,4 +1,5 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:kepleomax/features/call/bloc/call_state.dart';
 
 class OfferUpdate {
   const OfferUpdate({
@@ -59,10 +60,23 @@ class CandidateUpdate {
 }
 
 class EndCallUpdate {
-  const EndCallUpdate({required this.fromUserId});
+  const EndCallUpdate({required this.callId});
 
   factory EndCallUpdate.fromJson(Map<String, dynamic> json) =>
-      EndCallUpdate(fromUserId: json['other_user_id'] as int);
+      EndCallUpdate(callId: json['call_id'] as String);
 
-  final int fromUserId;
+  final String callId;
+}
+
+class CameraStatusUpdate {
+  CameraStatusUpdate({required this.callId, required this.status});
+
+  factory CameraStatusUpdate.fromJson(Map<String, dynamic> json) =>
+      CameraStatusUpdate(
+        callId: json['call_id'] as String,
+        status: CameraStatus.fromJson(json['status'] as String),
+      );
+
+  final String callId;
+  final CameraStatus status;
 }

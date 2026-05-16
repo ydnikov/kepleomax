@@ -50,6 +50,27 @@ class _CallsApi implements CallsApi {
   }
 
   @override
+  Future<HttpResponse<void>> acceptCall({required String callId}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'call_id': callId};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<HttpResponse<void>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/accept',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<void>(_options);
+    final httpResponse = HttpResponse(null, _result);
+    return httpResponse;
+  }
+
+  @override
   Future<HttpResponse<NewCallDto>> newCall({required int otherUserId}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'other_user_id': otherUserId};
