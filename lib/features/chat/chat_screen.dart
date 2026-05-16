@@ -417,7 +417,10 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                       context,
                     )!.push(CallPage(otherUser: data.otherUser, doCall: true));
                   },
-                  icon: const Icon(Icons.call, color: KlmColors.primaryColor),
+                  style: IconButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                  ),
+                  icon: const Icon(Icons.videocam_outlined, color: KlmColors.primaryColor),
                 ),
               ],
             ),

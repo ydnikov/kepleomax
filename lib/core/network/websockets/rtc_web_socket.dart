@@ -9,11 +9,7 @@ abstract class RtcWebSocket {
   /// actions
   void sendOffer(RTCSessionDescription offer, String callId);
 
-  void sendAnswer(
-    RTCSessionDescription answer, {
-    required String callId,
-    required String? fcmToken,
-  });
+  void sendAnswer(RTCSessionDescription answer, {required String callId});
 
   void sendIceCandidate(RTCIceCandidate candidate, String callId);
 
@@ -74,15 +70,10 @@ class RtcWebSocketImpl implements RtcWebSocket {
   }
 
   @override
-  void sendAnswer(
-    RTCSessionDescription answer, {
-    required String callId,
-    required String? fcmToken,
-  }) {
+  void sendAnswer(RTCSessionDescription answer, {required String callId}) {
     _webSocket.emit('webrtc_send_answer', {
       'call_id': callId,
       'answer': answer.toMap(),
-      'fcm_token': fcmToken,
     });
   }
 

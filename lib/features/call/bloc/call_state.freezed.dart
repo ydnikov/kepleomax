@@ -951,7 +951,7 @@ return $default(_that.otherUser,_that.callId,_that.connectionStatus,_that.localR
 
 
 class _CallData extends CallData {
-  const _CallData({required this.otherUser, this.callId, this.connectionStatus = RTCPeerConnectionState.RTCPeerConnectionStateDisconnected, this.localRenderer, this.remoteRenderer, this.callStartedTime, this.localCameraStatus = CameraStatus.back, this.remoteCameraStatus = CameraStatus.back, this.isLocalMicrophoneOn = true, this.isCallAccepted = false}): super._();
+  const _CallData({required this.otherUser, this.callId, this.connectionStatus = RTCPeerConnectionState.RTCPeerConnectionStateDisconnected, this.localRenderer, this.remoteRenderer, this.callStartedTime, this.localCameraStatus = CameraStatus.front, this.remoteCameraStatus = CameraStatus.front, this.isLocalMicrophoneOn = true, this.isCallAccepted = false}): super._();
   
 
 @override final  User otherUser;

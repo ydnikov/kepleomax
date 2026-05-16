@@ -20,6 +20,10 @@ abstract class PeerConnectionController {
 
   Future<void> addTracks(MediaStream mediaStream);
 
+  Future<void> removeTrack(RTCRtpSender sender);
+
+  Future<List<RTCRtpSender>> getSenders();
+
   Future<void> dispose();
 
   bool get isActive;
@@ -53,7 +57,8 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
           'urls': [
             'turn:178.141.12.67:3478?transport=udp',
             'turn:178.141.12.67:3478?transport=tcp',
-            'turn:178.141.12.67:5349'],
+            'turn:178.141.12.67:5349',
+          ],
           'username': 'bober',
           'credential': 'kplmx9174',
         },
@@ -94,11 +99,8 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
   }
 
   @override
-  Future<void> dispose() async {
-    await _peerConnection!.close();
-    await _peerConnection!.dispose();
-    _peerConnection = null;
-  }
+  Future<void> removeTrack(RTCRtpSender sender) =>
+      _peerConnection!.removeTrack(sender);
 
   @override
   void addIceCandidate(RTCIceCandidate candidate) {
@@ -119,6 +121,16 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
   @override
   Future<void> setRemoteDescription(RTCSessionDescription desc) async =>
       _peerConnection!.setRemoteDescription(desc);
+
+  @override
+  Future<List<RTCRtpSender>> getSenders() => _peerConnection!.getSenders();
+
+  @override
+  Future<void> dispose() async {
+    await _peerConnection!.close();
+    await _peerConnection!.dispose();
+    _peerConnection = null;
+  }
 
   @override
   bool get isActive => _peerConnection != null;

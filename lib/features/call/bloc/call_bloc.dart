@@ -12,6 +12,9 @@ import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:kepleomax/features/call/bloc/call_state.dart';
 import 'package:kepleomax/features/call/data/calls_repository.dart';
 
+const int _callWidth = 1280;
+const int _callHeight = 720;
+
 class CallBloc extends Bloc<CallEvent, CallState> {
   CallBloc({
     required CallsRepository callsRepository,
@@ -37,6 +40,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
     _remoteCameraStatusSub = _rtcWebSocket.remoteCameraStatusStream.listen((update) {
       if (update.callId != _data.callId) return;
+
       _data = _data.copyWith(remoteCameraStatus: update.status);
       add(const _CallEventEmit());
     });
@@ -154,10 +158,12 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       _localRenderer = await _setUpLocalRenderer();
       _remoteRenderer = await _setUpRemoteRenderer();
 
+      final offer = await _callsRepository.getOffer(callId: _data.callId!);
+
       await _callsRepository.acceptCall(
         callId: _data.callId!,
         otherUserId: _data.otherUser.id,
-        offer: CallsService.instance.cachedOffer!.offer,
+        offer: offer,
         localRenderer: _localRenderer!,
         remoteRenderer: _remoteRenderer!,
       );
@@ -189,14 +195,13 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   Future<RTCVideoRenderer> _setUpLocalRenderer() async {
     final mediaStream = await navigator.mediaDevices.getUserMedia({
       'audio': true,
-      'video': {
-        'facingMode': 'environment', // or user
-      },
+      'video': {'facingMode': 'user', 'width': _callWidth, 'height': _callHeight},
     });
 
     final renderer = RTCVideoRenderer();
     await renderer.initialize();
     renderer.srcObject = mediaStream;
+
     return renderer;
   }
 
@@ -303,11 +308,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 abstract class CallEvent {}
 
 class CallEventInit implements CallEvent {
-  const CallEventInit({required this.otherUser, required this.doCall, this.offer});
+  const CallEventInit({required this.otherUser, required this.doCall});
 
   final User otherUser;
   final bool doCall;
-  final RTCSessionDescription? offer;
 }
 
 class CallEventCall implements CallEvent {

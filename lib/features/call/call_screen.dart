@@ -7,22 +7,17 @@ import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
+import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
 import 'package:kepleomax/features/call/bloc/call_bloc.dart';
 import 'package:kepleomax/features/call/bloc/call_state.dart';
 import 'package:kepleomax/features/call/widgets/call_stopwatch_widget.dart';
 
 class CallScreen extends StatefulWidget {
-  const CallScreen({
-    required this.otherUser,
-    required this.doCall,
-    this.offer,
-    super.key,
-  });
+  const CallScreen({required this.otherUser, required this.doCall, super.key});
 
   final User otherUser;
   final bool doCall;
-  final RTCSessionDescription? offer;
 
   @override
   State<CallScreen> createState() => _CallScreenState();
@@ -34,17 +29,10 @@ class _CallScreenState extends State<CallScreen> {
   @override
   void initState() {
     final dp = Dependencies.of(context);
-    _callBloc =
-        CallBloc(
-          rtcWebSocket: dp.read<RtcWebSocket>(),
-          callsRepository: dp.callsRepositoryBuilder(),
-        )..add(
-          CallEventInit(
-            otherUser: widget.otherUser,
-            doCall: widget.doCall,
-            offer: widget.offer,
-          ),
-        );
+    _callBloc = CallBloc(
+      rtcWebSocket: dp.read<RtcWebSocket>(),
+      callsRepository: dp.callsRepositoryBuilder(),
+    )..add(CallEventInit(otherUser: widget.otherUser, doCall: widget.doCall));
     super.initState();
   }
 
@@ -71,9 +59,8 @@ class _CallScreenState extends State<CallScreen> {
 
           final oldData = oldState.data;
           final newData = newState.data;
-          return oldData.isRemoteCameraAvailable !=
-                  newData.isRemoteCameraAvailable ||
-              oldData.isLocalCameraAvailable != newData.isLocalCameraAvailable;
+          return oldData.remoteCameraAvailable != newData.remoteCameraAvailable ||
+              oldData.localCameraAvailable != newData.localCameraAvailable;
         },
         builder: (context, state) {
           return AnnotatedRegion(
@@ -85,8 +72,8 @@ class _CallScreenState extends State<CallScreen> {
             child: Scaffold(
               backgroundColor:
                   state is CallStateBase &&
-                      (state.data.isRemoteCameraAvailable ||
-                          state.data.isLocalCameraAvailable)
+                      (state.data.remoteCameraAvailable ||
+                          state.data.localCameraAvailable)
                   ? const Color(0xFF121212)
                   : Colors.blue,
               //appBar: _AppBar(),
@@ -120,27 +107,31 @@ class _BodyState extends State<_Body> {
 
           if (oldState is! CallStateBase) return true;
 
-          final localAvailable = newState.data.isLocalCameraAvailable;
-          final remoteAvailable = newState.data.isRemoteCameraAvailable;
-          if (localAvailable && !remoteAvailable && !_camerasSwitched) {
+          final localAvailable = newState.data.localCameraAvailable;
+          final oldRemoteAvailable = oldState.data.remoteCameraAvailable;
+          final newRemoteAvailable = newState.data.remoteCameraAvailable;
+          if (!oldRemoteAvailable && newRemoteAvailable) {
+            _camerasSwitched = false;
+          } else if (localAvailable && !newRemoteAvailable && !_camerasSwitched) {
             _camerasSwitched = true;
-          } else if (!localAvailable && remoteAvailable && _camerasSwitched) {
+          } else if (!localAvailable && newRemoteAvailable && _camerasSwitched) {
             _camerasSwitched = false;
           }
+
           return oldState.data != newState.data;
         },
         builder: (context, state) {
           if (state is! CallStateBase) return const SizedBox();
           final data = state.data;
 
-          final RTCVideoView? remoteView = data.isRemoteCameraAvailable
+          final RTCVideoView? remoteView = data.remoteCameraAvailable
               ? RTCVideoView(
                   data.remoteRenderer!,
                   mirror: data.remoteCameraStatus.isFront,
                 )
               : null;
 
-          final RTCVideoView? localView = data.isLocalCameraAvailable
+          final RTCVideoView? localView = data.localCameraAvailable
               ? RTCVideoView(
                   data.localRenderer!,
                   mirror: data.localCameraStatus.isFront,
@@ -149,11 +140,11 @@ class _BodyState extends State<_Body> {
 
           return Stack(
             children: [
-              if ((!_camerasSwitched && data.isRemoteCameraAvailable) ||
-                  (_camerasSwitched && data.isLocalCameraAvailable))
+              if ((!_camerasSwitched && data.remoteCameraAvailable) ||
+                  (_camerasSwitched && data.localCameraAvailable))
                 _camerasSwitched ? localView! : remoteView!,
-              if ((!_camerasSwitched && data.isLocalCameraAvailable) ||
-                  (_camerasSwitched && data.isRemoteCameraAvailable))
+              if ((!_camerasSwitched && data.localCameraAvailable) ||
+                  (_camerasSwitched && data.remoteCameraAvailable))
                 Positioned(
                   right: 10,
                   bottom: 150,
@@ -163,10 +154,18 @@ class _BodyState extends State<_Body> {
                         _camerasSwitched = !_camerasSwitched;
                       });
                     },
-                    child: SizedBox(
-                      height: 160 * 1.3,
-                      width: 90 * 1.3,
-                      child: _camerasSwitched ? remoteView : localView,
+                    child: Material(
+                      elevation: 6,
+                      shadowColor: Colors.black,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: SizedBox(
+                          height: 160 * 1.3,
+                          width: 90 * 1.3,
+                          child: _camerasSwitched ? remoteView : localView,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -174,18 +173,26 @@ class _BodyState extends State<_Body> {
               Column(
                 children: [
                   const SizedBox(height: 6),
-                  if (data.isRemoteCameraAvailable || data.isLocalCameraAvailable)
-                    Text(
-                      data.connectionStatus.toUserString(),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
+                  if (data.localCameraAvailable || data.remoteCameraAvailable)
+                    if (data.connectionStatus ==
+                        RTCPeerConnectionState.RTCPeerConnectionStateConnected)
+                      CallStopwatchWidget(
+                        callStartedTime: data.callStartedTime!,
+                        color: Colors.white70,
+                        fontSize: 14,
+                      )
+                    else
+                      EllipsisTextWidget(
+                        data.connectionStatus.userString,
+                        ellipsis: data.connectionStatus.showEllipsis,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey,
+                        ),
                       ),
-                    ),
-                  if (!data.isRemoteCameraAvailable &&
-                      !data.isLocalCameraAvailable) ...[
+                  if (!data.remoteCameraAvailable && !data.localCameraAvailable) ...[
                     const SizedBox(height: 80),
                     UserImage(user: data.otherUser, size: 200),
                     const SizedBox(height: 10),
@@ -221,18 +228,18 @@ class _BodyState extends State<_Body> {
                             );
                           },
                         ),
-                        _Button(
-                          'Flip',
-                          icon: Icons.cameraswitch,
-                          iconColor: Colors.blue,
-                          color: Colors.white,
-                          enabled: data.localCameraStatus.isOn,
-                          onPressed: () {
-                            context.read<CallBloc>().add(
-                              const CallEventFlipCamera(),
-                            );
-                          },
-                        ),
+                        if (data.localCameraStatus.isOn)
+                          _Button(
+                            'Flip',
+                            icon: Icons.cameraswitch,
+                            iconColor: Colors.blue,
+                            color: Colors.white,
+                            onPressed: () {
+                              context.read<CallBloc>().add(
+                                const CallEventFlipCamera(),
+                              );
+                            },
+                          ),
                         _Button(
                           data.isLocalMicrophoneOn ? 'Mute' : 'Unmute',
                           icon: data.isLocalMicrophoneOn ? Icons.mic : Icons.mic_off,
@@ -305,14 +312,19 @@ class _Button extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        IconButton(
-          onPressed: enabled ? onPressed : null,
-          style: IconButton.styleFrom(
-            disabledBackgroundColor: Colors.grey.shade300,
-            backgroundColor: color,
-            minimumSize: const Size(70, 70),
+        Material(
+          elevation: 4,
+          shadowColor: Colors.black,
+          borderRadius: BorderRadius.circular(100),
+          child: IconButton(
+            onPressed: enabled ? onPressed : null,
+            style: IconButton.styleFrom(
+              disabledBackgroundColor: Colors.grey.shade300,
+              backgroundColor: color,
+              minimumSize: const Size(70, 70),
+            ),
+            icon: Icon(icon, color: iconColor, size: 34),
           ),
-          icon: Icon(icon, color: iconColor, size: 34),
         ),
         const SizedBox(height: 10),
         Text(
@@ -325,10 +337,8 @@ class _Button extends StatelessWidget {
 }
 
 extension RTCConnectionStateToString on RTCPeerConnectionState {
-  String toUserString() {
+  String get userString {
     switch (this) {
-      case RTCPeerConnectionState.RTCPeerConnectionStateClosed:
-        return 'Waiting';
       case RTCPeerConnectionState.RTCPeerConnectionStateConnecting:
         return 'Connecting';
       case RTCPeerConnectionState.RTCPeerConnectionStateConnected:
@@ -337,8 +347,14 @@ extension RTCConnectionStateToString on RTCPeerConnectionState {
         return 'Disconnected';
       case RTCPeerConnectionState.RTCPeerConnectionStateFailed:
         return 'Failed';
+      case RTCPeerConnectionState.RTCPeerConnectionStateClosed:
+        return 'Closed';
       case RTCPeerConnectionState.RTCPeerConnectionStateNew:
-        return 'New';
+        return 'Waiting';
     }
   }
+
+  bool get showEllipsis =>
+      this == RTCPeerConnectionState.RTCPeerConnectionStateNew ||
+      this == RTCPeerConnectionState.RTCPeerConnectionStateConnecting;
 }

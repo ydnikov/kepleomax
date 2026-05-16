@@ -8,12 +8,14 @@ class EllipsisTextWidget extends StatefulWidget {
     this.style,
     this.ellipsis = true,
     this.textKey,
+    this.textAlign,
     super.key,
   });
 
   final String text;
   final TextStyle? style;
   final bool ellipsis;
+  final TextAlign? textAlign;
   final Key? textKey;
 
   @override
@@ -26,7 +28,7 @@ class _EllipsisTextWidgetState extends State<EllipsisTextWidget> {
 
   @override
   void initState() {
-    _timer = Timer.periodic(const Duration(milliseconds: 300), (_) {
+    _timer = Timer.periodic(const Duration(milliseconds: 600), (_) {
       if (_dotsCount == 3) {
         _dotsCount = 0;
       } else {
@@ -44,8 +46,12 @@ class _EllipsisTextWidgetState extends State<EllipsisTextWidget> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Text(_text, style: widget.style, key: widget.textKey);
+  Widget build(BuildContext context) => Text(
+    _text,
+    style: widget.style,
+    textAlign: widget.textAlign,
+    key: widget.textKey,
+  );
 
   String get _text {
     if (!widget.ellipsis) return widget.text;

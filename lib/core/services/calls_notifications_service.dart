@@ -4,7 +4,6 @@ import 'package:flutter_callkit_incoming/entities/android_params.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,14 +25,8 @@ class CallsNotificationsService {
     required String id,
     required UserDto otherUser,
     required DateTime startedAt,
-    RTCSessionDescription? offer,
   }) async {
-    final params = _generateCallKitParams(
-      id,
-      otherUser,
-      startedAt: startedAt,
-      offer: offer,
-    );
+    final params = _generateCallKitParams(id, otherUser, startedAt: startedAt);
     await FlutterCallkitIncoming.showCallkitIncoming(params);
   }
 
@@ -73,7 +66,6 @@ class CallsNotificationsService {
     String id,
     UserDto otherUser, {
     required DateTime startedAt,
-    RTCSessionDescription? offer,
   }) => CallKitParams(
     id: id,
     nameCaller: otherUser.username,
@@ -95,14 +87,7 @@ class CallsNotificationsService {
     duration:
         AppConstants.callingTimeout.inMilliseconds -
         (DateTime.now().millisecondsSinceEpoch - startedAt.millisecondsSinceEpoch),
-    extra: offer == null
-        ? {'id': id, 'other_user_id': otherUser.id}
-        : {
-            'id': id,
-            'other_user_id': otherUser.id,
-            'offer_sdp': offer.sdp,
-            'offer_type': offer.type,
-          },
+    extra: {'id': id, 'other_user_id': otherUser.id},
     android: AndroidParams(
       isCustomNotification: true,
       isShowLogo: false,

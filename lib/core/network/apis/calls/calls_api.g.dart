@@ -20,6 +20,67 @@ class _CallsApi implements CallsApi {
   final ParseErrorLogger? errorLogger;
 
   @override
+  Future<HttpResponse<NewCallDto>> newCall({
+    required int otherUserId,
+    required String fcmToken,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'other_user_id': otherUserId,
+      r'fcm_token': fcmToken,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<HttpResponse<NewCallDto>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/new',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late NewCallDto _value;
+    try {
+      _value = NewCallDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
+  }
+
+  @override
+  Future<HttpResponse<void>> acceptCall({
+    required String callId,
+    required String fcmToken,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'call_id': callId,
+      r'fcm_token': fcmToken,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<HttpResponse<void>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/accept',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<void>(_options);
+    final httpResponse = HttpResponse(null, _result);
+    return httpResponse;
+  }
+
+  @override
   Future<HttpResponse<CallStatusDto>> getStatusOfCall({
     required String callId,
   }) async {
@@ -50,46 +111,27 @@ class _CallsApi implements CallsApi {
   }
 
   @override
-  Future<HttpResponse<void>> acceptCall({required String callId}) async {
+  Future<HttpResponse<CallGetOfferDto>> getOffer({
+    required String callId,
+  }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'call_id': callId};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<HttpResponse<void>>(
+    final _options = _setStreamType<HttpResponse<CallGetOfferDto>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/accept',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<void>(_options);
-    final httpResponse = HttpResponse(null, _result);
-    return httpResponse;
-  }
-
-  @override
-  Future<HttpResponse<NewCallDto>> newCall({required int otherUserId}) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'other_user_id': otherUserId};
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<HttpResponse<NewCallDto>>(
-      Options(method: 'GET', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/newCall',
+            '/getOffer',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late NewCallDto _value;
+    late CallGetOfferDto _value;
     try {
-      _value = NewCallDto.fromJson(_result.data!);
+      _value = CallGetOfferDto.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
@@ -112,7 +154,7 @@ class _CallsApi implements CallsApi {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/declineCall',
+            '/decline',
             queryParameters: queryParameters,
             data: _data,
           )

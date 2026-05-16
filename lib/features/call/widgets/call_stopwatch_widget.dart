@@ -7,10 +7,12 @@ class CallStopwatchWidget extends StatefulWidget {
   const CallStopwatchWidget({
     required this.callStartedTime,
     this.color = Colors.white,
+    this.fontSize = 18,
     super.key,
   });
 
   final DateTime callStartedTime;
+  final double fontSize;
   final Color color;
 
   @override
@@ -40,7 +42,7 @@ class _CallStopwatchWidgetState extends State<CallStopwatchWidget> {
       ParseTime.toStopwatch(DateTime.now().difference(widget.callStartedTime)),
       textAlign: TextAlign.center,
       style: TextStyle(
-        fontSize: 18,
+        fontSize: widget.fontSize,
         fontWeight: FontWeight.w500,
         color: widget.color,
       ),

@@ -9,7 +9,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:kepleomax/core/app.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/di/initialize_dependencies.dart';
-import 'package:kepleomax/core/extensions/rtc_session_description_extension.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
@@ -181,10 +180,7 @@ class NotificationService {
           otherUser: UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
           ),
-          startedAt: DateTime.fromMillisecondsSinceEpoch(sentAt),
-          offer: RtcSessionDescriptionFromJsonExtension.fromNotificationExtra(
-            message.data,
-          ),
+          startedAt: DateTime.fromMillisecondsSinceEpoch(sentAt)
         );
         break;
 

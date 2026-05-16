@@ -23,7 +23,13 @@ abstract class CallsRepository {
     required RTCVideoRenderer remoteRenderer,
   });
 
+  Future<RTCSessionDescription> getOffer({required String callId});
+
   Future<void> disposeConnection();
+
+  Future<List<RTCRtpSender>> getSenders();
+
+  Future<void> removeTrack(RTCRtpSender sender);
 
   Stream<RTCPeerConnectionState> get connectionStream;
 }
@@ -47,9 +53,15 @@ class CallsRepositoryImpl implements CallsRepository {
   final PeerConnectionController _peerConnection;
   int? _doCallLastInstanceId;
 
+  Future<String?> get _getFcmToken => FirebaseMessaging.instance.getToken();
+
   @override
   Future<String> createCall({required int otherUserId}) async {
-    final result = await _callsApi.newCall(otherUserId: otherUserId);
+    final fcmToken = await _getFcmToken;
+    final result = await _callsApi.newCall(
+      otherUserId: otherUserId,
+      fcmToken: fcmToken!,
+    );
     if (result.response.statusCode != 200) {
       throw InitCallException(
         result.data.message ??
@@ -122,7 +134,8 @@ class CallsRepositoryImpl implements CallsRepository {
     required RTCVideoRenderer localRenderer,
     required RTCVideoRenderer remoteRenderer,
   }) async {
-    final response = await _callsApi.acceptCall(callId: callId);
+    final fcmToken = await _getFcmToken;
+    final response = await _callsApi.acceptCall(callId: callId, fcmToken: fcmToken!);
     if (response.response.statusCode != 200) {
       throw const InitCallException('Failed to accept the call');
     }
@@ -142,9 +155,27 @@ class CallsRepositoryImpl implements CallsRepository {
 
     await _peerConnection.setRemoteDescription(offer);
     final answer = await _peerConnection.createAnswer();
-    final fcmToken = await FirebaseMessaging.instance.getToken();
-    _webSocket.sendAnswer(answer, callId: callId, fcmToken: fcmToken);
+    _webSocket.sendAnswer(answer, callId: callId);
     await _peerConnection.setLocalDescription(answer);
+  }
+
+  @override
+  Future<List<RTCRtpSender>> getSenders() => _peerConnection.getSenders();
+
+  @override
+  Future<void> removeTrack(RTCRtpSender sender) =>
+      _peerConnection.removeTrack(sender);
+
+  @override
+  Future<RTCSessionDescription> getOffer({required String callId}) async {
+    final res = await _callsApi.getOffer(callId: callId);
+
+    if (res.response.statusCode == 200) {
+      final data = res.data.data;
+      return RTCSessionDescription(data.sdp, data.type);
+    }
+
+    throw Exception('Failed to get offer, statusCode: ${res.response.statusCode}');
   }
 
   @override

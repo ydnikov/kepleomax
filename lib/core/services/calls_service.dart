@@ -47,7 +47,7 @@ class CallsService {
     /// TODO getUserFromCacheOrApi
     final otherUser = await _userRepository.getUser(userId: offerUpdate.otherUserId);
     mainNavigatorGlobalKey.currentState!.push(
-      CallPage(otherUser: otherUser, doCall: false, offer: offerUpdate.offer),
+      CallPage(otherUser: otherUser, doCall: false),
     );
   }
 

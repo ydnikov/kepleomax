@@ -35,6 +35,27 @@ class CallStatusDto {
   CallStatus status;
 }
 
+@JsonSerializable()
+class CallGetOfferDto {
+  CallGetOfferDto({required this.data});
+
+  factory CallGetOfferDto.fromJson(Map<String, dynamic> json) =>
+      _$CallGetOfferDtoFromJson(json);
+
+  final CallGetOfferData data;
+}
+
+@JsonSerializable()
+class CallGetOfferData {
+  CallGetOfferData({required this.type, required this.sdp});
+
+  factory CallGetOfferData.fromJson(Map<String, dynamic> json) =>
+      _$CallGetOfferDataFromJson(json);
+
+  final String type;
+  final String sdp;
+}
+
 enum CallStatus {
   active,
   pending,

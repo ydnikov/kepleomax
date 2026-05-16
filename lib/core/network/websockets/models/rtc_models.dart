@@ -5,21 +5,19 @@ class OfferUpdate {
   const OfferUpdate({
     required this.callId,
     required this.otherUserId,
-    required this.offer,
   });
 
   factory OfferUpdate.fromJson(Map<dynamic, dynamic> json) => OfferUpdate(
     callId: json['id'] as String,
     otherUserId: json['other_user_id'] as int,
-    offer: RTCSessionDescription(
-      (json['offer_sdp'] as String?) ?? json['offer']['sdp'] as String?,
-      (json['offer_type'] as String?) ?? json['offer']['type'] as String?,
-    ),
+    // offer: RTCSessionDescription(
+    //   (json['offer_sdp'] as String?) ?? json['offer']['sdp'] as String?,
+    //   (json['offer_type'] as String?) ?? json['offer']['type'] as String?,
+    // ),
   );
 
   final String callId;
   final int otherUserId;
-  final RTCSessionDescription offer;
 }
 
 class AnswerUpdate {
