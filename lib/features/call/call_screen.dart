@@ -147,7 +147,7 @@ class _BodyState extends State<_Body> {
                   (_camerasSwitched && data.remoteCameraAvailable))
                 Positioned(
                   right: 10,
-                  bottom: 150,
+                  bottom: 92,
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
@@ -211,76 +211,83 @@ class _BodyState extends State<_Body> {
                     ],
                   ],
                   const Expanded(child: SizedBox()),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      if (data.isCallAccepted) ...[
-                        _Button(
-                          data.localCameraStatus.isOn ? 'Stop video' : 'Start video',
-                          icon: data.localCameraStatus.isOn
-                              ? Icons.videocam
-                              : Icons.videocam_off_outlined,
-                          iconColor: Colors.blue,
-                          color: Colors.white,
-                          onPressed: () {
-                            context.read<CallBloc>().add(
-                              const CallEventToggleCamera(),
-                            );
-                          },
-                        ),
-                        if (data.localCameraStatus.isOn)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        if (data.isCallAccepted) ...[
                           _Button(
-                            'Flip',
-                            icon: Icons.cameraswitch,
+                            data.localCameraStatus.isOn
+                                ? 'Stop video'
+                                : 'Start video',
+                            icon: data.localCameraStatus.isOn
+                                ? Icons.videocam
+                                : Icons.videocam_off_outlined,
                             iconColor: Colors.blue,
                             color: Colors.white,
                             onPressed: () {
                               context.read<CallBloc>().add(
-                                const CallEventFlipCamera(),
+                                const CallEventToggleCamera(),
                               );
                             },
                           ),
-                        _Button(
-                          data.isLocalMicrophoneOn ? 'Mute' : 'Unmute',
-                          icon: data.isLocalMicrophoneOn ? Icons.mic : Icons.mic_off,
-                          iconColor: Colors.blue,
-                          color: Colors.white,
-                          onPressed: () {
-                            context.read<CallBloc>().add(
-                              const CallEventToggleMicrophone(),
-                            );
-                          },
-                        ),
-                      ],
+                          if (data.localCameraStatus.isOn)
+                            _Button(
+                              'Flip',
+                              icon: Icons.cameraswitch,
+                              iconColor: Colors.blue,
+                              color: Colors.white,
+                              onPressed: () {
+                                context.read<CallBloc>().add(
+                                  const CallEventFlipCamera(),
+                                );
+                              },
+                            ),
+                          _Button(
+                            data.isLocalMicrophoneOn ? 'Mute' : 'Unmute',
+                            icon: data.isLocalMicrophoneOn
+                                ? Icons.mic
+                                : Icons.mic_off,
+                            iconColor: Colors.blue,
+                            color: Colors.white,
+                            onPressed: () {
+                              context.read<CallBloc>().add(
+                                const CallEventToggleMicrophone(),
+                              );
+                            },
+                          ),
+                        ],
 
-                      _Button(
-                        data.isCallAccepted
-                            ? 'End Call'
-                            : widget.doCall
-                            ? 'Cancel'
-                            : 'Decline',
-                        icon: Icons.call_end,
-                        iconColor: Colors.white,
-                        color: Colors.red,
-                        onPressed: () {
-                          AppNavigator.pop(context);
-                        },
-                      ),
-                      if (!data.isCallAccepted && !widget.doCall)
                         _Button(
-                          'Accept',
-                          icon: Icons.call,
+                          data.isCallAccepted
+                              ? 'End Call'
+                              : widget.doCall
+                              ? 'Cancel'
+                              : 'Decline',
+                          icon: Icons.call_end,
                           iconColor: Colors.white,
-                          color: Colors.green,
+                          color: Colors.red,
                           onPressed: () {
-                            context.read<CallBloc>().add(
-                              const CallEventAcceptCall(),
-                            );
+                            AppNavigator.pop(context);
                           },
                         ),
-                    ],
+                        if (!data.isCallAccepted && !widget.doCall)
+                          _Button(
+                            'Accept',
+                            icon: Icons.call,
+                            iconColor: Colors.white,
+                            color: Colors.green,
+                            onPressed: () {
+                              context.read<CallBloc>().add(
+                                const CallEventAcceptCall(),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 16),
                 ],
               ),
             ],
@@ -321,16 +328,16 @@ class _Button extends StatelessWidget {
             style: IconButton.styleFrom(
               disabledBackgroundColor: Colors.grey.shade300,
               backgroundColor: color,
-              minimumSize: const Size(70, 70),
+              minimumSize: const Size(60, 60),
             ),
             icon: Icon(icon, color: iconColor, size: 34),
           ),
         ),
-        const SizedBox(height: 10),
-        Text(
-          title,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-        ),
+        // const SizedBox(height: 10),
+        // Text(
+        //   title,
+        //   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+        // ),
       ],
     );
   }

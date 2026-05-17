@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/token_provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
@@ -44,13 +45,14 @@ class KlmWebSocketImpl implements KlmWebSocket {
     /// you can't pass auth data in OptionBuilder cause on reconnect it won't update
     /// for some reason (idk why)
     final accessToken = await _tokenProvider.getAccessToken();
+    final fcmToken = await FirebaseMessaging.instance.getToken();
 
     /// socket
     _socket = io(
       _baseUrl,
       OptionBuilder()
           .enableForceNew()
-          .setAuth({'token': 'Bearer $accessToken'})
+          .setAuth({'token': 'Bearer $accessToken', 'fcm_token': fcmToken})
           .enableAutoConnect()
           .setTransports(['websocket'])
           .build(),
@@ -90,7 +92,7 @@ class KlmWebSocketImpl implements KlmWebSocket {
           return;
         }
         _socket!.disconnect();
-        _socket!.auth = {'token': 'Bearer $token'};
+        _socket!.auth = {'token': 'Bearer $token', 'fcm_token': fcmToken};
         _socket!.connect();
       }
     });

@@ -94,10 +94,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   Future<void> _onCall(CallEventCall event, Emitter<CallState> emit) async {
     try {
       _localRenderer = await _setUpLocalRenderer();
-      _remoteRenderer = await _setUpRemoteRenderer();
-
       _data = _data.copyWith(localRenderer: _localRenderer);
       emit(CallStateBase(data: _data));
+      _remoteRenderer = await _setUpRemoteRenderer();
 
       final callId = await _callsRepository.createCall(
         otherUserId: event.otherUser.id,
@@ -150,16 +149,26 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     }
     _lastTimeAcceptCallCalled = now;
 
+    _data = _data.copyWith(isCallAccepted: true);
+    emit(CallStateBase(data: _data));
+
     try {
       if (CallsService.instance.cachedOffer == null) {
         throw Exception('Trying to accept the call, but the offer is null');
       }
 
+      unawaited(CallsService.instance.acceptCall());
+
       _localRenderer = await _setUpLocalRenderer();
       _remoteRenderer = await _setUpRemoteRenderer();
 
-      final offer = await _callsRepository.getOffer(callId: _data.callId!);
+      _data = _data.copyWith(
+        localRenderer: _localRenderer,
+        remoteRenderer: _remoteRenderer,
+      );
+      emit(CallStateBase(data: _data));
 
+      final offer = await _callsRepository.getOffer(callId: _data.callId!);
       await _callsRepository.acceptCall(
         callId: _data.callId!,
         otherUserId: _data.otherUser.id,
@@ -168,15 +177,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         remoteRenderer: _remoteRenderer!,
       );
 
-      _data = _data.copyWith(
-        isCallAccepted: true,
-        localRenderer: _localRenderer,
-        remoteRenderer: _remoteRenderer,
-        callStartedTime: DateTime.now(),
-      );
+      _data = _data.copyWith(callStartedTime: DateTime.now());
       emit(CallStateBase(data: _data));
-
-      unawaited(CallsService.instance.acceptCall());
     } catch (e, st) {
       logger.e(e, stackTrace: st);
 
