@@ -8,7 +8,7 @@ class OfferUpdate {
   });
 
   factory OfferUpdate.fromJson(Map<dynamic, dynamic> json) => OfferUpdate(
-    callId: json['id'] as String,
+    callId: (json['id'] ?? json['call_id']) as String,
     otherUserId: json['other_user_id'] as int,
     // offer: RTCSessionDescription(
     //   (json['offer_sdp'] as String?) ?? json['offer']['sdp'] as String?,

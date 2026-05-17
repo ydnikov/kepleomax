@@ -95,8 +95,29 @@ class _Body extends StatefulWidget {
   State<_Body> createState() => _BodyState();
 }
 
-class _BodyState extends State<_Body> {
+class _BodyState extends State<_Body> with WidgetsBindingObserver {
   bool _camerasSwitched = false;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      // context.read<CallBloc>().add(const CallEventOnPause());
+    } else if (state == AppLifecycleState.resumed) {
+      // context.read<CallBloc>().add(const CallEventOnResume()); // Создайте ивент для включения камеры назад
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +213,8 @@ class _BodyState extends State<_Body> {
                           color: Colors.grey,
                         ),
                       ),
-                  if (!data.remoteCameraAvailable && !data.localCameraAvailable) ...[
+                  if (!data.remoteCameraAvailable &&
+                      !data.localCameraAvailable) ...[
                     const SizedBox(height: 80),
                     UserImage(user: data.otherUser, size: 200),
                     const SizedBox(height: 10),

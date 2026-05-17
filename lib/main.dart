@@ -12,6 +12,14 @@ Future<void> main() async {
     () async {
       WidgetsFlutterBinding.ensureInitialized().deferFirstFrame();
 
+      // await FlutterCallkitIncoming.startCall(CallKitParams(
+      //   id: 'init_id',
+      //   nameCaller: 'Register',
+      //   type: 1,
+      // ));
+      //
+      // await FlutterCallkitIncoming.endAllCalls();
+
       final dependencies = await initializeDependencies();
 
       WidgetsFlutterBinding.ensureInitialized().allowFirstFrame();

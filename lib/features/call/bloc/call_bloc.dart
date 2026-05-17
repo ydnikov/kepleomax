@@ -11,6 +11,7 @@ import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:kepleomax/features/call/bloc/call_state.dart';
 import 'package:kepleomax/features/call/data/calls_repository.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 const int _callWidth = 1280;
 const int _callHeight = 720;
@@ -35,6 +36,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     on<CallEventFlipCamera>(_onFlipCamera);
     on<CallEventToggleCamera>(_onToggleCamera);
     on<CallEventToggleMicrophone>(_onToggleMicrophone);
+    on<CallEventOnPause>(_onPause);
     on<_CallEventEmit>(_onEmit);
     on<_CallEventExit>(_onExit);
 
@@ -81,12 +83,41 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   // /// used to restore state after turn on (cause off doesn't contains it was front or back)
   // CameraStatus _lastLocalCameraStatus = CameraStatus.back;
 
+  Future<void> _onPause(CallEventOnPause event, Emitter<CallState> emit) async {
+    if (_localRenderer == null) return;
+
+    _localRenderer!.srcObject!.getVideoTracks().first.enabled = false;
+    _localRenderer!.srcObject!.getAudioTracks().first.enabled = true;
+
+    await WakelockPlus.enable();
+
+    await Helper.setSpeakerphoneOn(true);
+
+    print('CallBloc onPause');
+
+    _data = _data.copyWith(localCameraStatus: CameraStatus.off);
+    emit(CallStateBase(data: _data));
+  }
+
   Future<void> _onInit(CallEventInit event, Emitter<CallState> emit) async {
     _data = _data.copyWith(
       otherUser: event.otherUser,
       callId: CallsService.instance.cachedOffer?.callId,
     );
     emit(CallStateBase(data: _data));
+
+    await Helper.setAndroidAudioConfiguration(
+      AndroidAudioConfiguration(
+        manageAudioFocus: false,
+        forceHandleAudioRouting: false,
+        androidAudioMode: AndroidAudioMode.inCommunication,
+        androidAudioStreamType: AndroidAudioStreamType.voiceCall,
+        androidAudioFocusMode: AndroidAudioFocusMode.gainTransient,
+        androidAudioAttributesUsageType:
+            AndroidAudioAttributesUsageType.voiceCommunication,
+        androidAudioAttributesContentType: AndroidAudioAttributesContentType.speech,
+      ),
+    );
 
     if (event.doCall) add(CallEventCall(otherUser: event.otherUser));
   }
@@ -143,6 +174,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     CallEventAcceptCall event,
     Emitter<CallState> emit,
   ) async {
+    if (_data.isCallAccepted) return;
+
     final now = DateTime.now().millisecondsSinceEpoch;
     if (_lastTimeAcceptCallCalled + 1000 > now || flavor.isTesting) {
       return;
@@ -216,6 +249,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   void _onToggleCamera(CallEventToggleCamera event, Emitter<CallState> emit) {
     final isCameraOn = _localRenderer!.srcObject!.getVideoTracks()[0].enabled;
     _localRenderer!.srcObject!.getVideoTracks()[0].enabled = !isCameraOn;
+
+    print('toggleCamera, newValue: ${!isCameraOn}');
 
     final CameraStatus newStatus;
     if (isCameraOn) {
@@ -336,6 +371,10 @@ class CallEventToggleMicrophone implements CallEvent {
 
 class CallEventFlipCamera implements CallEvent {
   const CallEventFlipCamera();
+}
+
+class CallEventOnPause implements CallEvent {
+  const CallEventOnPause();
 }
 
 class _CallEventExit implements CallEvent {

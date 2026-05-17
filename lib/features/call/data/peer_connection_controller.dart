@@ -89,7 +89,18 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
   }
 
   @override
-  Future<RTCSessionDescription> createOffer() => _peerConnection!.createOffer();
+  Future<RTCSessionDescription> createOffer() async {
+    final config = {
+      'mandatory': {
+        'OfferToReceiveAudio': true,
+        'OfferToReceiveVideo': true,
+      },
+      'optional': [
+        {'DtlsSrtpKeyAgreement': true},
+      ],
+    };
+    return _peerConnection!.createOffer(config);
+  }
 
   @override
   Future<void> addTracks(MediaStream mediaStream) async {

@@ -124,7 +124,7 @@ class NotificationService {
       case 'new_missed_call':
         {
           if (type == 'new_missed_call') {
-            await CallsNotificationsService.instance.hideNotification(
+            await CallsNotificationsService.instance.endCall(
               message.data['call_id'] as String,
             );
           }
@@ -180,18 +180,16 @@ class NotificationService {
           otherUser: UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
           ),
-          startedAt: DateTime.fromMillisecondsSinceEpoch(sentAt)
+          startedAt: DateTime.fromMillisecondsSinceEpoch(sentAt),
         );
         break;
 
       case 'stop_call':
-        await CallsNotificationsService.instance.hideNotification(
+        print('KlmLog stop_call');
+        await CallsNotificationsService.instance.endCall(
           message.data['call_id'] as String,
         );
-        if (message.data['only_hide_notification'] != 'true') {
-          print('KlmLog only_hide_notification == false');
-          CallsService.instance.callEnded();
-        }
+        CallsService.instance.callEnded();
         break;
     }
   }

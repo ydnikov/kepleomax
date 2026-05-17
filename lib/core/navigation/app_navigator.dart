@@ -110,7 +110,7 @@ class AppNavigatorState extends State<AppNavigator> with WidgetsBindingObserver 
     }
   }
 
-  bool lastIs<T extends AppPage>() => state.last is T;
+  bool currentIs<T extends AppPage>() => state.last is T;
 
   void popAll() => change((state) {
     return [state[0]];

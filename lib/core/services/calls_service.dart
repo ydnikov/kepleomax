@@ -53,28 +53,27 @@ class CallsService {
 
   void callEnded() {
     print('KlmLog callEnded');
-    if (mainNavigatorGlobalKey.currentState!.lastIs<CallPage>()) {
+    if (mainNavigatorGlobalKey.currentState!.currentIs<CallPage>()) {
       _callEndedByCurrentUser = false;
       mainNavigatorGlobalKey.currentState!.pop();
     }
 
-    // /// it closes the page and CallBloc will call endCall()
-    // mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
+    _cachedOffer = null;
   }
 
   Future<void> acceptCall() async {
     print('KlmLog acceptCall');
-    await CallsNotificationsService.instance.hideNotification(cachedOffer!.callId);
+    await CallsNotificationsService.instance.acceptCall(cachedOffer!.callId);
 
-    _cachedOffer = null;
+    // _cachedOffer = null;
   }
 
   Future<void> endCall(String callId) async {
     print('KlmLog endCall, byCurrentUser: $_callEndedByCurrentUser');
     if (_callEndedByCurrentUser) {
+      await CallsNotificationsService.instance.endCall(callId);
       final fcmToken = await FirebaseMessaging.instance.getToken();
       unawaited(_callsApi.endCall(id: callId, fcmToken: fcmToken));
-      await CallsNotificationsService.instance.hideNotification(callId);
     } else {
       _callEndedByCurrentUser = true; // reset to default
     }
@@ -123,6 +122,15 @@ class CallsService {
       case Event.actionCallDecline:
         mainNavigatorGlobalKey.currentState!.popIfType<CallPage>();
         // endCall(event.body['extra']['other_user_id'] as int, isCallAccepted: false);
+        break;
+      case Event.actionCallEnded:
+        if (mainNavigatorGlobalKey.currentState!.currentIs<CallPage>()) {
+          mainNavigatorGlobalKey.currentState!.pop();
+        } else {
+          final extra = event.body['extra'] as Map<dynamic, dynamic>;
+          print('extra: $extra');
+          await CallsService.instance.endCall(extra['call_id'] as String);
+        }
         break;
 
       default:

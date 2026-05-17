@@ -180,7 +180,6 @@ class CallsRepositoryImpl implements CallsRepository {
 
   @override
   Future<void> disposeConnection() async {
-    print('KlmLog callsRepository disposeConnection');
     await _peerConnection.dispose();
   }
 

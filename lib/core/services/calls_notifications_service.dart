@@ -4,7 +4,8 @@ import 'package:flutter_callkit_incoming/entities/android_params.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
-import 'package:kepleomax/core/app_constants.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,24 +31,76 @@ class CallsNotificationsService {
     await FlutterCallkitIncoming.showCallkitIncoming(params);
   }
 
-  Future<void> hideNotification(String callId) async {
+  Future<void> endCall(String callId) async {
     await _startIgnoringEvents();
 
+    print('KlmLog2 endCall');
     await FlutterCallkitIncoming.endCall(callId);
+
+    await _stopForeground();
 
     unawaited(_waitAndStopIgnoringEvents());
   }
 
-  // @Deprecated('Now missed call is made via new_message notification')
-  // Future<void> showMissedCall({required UserDto otherUser}) async {
-  //   await _startIgnoringEvents();
-  //
-  //   await FlutterCallkitIncoming.endCall(otherUser.id.toString());
-  //   final params = _generateCallKitParams(otherUser);
-  //   await FlutterCallkitIncoming.showMissCallNotification(params);
-  //
-  //   unawaited(_waitAndStopIgnoringEvents());
-  // }
+  Future<void> acceptCall(String callId) async {
+    await _startIgnoringEvents();
+
+    await FlutterCallkitIncoming.setCallConnected(callId);
+    // await FlutterCallkitIncoming.startCall(CallKitParams(
+    //   id: callId,
+    //   type: 1,
+    //   nameCaller: 'Caller name',
+    //   appName: 'KepLeoMax',
+    //   android: const AndroidParams(
+    //     isCustomNotification: true,
+    //     isImportant: true,
+    //     isShowFullLockedScreen: true,
+    //   ),
+    // ));
+
+    await _startForeground();
+
+    unawaited(_waitAndStopIgnoringEvents());
+  }
+
+  Future<void> _startForeground() async {
+    FlutterForegroundTask.init(
+      androidNotificationOptions: AndroidNotificationOptions(
+        channelId: 'webrtc_mic_protection',
+        channelName: 'Call Audio Protection',
+        channelDescription: 'Keeps microphone active',
+        channelImportance: NotificationChannelImportance.LOW, // Делаем тихим, чтобы не спамить
+        priority: NotificationPriority.LOW,
+      ),
+      iosNotificationOptions: const IOSNotificationOptions(showNotification: false),
+      foregroundTaskOptions: ForegroundTaskOptions(
+        eventAction: ForegroundTaskEventAction.nothing(),
+        autoRunOnBoot: false,
+        allowWakeLock: true,
+        allowAutoRestart: true,
+        stopWithTask: false,
+      ),
+    );
+
+    await FlutterForegroundTask.startService(
+      notificationTitle: 'Connected to Call',
+      notificationText: 'Microphone protection is active',
+      serviceId: 250, // random number
+      serviceTypes: [ForegroundServiceTypes.microphone],
+    );
+  }
+
+  Future<void> _stopForeground() async {
+    await Helper.setAndroidAudioConfiguration(
+      AndroidAudioConfiguration(
+        androidAudioMode: AndroidAudioMode.normal,
+        androidAudioStreamType: AndroidAudioStreamType.music,
+        androidAudioFocusMode: AndroidAudioFocusMode.gain,
+      ),
+    );
+
+    await FlutterForegroundTask.stopService();
+  }
 
   Future<void> _startIgnoringEvents() async {
     _prefs ??= await SharedPreferences.getInstance();
@@ -71,35 +124,40 @@ class CallsNotificationsService {
     nameCaller: otherUser.username,
     appName: 'KepLeoMax',
     avatar: otherUser.profileImage,
-    type: 0,
+    type: 1,
     textAccept: 'Accept',
     textDecline: 'Decline',
     callingNotification: const NotificationParams(
       showNotification: true,
       isShowCallback: true,
-      subtitle: 'Calling...',
+      subtitle: 'In progress',
       callbackText: 'Hang Up',
+
     ),
     missedCallNotification: const NotificationParams(
       showNotification: false,
       isShowCallback: false,
     ),
-    duration:
-        AppConstants.callingTimeout.inMilliseconds -
-        (DateTime.now().millisecondsSinceEpoch - startedAt.millisecondsSinceEpoch),
+    duration: const Duration(hours: 3).inMilliseconds, // TODO
+        // AppConstants.callingTimeout.inMilliseconds -
+        // (DateTime.now().millisecondsSinceEpoch - startedAt.millisecondsSinceEpoch),
     extra: {'id': id, 'other_user_id': otherUser.id},
     android: AndroidParams(
-      isCustomNotification: true,
+      isCustomNotification: false,
       isShowLogo: false,
+      isCustomSmallExNotification: true,
+      isImportant: true,
+      isShowFullLockedScreen: true,
+      isBot: false,
       logoUrl: otherUser.profileImage,
       ringtonePath: 'system_ringtone_default',
       backgroundColor: '#2196F3',
       backgroundUrl: otherUser.profileImage,
-      actionColor: '#4CAF50;',
+      actionColor: '#4CAF50',
       textColor: '#ffffff',
       incomingCallNotificationChannelName: 'Incoming Call',
       missedCallNotificationChannelName: 'Missed Call',
-      isShowCallID: false,
+      isShowCallID: true,
     ),
   );
 }
