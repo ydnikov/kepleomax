@@ -411,7 +411,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    if (data.isLoading || !data.isConnected) return;
+                    if (!data.isConnected) return;
 
                     AppNavigator.of(
                       context,

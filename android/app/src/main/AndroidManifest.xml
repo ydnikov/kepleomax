@@ -47,6 +47,10 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <meta-data
+            android:name="com.kepleomax.kepleomax.IC_NOTIFICATION"
+            android:resource="@drawable/icon_transparent" />
+
         <service
             android:name="com.hiennv.flutter_callkit_incoming.CallkitIncomingService"
             android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"

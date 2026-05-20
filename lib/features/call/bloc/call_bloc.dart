@@ -79,6 +79,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
   RTCVideoRenderer? _localRenderer;
   RTCVideoRenderer? _remoteRenderer;
+  late final MediaStream _mediaStream;
   late CallData _data = CallData.initial();
 
   // /// used to restore state after turn on (cause off doesn't contains it was front or back)
@@ -186,10 +187,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         throw Exception('Trying to accept the call, but the offer is null');
       }
 
-      unawaited(CallsService.instance.acceptCall());
-
       _localRenderer = await _setUpLocalRenderer();
       _remoteRenderer = await _setUpRemoteRenderer();
+
+      unawaited(CallsService.instance.acceptCall());
 
       _data = _data.copyWith(
         localRenderer: _localRenderer,
@@ -224,14 +225,14 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   Future<RTCVideoRenderer> _setUpLocalRenderer() async {
-    final mediaStream = await navigator.mediaDevices.getUserMedia({
+    _mediaStream = await navigator.mediaDevices.getUserMedia({
       'audio': true,
       'video': {'facingMode': 'user', 'width': _callWidth, 'height': _callHeight},
     });
 
     final renderer = RTCVideoRenderer();
     await renderer.initialize();
-    renderer.srcObject = mediaStream;
+    renderer.srcObject = _mediaStream;
 
     return renderer;
   }
@@ -242,14 +243,35 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     return remoteRenderer;
   }
 
-  void _onToggleCamera(CallEventToggleCamera event, Emitter<CallState> emit) {
-    final isCameraOn = _localRenderer!.srcObject!.getVideoTracks()[0].enabled;
-    _localRenderer!.srcObject!.getVideoTracks()[0].enabled = !isCameraOn;
+  Future<void> _onToggleCamera(
+    CallEventToggleCamera event,
+    Emitter<CallState> emit,
+  ) async {
+    final isCameraOn = _data.localCameraAvailable;
+    // _localRenderer!.srcObject!.getVideoTracks()[0].enabled = !isCameraOn;
 
     final CameraStatus newStatus;
     if (isCameraOn) {
+      final videoTrack = _localRenderer!.srcObject!.getVideoTracks().first;
+      await _mediaStream.removeTrack(videoTrack);
+      await videoTrack.stop();
+      _localRenderer!.srcObject = null;
       newStatus = CameraStatus.off;
     } else {
+      final videoTrack = (await navigator.mediaDevices.getUserMedia({
+        'audio': false,
+        'video': {'facingMode': 'user', 'width': _callWidth, 'height': _callHeight},
+      })).getVideoTracks().first;
+      await _mediaStream.addTrack(videoTrack);
+      _localRenderer!.srcObject = _mediaStream;
+
+      final senders = await _callsRepository.getSenders();
+      for (final sender in senders) {
+        if (sender.track?.kind == 'video' || (sender.parameters.encodings?.isNotEmpty ?? false)) {
+          await sender.replaceTrack(videoTrack);
+        }
+      }
+
       newStatus =
           _localRenderer!.srcObject!
                   .getVideoTracks()[0]

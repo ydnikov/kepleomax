@@ -5,7 +5,9 @@ import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CallsNotificationsService {
@@ -78,15 +80,21 @@ class CallsNotificationsService {
     unawaited(_waitAndStopIgnoringEvents());
   }
 
+  /// before call it ensure you have mic permission
   Future<void> _startForeground() async {
+    final status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      logger.e('Attempt to start microphone foreground service without permission');
+      return;
+    }
+
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'webrtc_mic_protection',
-        channelName: 'Call Audio Protection',
+        channelName: 'Call Audio Engine',
         channelDescription: 'Keeps microphone active',
         channelImportance: NotificationChannelImportance.LOW,
-        priority: NotificationPriority.LOW,
-
+        priority: NotificationPriority.MIN,
       ),
       iosNotificationOptions: const IOSNotificationOptions(showNotification: false),
       foregroundTaskOptions: ForegroundTaskOptions(
@@ -99,10 +107,13 @@ class CallsNotificationsService {
     );
 
     await FlutterForegroundTask.startService(
-      notificationTitle: 'Connected to Call',
-      notificationText: 'Microphone protection is active',
+      notificationTitle: 'Microphone is active',
+      notificationText: 'In use for active call',
       serviceId: 250, // random number
       serviceTypes: [ForegroundServiceTypes.microphone],
+      notificationIcon: const NotificationIcon(
+        metaDataName: 'com.kepleomax.kepleomax.IC_NOTIFICATION',
+      ),
     );
   }
 
