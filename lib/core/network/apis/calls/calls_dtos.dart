@@ -25,14 +25,18 @@ class NewCallResponseData {
 }
 
 class CallStatusDto {
-  CallStatusDto({required this.status});
+  CallStatusDto({required this.status, required this.message});
 
   factory CallStatusDto.fromJson(Map<String, dynamic> json) {
-    final status = json['data']?['status'] as String;
-    return CallStatusDto(status: CallStatus.fromString(status));
+    final status = json['data']?['status'] as String?;
+    return CallStatusDto(
+      status: status == null ? null : CallStatus.fromString(status),
+      message: json['message'] as String?,
+    );
   }
 
-  CallStatus status;
+  final CallStatus? status;
+  final String? message;
 }
 
 @JsonSerializable()

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:focus_detector/focus_detector.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
@@ -95,29 +96,9 @@ class _Body extends StatefulWidget {
   State<_Body> createState() => _BodyState();
 }
 
-class _BodyState extends State<_Body> with WidgetsBindingObserver {
+class _BodyState extends State<_Body> {
   bool _camerasSwitched = false;
-
-  @override
-  void initState() {
-    WidgetsBinding.instance.addObserver(this);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      // context.read<CallBloc>().add(const CallEventOnPause());
-    } else if (state == AppLifecycleState.resumed) {
-      // context.read<CallBloc>().add(const CallEventOnResume()); // Создайте ивент для включения камеры назад
-    }
-  }
+  bool _cameraWasClosedOnForegroundLost = false;
 
   @override
   Widget build(BuildContext context) {
@@ -159,160 +140,175 @@ class _BodyState extends State<_Body> with WidgetsBindingObserver {
                 )
               : null;
 
-          return Stack(
-            children: [
-              if ((!_camerasSwitched && data.remoteCameraAvailable) ||
-                  (_camerasSwitched && data.localCameraAvailable))
-                _camerasSwitched ? localView! : remoteView!,
-              if ((!_camerasSwitched && data.localCameraAvailable) ||
-                  (_camerasSwitched && data.remoteCameraAvailable))
-                Positioned(
-                  right: 10,
-                  bottom: 92,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _camerasSwitched = !_camerasSwitched;
-                      });
-                    },
-                    child: Material(
-                      elevation: 6,
-                      shadowColor: Colors.black,
-                      borderRadius: BorderRadius.circular(12),
-                      child: ClipRRect(
+          return FocusDetector(
+            onForegroundGained: () {
+              if (_cameraWasClosedOnForegroundLost) {
+                _cameraWasClosedOnForegroundLost = false;
+                context.read<CallBloc>().add(const CallEventToggleCamera());
+              }
+            },
+            onForegroundLost: () {
+              if (data.localCameraAvailable) {
+                _cameraWasClosedOnForegroundLost = true;
+                Fluttertoast.showToast(msg: 'Camera stopped');
+                context.read<CallBloc>().add(const CallEventToggleCamera());
+              }
+            },
+            child: Stack(
+              children: [
+                if ((!_camerasSwitched && data.remoteCameraAvailable) ||
+                    (_camerasSwitched && data.localCameraAvailable))
+                  _camerasSwitched ? localView! : remoteView!,
+                if ((!_camerasSwitched && data.localCameraAvailable) ||
+                    (_camerasSwitched && data.remoteCameraAvailable))
+                  Positioned(
+                    right: 10,
+                    bottom: 92,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _camerasSwitched = !_camerasSwitched;
+                        });
+                      },
+                      child: Material(
+                        elevation: 6,
+                        shadowColor: Colors.black,
                         borderRadius: BorderRadius.circular(12),
-                        child: SizedBox(
-                          height: 160 * 1.3,
-                          width: 90 * 1.3,
-                          child: _camerasSwitched ? remoteView : localView,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: SizedBox(
+                            height: 160 * 1.3,
+                            width: 90 * 1.3,
+                            child: _camerasSwitched ? remoteView : localView,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
 
-              Column(
-                children: [
-                  const SizedBox(height: 6),
-                  if (data.localCameraAvailable || data.remoteCameraAvailable)
-                    if (data.connectionStatus ==
-                        RTCPeerConnectionState.RTCPeerConnectionStateConnected)
-                      CallStopwatchWidget(
-                        callStartedTime: data.callStartedTime!,
-                        color: Colors.white70,
-                        fontSize: 14,
-                      )
-                    else
-                      EllipsisTextWidget(
-                        data.connectionStatus.userString,
-                        ellipsis: data.connectionStatus.showEllipsis,
+                Column(
+                  children: [
+                    const SizedBox(height: 6),
+                    if (data.localCameraAvailable || data.remoteCameraAvailable)
+                      if (data.connectionStatus ==
+                          RTCPeerConnectionState.RTCPeerConnectionStateConnected)
+                        CallStopwatchWidget(
+                          callStartedTime: data.callStartedTime!,
+                          color: Colors.white70,
+                          fontSize: 14,
+                        )
+                      else
+                        EllipsisTextWidget(
+                          data.connectionStatus.userString,
+                          ellipsis: data.connectionStatus.showEllipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey,
+                          ),
+                        ),
+                    if (!data.remoteCameraAvailable &&
+                        !data.localCameraAvailable) ...[
+                      const SizedBox(height: 80),
+                      UserImage(user: data.otherUser, size: 200),
+                      const SizedBox(height: 10),
+                      Text(
+                        data.otherUser.username,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
-                  if (!data.remoteCameraAvailable &&
-                      !data.localCameraAvailable) ...[
-                    const SizedBox(height: 80),
-                    UserImage(user: data.otherUser, size: 200),
-                    const SizedBox(height: 10),
-                    Text(
-                      data.otherUser.username,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    if (data.callStartedTime != null) ...[
-                      const SizedBox(height: 8),
-                      CallStopwatchWidget(callStartedTime: data.callStartedTime!),
+                      if (data.callStartedTime != null) ...[
+                        const SizedBox(height: 8),
+                        CallStopwatchWidget(callStartedTime: data.callStartedTime!),
+                      ],
                     ],
-                  ],
-                  const Expanded(child: SizedBox()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        if (data.isCallAccepted) ...[
-                          _Button(
-                            data.localCameraStatus.isOn
-                                ? 'Stop video'
-                                : 'Start video',
-                            icon: data.localCameraStatus.isOn
-                                ? Icons.videocam
-                                : Icons.videocam_off_outlined,
-                            iconColor: Colors.blue,
-                            color: Colors.white,
-                            onPressed: () {
-                              context.read<CallBloc>().add(
-                                const CallEventToggleCamera(),
-                              );
-                            },
-                          ),
-                          if (data.localCameraStatus.isOn)
+                    const Expanded(child: SizedBox()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          if (data.isCallAccepted) ...[
                             _Button(
-                              'Flip',
-                              icon: Icons.cameraswitch,
+                              data.localCameraStatus.isOn
+                                  ? 'Stop video'
+                                  : 'Start video',
+                              icon: data.localCameraStatus.isOn
+                                  ? Icons.videocam
+                                  : Icons.videocam_off_outlined,
                               iconColor: Colors.blue,
                               color: Colors.white,
                               onPressed: () {
                                 context.read<CallBloc>().add(
-                                  const CallEventFlipCamera(),
+                                  const CallEventToggleCamera(),
                                 );
                               },
                             ),
-                          _Button(
-                            data.isLocalMicrophoneOn ? 'Mute' : 'Unmute',
-                            icon: data.isLocalMicrophoneOn
-                                ? Icons.mic
-                                : Icons.mic_off,
-                            iconColor: Colors.blue,
-                            color: Colors.white,
-                            onPressed: () {
-                              context.read<CallBloc>().add(
-                                const CallEventToggleMicrophone(),
-                              );
-                            },
-                          ),
-                        ],
+                            if (data.localCameraStatus.isOn)
+                              _Button(
+                                'Flip',
+                                icon: Icons.cameraswitch,
+                                iconColor: Colors.blue,
+                                color: Colors.white,
+                                onPressed: () {
+                                  context.read<CallBloc>().add(
+                                    const CallEventFlipCamera(),
+                                  );
+                                },
+                              ),
+                            _Button(
+                              data.isLocalMicrophoneOn ? 'Mute' : 'Unmute',
+                              icon: data.isLocalMicrophoneOn
+                                  ? Icons.mic
+                                  : Icons.mic_off,
+                              iconColor: Colors.blue,
+                              color: Colors.white,
+                              onPressed: () {
+                                context.read<CallBloc>().add(
+                                  const CallEventToggleMicrophone(),
+                                );
+                              },
+                            ),
+                          ],
 
-                        _Button(
-                          data.isCallAccepted
-                              ? 'End Call'
-                              : widget.doCall
-                              ? 'Cancel'
-                              : 'Decline',
-                          icon: Icons.call_end,
-                          iconColor: Colors.white,
-                          color: Colors.red,
-                          onPressed: () {
-                            AppNavigator.pop(context);
-                          },
-                        ),
-                        if (!data.isCallAccepted && !widget.doCall)
                           _Button(
-                            'Accept',
-                            icon: Icons.call,
+                            data.isCallAccepted
+                                ? 'End Call'
+                                : widget.doCall
+                                ? 'Cancel'
+                                : 'Decline',
+                            icon: Icons.call_end,
                             iconColor: Colors.white,
-                            color: Colors.green,
+                            color: Colors.red,
                             onPressed: () {
-                              context.read<CallBloc>().add(
-                                const CallEventAcceptCall(),
-                              );
+                              AppNavigator.pop(context);
                             },
                           ),
-                      ],
+                          if (!data.isCallAccepted && !widget.doCall)
+                            _Button(
+                              'Accept',
+                              icon: Icons.call,
+                              iconColor: Colors.white,
+                              color: Colors.green,
+                              onPressed: () {
+                                context.read<CallBloc>().add(
+                                  const CallEventAcceptCall(),
+                                );
+                              },
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ],
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ],
+            ),
           );
         },
       ),

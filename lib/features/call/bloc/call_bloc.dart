@@ -8,6 +8,7 @@ import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
+import 'package:kepleomax/core/services/calls_notifications_service.dart';
 import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:kepleomax/features/call/bloc/call_state.dart';
 import 'package:kepleomax/features/call/data/calls_repository.dart';
@@ -106,19 +107,6 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     );
     emit(CallStateBase(data: _data));
 
-    await Helper.setAndroidAudioConfiguration(
-      AndroidAudioConfiguration(
-        manageAudioFocus: false,
-        forceHandleAudioRouting: false,
-        androidAudioMode: AndroidAudioMode.inCommunication,
-        androidAudioStreamType: AndroidAudioStreamType.voiceCall,
-        androidAudioFocusMode: AndroidAudioFocusMode.gainTransient,
-        androidAudioAttributesUsageType:
-            AndroidAudioAttributesUsageType.voiceCommunication,
-        androidAudioAttributesContentType: AndroidAudioAttributesContentType.speech,
-      ),
-    );
-
     if (event.doCall) add(CallEventCall(otherUser: event.otherUser));
   }
 
@@ -133,6 +121,13 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         otherUserId: event.otherUser.id,
       );
       _data = _data.copyWith(callId: callId);
+
+      unawaited(
+        CallsNotificationsService.instance.registerNewCall(
+          callId,
+          otherUserName: _data.otherUser.username,
+        ),
+      );
 
       await _callsRepository.doCall(
         callId: callId,
@@ -158,6 +153,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     } catch (e, st) {
       logger.e(e, stackTrace: st);
 
+      // TODO make more accurate errors handling
       if (_localRenderer == null) {
         emit(const CallStateMessage(message: 'Access denied. Check permissions'));
         emit(CallStateBase(data: _data));
@@ -249,8 +245,6 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   void _onToggleCamera(CallEventToggleCamera event, Emitter<CallState> emit) {
     final isCameraOn = _localRenderer!.srcObject!.getVideoTracks()[0].enabled;
     _localRenderer!.srcObject!.getVideoTracks()[0].enabled = !isCameraOn;
-
-    print('toggleCamera, newValue: ${!isCameraOn}');
 
     final CameraStatus newStatus;
     if (isCameraOn) {

@@ -5,7 +5,6 @@ import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,10 +33,19 @@ class CallsNotificationsService {
   Future<void> endCall(String callId) async {
     await _startIgnoringEvents();
 
-    print('KlmLog2 endCall');
+    print('KlmLog endCallNotification');
     await FlutterCallkitIncoming.endCall(callId);
 
     await _stopForeground();
+
+    unawaited(_waitAndStopIgnoringEvents());
+  }
+
+  Future<void> endAllCalls() async {
+    await _startIgnoringEvents();
+
+    print('KlmLog2 endAllCalls');
+    await FlutterCallkitIncoming.endAllCalls();
 
     unawaited(_waitAndStopIgnoringEvents());
   }
@@ -46,18 +54,25 @@ class CallsNotificationsService {
     await _startIgnoringEvents();
 
     await FlutterCallkitIncoming.setCallConnected(callId);
-    // await FlutterCallkitIncoming.startCall(CallKitParams(
-    //   id: callId,
-    //   type: 1,
-    //   nameCaller: 'Caller name',
-    //   appName: 'KepLeoMax',
-    //   android: const AndroidParams(
-    //     isCustomNotification: true,
-    //     isImportant: true,
-    //     isShowFullLockedScreen: true,
-    //   ),
-    // ));
+    await _startForeground();
 
+    unawaited(_waitAndStopIgnoringEvents());
+  }
+
+  Future<void> registerNewCall(String callId, {required String otherUserName}) async {
+    await _startIgnoringEvents();
+
+    await FlutterCallkitIncoming.startCall(CallKitParams(
+      id: callId,
+      type: 1,
+      nameCaller: otherUserName,
+      appName: 'KepLeoMax',
+      android: const AndroidParams(
+        isCustomNotification: true,
+        isImportant: true,
+        isShowFullLockedScreen: true,
+      ),
+    ));
     await _startForeground();
 
     unawaited(_waitAndStopIgnoringEvents());
@@ -69,15 +84,16 @@ class CallsNotificationsService {
         channelId: 'webrtc_mic_protection',
         channelName: 'Call Audio Protection',
         channelDescription: 'Keeps microphone active',
-        channelImportance: NotificationChannelImportance.LOW, // Делаем тихим, чтобы не спамить
+        channelImportance: NotificationChannelImportance.LOW,
         priority: NotificationPriority.LOW,
+
       ),
       iosNotificationOptions: const IOSNotificationOptions(showNotification: false),
       foregroundTaskOptions: ForegroundTaskOptions(
         eventAction: ForegroundTaskEventAction.nothing(),
         autoRunOnBoot: false,
         allowWakeLock: true,
-        allowAutoRestart: true,
+        allowAutoRestart: false,
         stopWithTask: false,
       ),
     );
@@ -91,15 +107,8 @@ class CallsNotificationsService {
   }
 
   Future<void> _stopForeground() async {
-    await Helper.setAndroidAudioConfiguration(
-      AndroidAudioConfiguration(
-        androidAudioMode: AndroidAudioMode.normal,
-        androidAudioStreamType: AndroidAudioStreamType.music,
-        androidAudioFocusMode: AndroidAudioFocusMode.gain,
-      ),
-    );
-
     await FlutterForegroundTask.stopService();
+    await FlutterForegroundTask.clearAllData();
   }
 
   Future<void> _startIgnoringEvents() async {
@@ -130,8 +139,8 @@ class CallsNotificationsService {
     callingNotification: const NotificationParams(
       showNotification: true,
       isShowCallback: true,
-      subtitle: 'In progress',
-      callbackText: 'Hang Up',
+      subtitle: 'Video call',
+      callbackText: 'End call',
 
     ),
     missedCallNotification: const NotificationParams(

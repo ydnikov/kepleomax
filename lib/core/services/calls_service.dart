@@ -5,7 +5,9 @@ import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:kepleomax/core/app.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
+import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
+import 'package:kepleomax/core/network/apis/calls/calls_dtos.dart';
 import 'package:kepleomax/core/network/websockets/models/rtc_models.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/services/calls_notifications_service.dart';
@@ -35,16 +37,12 @@ class CallsService {
   /// main methods
   Future<void> _incomingCallNavigate(OfferUpdate offerUpdate) async {
     print('KlmLog incomingCallNavigate');
-    // if (await PeerConnectionControllerImpl.activeCallOtherUserId != null) {
-    //   print('KlmLog activeCallOtherUserId != null, declineCall');
-    //   unawaited(_callsApi.endCall(id: offerUpdate.callId));
-    //   await CallsNotificationsService.instance.hideNotification(offerUpdate.callId);
-    //   return;
-    // }
 
     _cachedOffer = offerUpdate;
 
-    /// TODO getUserFromCacheOrApi
+    if (mainNavigatorGlobalKey.currentState!.currentIs<CallPage>()) return;
+
+    // TODO getUserFromCacheOrApi
     final otherUser = await _userRepository.getUser(userId: offerUpdate.otherUserId);
     mainNavigatorGlobalKey.currentState!.push(
       CallPage(otherUser: otherUser, doCall: false),
@@ -70,8 +68,9 @@ class CallsService {
 
   Future<void> endCall(String callId) async {
     print('KlmLog endCall, byCurrentUser: $_callEndedByCurrentUser');
+    await CallsNotificationsService.instance.endCall(callId);
+
     if (_callEndedByCurrentUser) {
-      await CallsNotificationsService.instance.endCall(callId);
       final fcmToken = await FirebaseMessaging.instance.getToken();
       unawaited(_callsApi.endCall(id: callId, fcmToken: fcmToken));
     } else {
@@ -129,7 +128,7 @@ class CallsService {
         } else {
           final extra = event.body['extra'] as Map<dynamic, dynamic>;
           print('extra: $extra');
-          await CallsService.instance.endCall(extra['call_id'] as String);
+          await CallsService.instance.endCall(extra['id'] as String);
         }
         break;
 
@@ -147,15 +146,31 @@ class CallsService {
     _callEndsSub = null;
   }
 
-  void checkActiveCalls(UserRepository userRepository) {
+  void checkActiveCalls(UserRepository userRepository, CallsApi callsApi) {
     FlutterCallkitIncoming.activeCalls().then((calls) async {
       if (calls is List && calls.isNotEmpty) {
-        if (calls[0]['isAccepted'] == true) {
+        final activeCall = calls[0];
+
+        if (activeCall['isAccepted'] == true) {
           final extra = calls[0]['extra'] as Map<dynamic, dynamic>;
-          if (_cachedOffer == null) {
-            await _incomingCallNavigate(OfferUpdate.fromJson(extra));
+          final callId = extra['id'] as String;
+          final res = await callsApi.getStatusOfCall(callId: callId);
+          if (res.response.statusCode != 200) {
+            logger.e(
+              res.data.message ??
+                  'Failed to get status, statusCode: ${res.response.statusCode}',
+            );
           }
-          _acceptCallController.add(null);
+
+          if (res.data.status == CallStatus.active ||
+              res.data.status == CallStatus.pending) {
+            if (_cachedOffer == null) {
+              await _incomingCallNavigate(OfferUpdate.fromJson(extra));
+            }
+            _acceptCallController.add(null);
+          } else {
+            CallsNotificationsService.instance.endCall(callId).ignore();
+          }
         }
       }
     });

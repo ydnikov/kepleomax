@@ -51,8 +51,9 @@
             android:name="com.hiennv.flutter_callkit_incoming.CallkitIncomingService"
             android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
             android:foregroundServiceType="microphone"
+            android:stopWithTask="true"
             android:exported="true"
-            tools:replace="android:foregroundServiceType">
+            tools:replace="android:foregroundServiceType,android:stopWithTask">
             <intent-filter>
                 <action android:name="android.telecom.ConnectionService" />
             </intent-filter>
@@ -70,8 +71,9 @@
         <service
             android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
             android:foregroundServiceType="microphone"
+            android:stopWithTask="true"
             android:exported="false"
-            tools:replace="android:foregroundServiceType" />
+            tools:replace="android:foregroundServiceType,android:stopWithTask" />
     </application>
 
     <queries>

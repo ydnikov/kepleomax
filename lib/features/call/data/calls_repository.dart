@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
+import 'package:kepleomax/core/network/apis/calls/calls_dtos.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/features/call/data/peer_connection_controller.dart';
 
@@ -25,11 +26,13 @@ abstract class CallsRepository {
 
   Future<RTCSessionDescription> getOffer({required String callId});
 
-  Future<void> disposeConnection();
+  Future<CallStatus> getStatus({required String callId});
 
   Future<List<RTCRtpSender>> getSenders();
 
   Future<void> removeTrack(RTCRtpSender sender);
+
+  Future<void> disposeConnection();
 
   Stream<RTCPeerConnectionState> get connectionStream;
 }
@@ -160,13 +163,6 @@ class CallsRepositoryImpl implements CallsRepository {
   }
 
   @override
-  Future<List<RTCRtpSender>> getSenders() => _peerConnection.getSenders();
-
-  @override
-  Future<void> removeTrack(RTCRtpSender sender) =>
-      _peerConnection.removeTrack(sender);
-
-  @override
   Future<RTCSessionDescription> getOffer({required String callId}) async {
     final res = await _callsApi.getOffer(callId: callId);
 
@@ -177,6 +173,27 @@ class CallsRepositoryImpl implements CallsRepository {
 
     throw Exception('Failed to get offer, statusCode: ${res.response.statusCode}');
   }
+
+  @override
+  Future<CallStatus> getStatus({required String callId}) async {
+    final res = await _callsApi.getStatusOfCall(callId: callId);
+
+    if (res.response.statusCode == 200) {
+      return res.data.status!;
+    }
+
+    throw Exception(
+      res.data.message ??
+          'Failed to get status, statusCode: ${res.response.statusCode}',
+    );
+  }
+
+  @override
+  Future<List<RTCRtpSender>> getSenders() => _peerConnection.getSenders();
+
+  @override
+  Future<void> removeTrack(RTCRtpSender sender) =>
+      _peerConnection.removeTrack(sender);
 
   @override
   Future<void> disposeConnection() async {

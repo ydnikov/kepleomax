@@ -40,7 +40,7 @@ class _CallsScopeState extends State<CallsScope> {
   }
 
   void _onResume() {
-    CallsService.instance.checkActiveCalls(_dp.userRepository);
+    CallsService.instance.checkActiveCalls(_dp.userRepository, _dp.callsApi);
   }
 
   @override
