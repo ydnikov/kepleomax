@@ -49,14 +49,20 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     });
 
     _connectionStatusSub = _callsRepository.connectionStream.listen((status) {
-      _data = _data.copyWith(connectionStatus: status);
-      add(const _CallEventEmit());
+      if (status != _data.connectionStatus &&
+          (status == RTCPeerConnectionState.RTCPeerConnectionStateFailed ||
+              status == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected ||
+              status == RTCPeerConnectionState.RTCPeerConnectionStateClosed)) {
+        if (status == RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
+          Fluttertoast.showToast(msg: 'Failed to connect'); // TODO make better
+        }
 
-      if (status == RTCPeerConnectionState.RTCPeerConnectionStateFailed ||
-          status == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected ||
-          status == RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
+        print('KlmLog exitStatus: $status');
         add(const _CallEventExit());
       }
+
+      _data = _data.copyWith(connectionStatus: status);
+      add(const _CallEventEmit());
     });
 
     /// accept call can be called twice in a short time, so onAcceptCall has debouncer
@@ -123,13 +129,12 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       );
       _data = _data.copyWith(callId: callId);
 
-      unawaited(
-        CallsNotificationsService.instance.registerNewCall(
-          callId,
-          otherUserName: _data.otherUser.username,
-        ),
+      await CallsNotificationsService.instance.registerNewCall(
+        callId,
+        otherUserName: _data.otherUser.username,
       );
 
+      print('KlmLog doCall');
       await _callsRepository.doCall(
         callId: callId,
         otherUserId: event.otherUser.id,
@@ -144,6 +149,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         callStartedTime: DateTime.now(),
       );
       emit(CallStateBase(data: _data));
+
+      await CallsNotificationsService.instance.setCallConnected(callId);
     } on InitCallException catch (e, st) {
       logger.e(e, stackTrace: st);
 
@@ -160,7 +167,6 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         emit(CallStateBase(data: _data));
       }
 
-      if (isClosed) return;
       add(const _CallEventExit());
     }
   }
@@ -186,6 +192,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       if (CallsService.instance.cachedOffer == null) {
         throw Exception('Trying to accept the call, but the offer is null');
       }
+
+      unawaited(
+        CallsNotificationsService.instance.hideIncomingNotification(_data.callId!),
+      );
 
       _localRenderer = await _setUpLocalRenderer();
       _remoteRenderer = await _setUpRemoteRenderer();
@@ -219,7 +229,6 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         emit(CallStateBase(data: _data));
       }
 
-      if (isClosed) return;
       add(const _CallEventExit());
     }
   }
@@ -267,7 +276,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
       final senders = await _callsRepository.getSenders();
       for (final sender in senders) {
-        if (sender.track?.kind == 'video' || (sender.parameters.encodings?.isNotEmpty ?? false)) {
+        if (sender.track?.kind == 'video' ||
+            (sender.parameters.encodings?.isNotEmpty ?? false)) {
           await sender.replaceTrack(videoTrack);
         }
       }
@@ -317,7 +327,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     emit(CallStateBase(data: _data));
   }
 
+  bool _exiting = false;
   void _onExit(_CallEventExit event, Emitter<CallState> emit) {
+    if (_exiting) return;
+    _exiting = true;
+
     print('KlmLog onExit');
     emit(const CallStateExit());
     emit(CallStateBase(data: _data));

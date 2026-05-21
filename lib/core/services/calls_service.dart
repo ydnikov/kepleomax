@@ -49,7 +49,7 @@ class CallsService {
     );
   }
 
-  void callEnded() {
+  void callEnded(String callId) {
     print('KlmLog callEnded');
     if (mainNavigatorGlobalKey.currentState!.currentIs<CallPage>()) {
       _callEndedByCurrentUser = false;
@@ -57,13 +57,14 @@ class CallsService {
     }
 
     _cachedOffer = null;
+    CallsNotificationsService.instance.endCall(callId);
   }
 
   Future<void> acceptCall() async {
     print('KlmLog acceptCall');
-    await CallsNotificationsService.instance.acceptCall(cachedOffer!.callId);
+    await CallsNotificationsService.instance.setCallConnected(cachedOffer!.callId);
 
-    // _cachedOffer = null;
+    _cachedOffer = null;
   }
 
   Future<void> endCall(String callId) async {
@@ -72,7 +73,7 @@ class CallsService {
 
     if (_callEndedByCurrentUser) {
       final fcmToken = await FirebaseMessaging.instance.getToken();
-      unawaited(_callsApi.endCall(id: callId, fcmToken: fcmToken));
+      _callsApi.endCall(id: callId, fcmToken: fcmToken).ignore();
     } else {
       _callEndedByCurrentUser = true; // reset to default
     }
@@ -93,20 +94,25 @@ class CallsService {
     _callsApi = callsApi;
 
     _callEndsSub = _webSocket.endCallStream.listen((update) {
-      callEnded();
+      callEnded(update.callId);
     });
 
-    _eventsSub = FlutterCallkitIncoming.onEvent.listen(_handleCallKitEvent);
+    _eventsSub = FlutterCallkitIncoming.onEvent.listen((event) {
+      if (event?.event != null) {
+        _handleCallKitEvent(event!);
+      }
+    });
   }
 
-  Future<void> _handleCallKitEvent(CallEvent? event) async {
-    print(
-      'KlmLog event: ${event?.event}, ignore: ${CallsNotificationsService.instance.ignoreEvents}',
-    );
-    if (event?.event == null || CallsNotificationsService.instance.ignoreEvents)
+  Future<void> _handleCallKitEvent(CallEvent event) async {
+    if (CallsNotificationsService.instance.ignoreEventsAndReset) {
+      print('KlmLog CallKitIncoming ignore event: ${event.event}');
       return;
+    } else {
+      print('KlmLog CallKitIncoming event: ${event.event}');
+    }
 
-    switch (event!.event) {
+    switch (event.event) {
       case Event.actionCallIncoming:
         final extra = event.body['extra'] as Map<dynamic, dynamic>;
         await _incomingCallNavigate(OfferUpdate.fromJson(extra));

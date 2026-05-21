@@ -76,7 +76,7 @@ class CallsRepositoryImpl implements CallsRepository {
   }
 
   @override
-  Future<String> doCall({
+  Future<void> doCall({
     required String callId,
     required int otherUserId,
     required RTCVideoRenderer localRenderer,
@@ -105,6 +105,7 @@ class CallsRepositoryImpl implements CallsRepository {
     await _peerConnection.addTracks(localRenderer.srcObject!);
 
     final offer = await _peerConnection.createOffer();
+    await _peerConnection.setLocalDescription(offer);
     _webSocket.sendOffer(offer, callId);
 
     final answer = await _webSocket.answersStream
@@ -118,15 +119,12 @@ class CallsRepositoryImpl implements CallsRepository {
       throw Exception('New call was made');
     }
 
-    await _peerConnection.setLocalDescription(offer);
     await _peerConnection.setRemoteDescription(answer.answer);
     isRemoteDescriptionSet = true;
 
     for (final candidate in iceCandidates) {
       _webSocket.sendIceCandidate(candidate, callId);
     }
-
-    return answer.callId;
   }
 
   @override

@@ -116,7 +116,7 @@ class NotificationService {
 
     /// check type
     final type = message.data['type'] as String?;
-    print('KlmLog newNotification, type: $type');
+    print('KlmLog newNotification type: $type');
     if (type == null) return;
 
     switch (type) {
@@ -186,10 +186,9 @@ class NotificationService {
 
       case 'stop_call':
         print('KlmLog stop_call');
-        await CallsNotificationsService.instance.endCall(
-          message.data['call_id'] as String,
-        );
-        CallsService.instance.callEnded();
+        final callId = message.data['call_id'] as String;
+        await CallsNotificationsService.instance.endCall(callId);
+        CallsService.instance.callEnded(callId);
         break;
     }
   }
@@ -223,18 +222,18 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
 
   if (message.data['type'] == 'incoming_call') {
     Future(() async {
-      if (CallsNotificationsService.instance.ignoreEvents) return;
-
       /// ONLY IF ISOLATE IN THE BACKGROUND - elementAt(0) will be Event.actionCallIncoming
       final event = await FlutterCallkitIncoming.onEvent
           .skipWhile((event) => event?.event == Event.actionCallIncoming)
           .first
           .timeout(AppConstants.callingTimeout);
 
-      print(
-        'KlmLog secondEvent: ${event?.event}, ignoreEvents: ${CallsNotificationsService.instance.ignoreEvents}',
-      );
-      if (CallsNotificationsService.instance.ignoreEvents) return;
+      if (CallsNotificationsService.instance.ignoreEventsAndReset) {
+        print('KlmLog CallKitIncoming ignore secondEvent: ${event?.event}');
+        return;
+      } else {
+        print('KlmLog secondEvent: ${event?.event}');
+      }
       if (event?.event == Event.actionCallDecline) {
         await sendDeclineApiCall(event!.body['extra']['id'] as String);
       }
