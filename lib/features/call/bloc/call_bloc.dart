@@ -33,7 +33,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     // );
     on<CallEventInit>(_onInit);
     on<CallEventCall>(_onCall);
-    on<CallEventAcceptCall>(_onAcceptCall);
+    on<_CallEventAcceptCall>(_onAcceptCall);
     on<CallEventFlipCamera>(_onFlipCamera);
     on<CallEventToggleCamera>(_onToggleCamera);
     on<CallEventToggleMicrophone>(_onToggleMicrophone);
@@ -67,11 +67,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
     /// accept call can be called twice in a short time, so onAcceptCall has debouncer
     _acceptCallSub = CallsService.instance.acceptCallStream.listen((_) {
-      add(const CallEventAcceptCall());
+      add(const _CallEventAcceptCall());
     });
     CallsService.instance.hasAcceptedCall().then((has) {
       if (has) {
-        add(const CallEventAcceptCall());
+        add(const _CallEventAcceptCall());
       }
     });
   }
@@ -119,20 +119,18 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
   Future<void> _onCall(CallEventCall event, Emitter<CallState> emit) async {
     try {
-      _localRenderer = await _setUpLocalRenderer();
-      _data = _data.copyWith(localRenderer: _localRenderer);
-      emit(CallStateBase(data: _data));
-      _remoteRenderer = await _setUpRemoteRenderer();
-
       final callId = await _callsRepository.createCall(
         otherUserId: event.otherUser.id,
       );
       _data = _data.copyWith(callId: callId);
 
-      await CallsNotificationsService.instance.registerNewCall(
-        callId,
-        otherUserName: _data.otherUser.username,
-      );
+      _localRenderer = await _setUpLocalRenderer();
+      _data = _data.copyWith(localRenderer: _localRenderer);
+      emit(CallStateBase(data: _data));
+
+      _remoteRenderer = await _setUpRemoteRenderer();
+
+      await CallsService.instance.registerNewCall(callId, _data.otherUser);
 
       print('KlmLog doCall');
       await _callsRepository.doCall(
@@ -174,7 +172,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   int _lastTimeAcceptCallCalled = 0;
 
   Future<void> _onAcceptCall(
-    CallEventAcceptCall event,
+    _CallEventAcceptCall event,
     Emitter<CallState> emit,
   ) async {
     if (_data.isCallAccepted) return;
@@ -193,14 +191,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         throw Exception('Trying to accept the call, but the offer is null');
       }
 
-      unawaited(
-        CallsNotificationsService.instance.hideIncomingNotification(_data.callId!),
-      );
-
       _localRenderer = await _setUpLocalRenderer();
       _remoteRenderer = await _setUpRemoteRenderer();
-
-      unawaited(CallsService.instance.acceptCall());
 
       _data = _data.copyWith(
         localRenderer: _localRenderer,
@@ -328,6 +320,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   bool _exiting = false;
+
   void _onExit(_CallEventExit event, Emitter<CallState> emit) {
     if (_exiting) return;
     _exiting = true;
@@ -362,7 +355,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     });
 
     if (_data.callId != null) {
-      CallsService.instance.endCall(_data.callId!);
+      CallsNotificationsService.instance.endCall(_data.callId!);
     } else {
       logger.i('close callBloc, _data.callId == null');
     }
@@ -387,8 +380,8 @@ class CallEventCall implements CallEvent {
   final User otherUser;
 }
 
-class CallEventAcceptCall implements CallEvent {
-  const CallEventAcceptCall();
+class _CallEventAcceptCall implements CallEvent {
+  const _CallEventAcceptCall();
 }
 
 class CallEventToggleCamera implements CallEvent {

@@ -126,6 +126,7 @@ class NotificationService {
           if (type == 'new_missed_call') {
             await CallsNotificationsService.instance.endCall(
               message.data['call_id'] as String,
+              byCurrentUser: false,
             );
           }
 
@@ -172,11 +173,18 @@ class NotificationService {
         final sentAt = int.parse(message.data['sent_at'] as String);
 
         if (DateTime.now().millisecondsSinceEpoch - sentAt >=
-            AppConstants.callingTimeout.inMilliseconds)
+            AppConstants.callingTimeout.inMilliseconds) {
           break;
+        }
+
+        final callId = message.data['id'] as String;
+        final activeCall = await CallsService.instance.getActiveCall();
+        if (activeCall != null && activeCall['id'] != callId) {
+          await FlutterCallkitIncoming.endCall(activeCall['id'] as String);
+        }
 
         await CallsNotificationsService.instance.showIncomingCall(
-          id: message.data['id'] as String,
+          id: callId,
           otherUser: UserDto.fromJson(
             jsonDecode(message.data['other_user'] as String) as Map<String, dynamic>,
           ),
@@ -184,11 +192,14 @@ class NotificationService {
         );
         break;
 
-      case 'stop_call':
-        print('KlmLog stop_call');
-        final callId = message.data['call_id'] as String;
-        await CallsNotificationsService.instance.endCall(callId);
-        CallsService.instance.callEnded(callId);
+      case 'stop_all_calls_on_this_device':
+        print('KlmLog stop_call_on_this_device');
+        /// TODO will it work and not trigger background handler?
+        await FlutterCallkitIncoming.endAllCalls();
+        // await CallsNotificationsService.instance.endCall(
+        //   message.data['call_id'] as String,
+        //   byCurrentUser: false,
+        // );
         break;
     }
   }
@@ -228,12 +239,7 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
           .first
           .timeout(AppConstants.callingTimeout);
 
-      if (CallsNotificationsService.instance.ignoreEventsAndReset) {
-        print('KlmLog CallKitIncoming ignore secondEvent: ${event?.event}');
-        return;
-      } else {
-        print('KlmLog secondEvent: ${event?.event}');
-      }
+      print('KlmLog secondEvent: ${event?.event}');
       if (event?.event == Event.actionCallDecline) {
         await sendDeclineApiCall(event!.body['extra']['id'] as String);
       }

@@ -7,9 +7,12 @@ import 'package:focus_detector/focus_detector.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
+import 'package:kepleomax/core/network/websockets/models/rtc_models.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/services/calls_notifications_service.dart';
+import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:kepleomax/features/call/bloc/call_bloc.dart';
 import 'package:kepleomax/features/call/bloc/call_state.dart';
 import 'package:kepleomax/features/call/widgets/call_stopwatch_widget.dart';
@@ -286,6 +289,7 @@ class _BodyState extends State<_Body> {
                             iconColor: Colors.white,
                             color: Colors.red,
                             onPressed: () {
+                              /// will be handled in bloc.close()
                               AppNavigator.pop(context);
                             },
                           ),
@@ -295,9 +299,15 @@ class _BodyState extends State<_Body> {
                               icon: Icons.call,
                               iconColor: Colors.white,
                               color: Colors.green,
-                              onPressed: () {
-                                context.read<CallBloc>().add(
-                                  const CallEventAcceptCall(),
+                              onPressed: () async {
+                                // TODO maybe through bloc?
+                                await CallsNotificationsService.instance
+                                    .hideIncomingNotification(data.callId!);
+                                await CallsService.instance.callAcceptEvent(
+                                  OfferUpdate(
+                                    callId: data.callId!,
+                                    otherUserId: data.otherUser.id,
+                                  ),
                                 );
                               },
                             ),
@@ -323,14 +333,12 @@ class _Button extends StatelessWidget {
     required this.iconColor,
     required this.color,
     required this.onPressed,
-    this.enabled = true,
   });
 
   final String title;
   final IconData icon;
   final Color iconColor;
   final Color color;
-  final bool enabled;
   final VoidCallback onPressed;
 
   @override
@@ -342,7 +350,7 @@ class _Button extends StatelessWidget {
           shadowColor: Colors.black,
           borderRadius: BorderRadius.circular(100),
           child: IconButton(
-            onPressed: enabled ? onPressed : null,
+            onPressed: onPressed,
             style: IconButton.styleFrom(
               disabledBackgroundColor: Colors.grey.shade300,
               backgroundColor: color,

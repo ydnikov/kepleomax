@@ -67,7 +67,6 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
     _peerConnection = await createPeerConnection(config);
 
     _peerConnection!.onTrack = (track) async {
-      print('KlmLog newTrack: ${track.track.kind}');
       onTrack(track);
     };
     _peerConnection!.onIceCandidate = onIceCandidate;
@@ -79,22 +78,21 @@ class PeerConnectionControllerImpl implements PeerConnectionController {
     }
 
     _peerConnection!.onConnectionState = (RTCPeerConnectionState state) {
-      print('KlmLog RTCPeerConnectionState: $state');
+      print(
+        'KlmLog RTCPeerConnectionState: ${state.toString().substring('RTCPeerConnectionState.RTCPeerConnectionState'.length)}',
+      );
       _connectionController.add(state);
     };
 
     _peerConnection!.onIceConnectionState = (RTCIceConnectionState state) {
-      print('KlmLog RTCIceConnectionState: $state');
+      // print('KlmLog RTCIceConnectionState: $state');
     };
   }
 
   @override
   Future<RTCSessionDescription> createOffer() async {
     final config = {
-      'mandatory': {
-        'OfferToReceiveAudio': true,
-        'OfferToReceiveVideo': true,
-      },
+      'mandatory': {'OfferToReceiveAudio': true, 'OfferToReceiveVideo': true},
       'optional': [
         {'DtlsSrtpKeyAgreement': true},
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/features/call/bloc/call_state.dart';
 
+/// TODO rename
 class OfferUpdate {
   const OfferUpdate({
     required this.callId,

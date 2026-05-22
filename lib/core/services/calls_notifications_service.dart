@@ -5,11 +5,10 @@ import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/notification_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
+import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CallsNotificationsService {
   CallsNotificationsService._();
@@ -17,17 +16,6 @@ class CallsNotificationsService {
   static final CallsNotificationsService _instance = CallsNotificationsService._();
 
   static CallsNotificationsService get instance => _instance;
-
-  static SharedPreferences? _prefs;
-  static const _ignoreEventsKey = '__ignore_events_key__';
-
-  bool get ignoreEventsAndReset {
-    final value = _prefs?.getBool(_ignoreEventsKey) ?? false;
-
-    if (value) _stopIgnoringEvent();
-
-    return value;
-  }
 
   Future<void> showIncomingCall({
     required String id,
@@ -38,15 +26,13 @@ class CallsNotificationsService {
     await FlutterCallkitIncoming.showCallkitIncoming(params);
   }
 
-  Future<void> endCall(String callId) async {
-    await _ignoreNextEventForSecond();
-
+  Future<void> endCall(String callId, {bool byCurrentUser = true}) async {
     print('KlmLog endCallNotification: $callId');
-    await FlutterCallkitIncoming.endCall(callId);
+    if (!byCurrentUser) {
+      CallsService.instance.setCallEndedNotByCurrentUser();
+    }
     await _stopForeground();
-
-    // await FlutterCallkitIncoming.hideCallkitIncoming(CallKitParams(id: callId));
-    // await FlutterCallkitIncoming.endAllCalls();
+    await FlutterCallkitIncoming.endCall(callId);
   }
 
   /// doesn't trigger any event
@@ -56,8 +42,6 @@ class CallsNotificationsService {
   }
 
   Future<void> setCallConnected(String callId) async {
-    await _ignoreNextEventForSecond();
-
     print('KlmLog acceptCall: $callId');
     await FlutterCallkitIncoming.setCallConnected(callId);
     await _startForeground();
@@ -67,15 +51,13 @@ class CallsNotificationsService {
     String callId, {
     required String otherUserName,
   }) async {
-    await _ignoreNextEventForSecond();
-
     await _startForeground();
 
     await FlutterCallkitIncoming.startCall(
       CallKitParams(
         id: callId,
         type: 1,
-        nameCaller: otherUserName,
+        handle: otherUserName,
         appName: 'KepLeoMax',
         android: const AndroidParams(
           isCustomNotification: true,
@@ -142,28 +124,6 @@ class CallsNotificationsService {
 
     await FlutterForegroundTask.stopService();
     await FlutterForegroundTask.clearAllData();
-  }
-
-  int _ignoreNextEventCalledTime = 0;
-
-  Future<void> _ignoreNextEventForSecond() async {
-    final ignoreStartTime = DateTime.now().millisecondsSinceEpoch;
-    _ignoreNextEventCalledTime = ignoreStartTime;
-
-    _prefs ??= await SharedPreferences.getInstance();
-    await _prefs!.setBool(_ignoreEventsKey, true);
-
-    Future.delayed(const Duration(seconds: 1), () {
-      if (_ignoreNextEventCalledTime == ignoreStartTime) {
-        _prefs!.setBool(_ignoreEventsKey, false);
-      }
-    });
-  }
-
-  Future<void> _stopIgnoringEvent() async {
-    _prefs ??= await SharedPreferences.getInstance();
-
-    await _prefs!.setBool(_ignoreEventsKey, false);
   }
 
   CallKitParams _generateCallKitParams(
