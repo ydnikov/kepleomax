@@ -214,9 +214,10 @@ class NotificationService {
         payload['other_user'] as Map<String, dynamic>,
       );
 
-      mainNavigatorGlobalKey.currentState!.push(
-        ChatPage(chatId: chatId, otherUser: User.fromDto(otherUser)),
-      );
+      // TODO
+      // mainNavigatorGlobalKey.currentState!.push(
+      //   ChatPage(chatId: chatId, otherUser: User.fromDto(otherUser)),
+      // );
     } catch (e, st) {
       logger.e(e, stackTrace: st);
     }

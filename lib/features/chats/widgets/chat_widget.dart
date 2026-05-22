@@ -17,7 +17,7 @@ class ChatWidget extends StatelessWidget {
                 AppNavigator.withKeyOf(
                   context,
                   mainNavigatorKey,
-                )!.push(ChatPage(chatId: chat.id, otherUser: chat.otherUser));
+                )!.push(ChatPage(chat: chat, otherUser: chat.otherUser));
               },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -36,13 +36,16 @@ class ChatWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      chat.otherUser.username,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20,
+                    ChannelOfficialIconWidget(
+                      leftWidget: Text(
+                        chat.channelData?.name ?? chat.otherUser.username,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20,
+                        ),
                       ),
+                      isOfficial: chat.channelData?.isOfficial ?? false,
                     ),
                     if (chat.lastMessage != null || chat.draft != null) ...[
                       FittedBox(

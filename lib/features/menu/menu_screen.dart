@@ -39,8 +39,8 @@ class MenuScreen extends StatelessWidget {
             key: const Key('communities_menu_item'),
           ),
           _MenuItem(
-            title: 'Music',
-            icon: Icons.music_note,
+            title: 'Channels',
+            icon: Icons.chat_bubble,
             backgroundColor: Colors.pinkAccent.shade200,
             onTap: () {
               Fluttertoast.showToast(msg: 'Not working');

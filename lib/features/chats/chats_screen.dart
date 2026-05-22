@@ -14,6 +14,7 @@ import 'package:kepleomax/core/presentation/klm_text_button.dart';
 import 'package:kepleomax/core/presentation/klm_error_widget.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/channel_official_widget.dart';
 import 'package:kepleomax/features/chats/bloc/chats_bloc.dart';
 import 'package:kepleomax/features/chats/bloc/chats_state.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
@@ -195,6 +196,23 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
               : 'Chats',
           // TODO is flavor good here?
           showLoading: (!data.isConnected || data.isLoading) && !flavor.isTesting,
+          actions: [
+            PopupMenuButton<ChatsAppBarCreateActions>(
+              icon: const Icon(Icons.create_new_folder_outlined),
+              onSelected: (value) {
+                switch (value) {
+                  case ChatsAppBarCreateActions.channel:
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: ChatsAppBarCreateActions.channel,
+                  child: Text('Create channel'),
+                ),
+              ],
+            ),
+          ],
           key: const Key('chats_app_bar'),
         );
       },
@@ -204,3 +222,5 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+
+enum ChatsAppBarCreateActions { channel }

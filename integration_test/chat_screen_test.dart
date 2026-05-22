@@ -12,6 +12,7 @@ import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/data/local_data_sources/local_database_manager.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/flavor.dart';
+import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
@@ -380,7 +381,7 @@ void main() {
       getChatWithUserMustReturn(null);
 
       /// open new chat, check
-      await tester.pushPage(ChatPage(chatId: -1, otherUser: User.fromDto(chatDto0.otherUser)));
+      await tester.pushPage(ChatPage(chat: null, otherUser: User.fromDto(chatDto0.otherUser)));
       tester.checkMessagesOrder([]);
 
       /// add message, check
@@ -411,7 +412,7 @@ void main() {
       getChatWithUserMustReturn(null);
 
       /// open new chat, check
-      await tester.pushPage(ChatPage(chatId: -1, otherUser: User.fromDto(chatDto0.otherUser)));
+      await tester.pushPage(ChatPage(chat: null, otherUser: User.fromDto(chatDto0.otherUser)));
       tester.checkMessagesOrder([]);
 
       /// add message, check
@@ -516,7 +517,12 @@ void main() {
       await setupApp(tester, [], []);
       getMessagesMustReturn([], chatId: 6);
 
-      await tester.pushPage(ChatPage(chatId: 6, otherUser: const User(id: 10, username: 'OTHER_USERNAME_10', profileImage: null, isCurrent: false)));
+      await tester.pushPage(
+        ChatPage(
+          chat: Chat(id: 6, otherUser: const User(id: 10, username: 'OTHER_USERNAME_10', profileImage: null, isCurrent: false), channelData: null, lastMessage: null, fromCache: true, unreadCount: 0),
+          otherUser: const User(id: 10, username: 'OTHER_USERNAME_10', profileImage: null, isCurrent: false),
+        ),
+      );
       tester.checkChatsOrder([]);
       await tester.pump(const Duration(milliseconds: 100));
 

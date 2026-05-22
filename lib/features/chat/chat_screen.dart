@@ -13,6 +13,7 @@ import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
+import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
@@ -28,6 +29,7 @@ import 'package:kepleomax/core/presentation/user_image.dart';
 import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/features/chat/bloc/chat_bloc.dart';
 import 'package:kepleomax/features/chat/bloc/chat_state.dart';
+import 'package:kepleomax/core/presentation/channel_official_widget.dart';
 import 'package:kepleomax/features/chat/widgets/message_widget.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
@@ -35,15 +37,17 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 part 'widgets/chat_bottom.dart';
 
+part 'widgets/channel_chat_bottom.dart';
+
 part 'widgets/read_button.dart';
 
 part 'widgets/tech_message.dart';
 
 /// screen
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({required this.chatId, required this.otherUser, super.key});
+  const ChatScreen({required this.chat, required this.otherUser, super.key});
 
-  final int chatId;
+  final Chat? chat;
   final User otherUser;
 
   @override
@@ -63,8 +67,7 @@ class _ChatScreenState extends State<ChatScreen> {
       messengerRepository: dp.read<MessengerRepository>(),
       connectionRepository: dp.read<ConnectionRepository>(),
       messengerWebSocket: dp.read<MessengerWebSocket>(),
-      chatId: widget.chatId,
-    )..add(ChatEventInit(chatId: widget.chatId, otherUser: widget.otherUser));
+    )..add(ChatEventInit(chat: widget.chat, otherUser: widget.otherUser));
     super.initState();
   }
 
@@ -79,33 +82,27 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => _chatBloc,
-      child: Builder(
-        builder: (context) {
-          /// ping to call init
-          context.read<ChatBloc>();
-
-          return Scaffold(
-            resizeToAvoidBottomInset: true,
-            floatingActionButton: _ReadButton(
-              scrollController: _scrollController,
-              chatId: widget.chatId,
-            ),
-            appBar: const _AppBar(key: Key('chat_appbar')),
-            body: _Body(
-              scrollController: _scrollController,
-              onRetry: () {
-                _chatBloc.add(
-                  ChatEventLoad(
-                    chatId: widget.chatId,
-                    otherUser: widget.otherUser,
-                    withCache: false,
-                  ),
-                );
-              },
-              key: const Key('chat_body'),
-            ),
-          );
-        },
+      lazy: false,
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        floatingActionButton: _ReadButton(
+          scrollController: _scrollController,
+          chatId: widget.chat?.id ?? -1, // TODO
+        ),
+        appBar: const _AppBar(key: Key('chat_appbar')),
+        body: _Body(
+          scrollController: _scrollController,
+          onRetry: () {
+            _chatBloc.add(
+              ChatEventLoad(
+                chat: widget.chat,
+                otherUser: widget.otherUser,
+                withCache: false,
+              ),
+            );
+          },
+          key: const Key('chat_body'),
+        ),
       ),
     );
   }
@@ -210,10 +207,10 @@ class _BodyState extends State<_Body> {
 
         final data = state.data;
         return FocusDetector(
-          key: Key('focus_detector_${data.chatId}'),
-          onForegroundGained: () => _onResume(data.chatId),
+          key: Key('focus_detector_${data.chat.id}'),
+          onForegroundGained: () => _onResume(data.chat.id),
           onForegroundLost: _onPause,
-          onVisibilityGained: () => _onResume(data.chatId),
+          onVisibilityGained: () => _onResume(data.chat.id),
           onVisibilityLost: _onPause,
           child: Column(
             children: [
@@ -284,26 +281,30 @@ class _BodyState extends State<_Body> {
                         ),
                 ),
               ),
-              _ChatBottom(
-                onSend: (message) {
-                  if (data.isLoading || !data.isConnected) return;
-                  _chatBloc.add(ChatEventSendMessage(value: message));
+              if (data.chat.channelData?.currentUserIsOwner ?? true)
+                _ChatBottom(
+                  onSend: (message) {
+                    if (data.isLoading || !data.isConnected) return;
+                    _chatBloc.add(ChatEventSendMessage(value: message));
 
-                  if (widget.scrollController.hasClients) {
-                    widget.scrollController.animateTo(
-                      0,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                    );
-                  }
-                },
-                onEdit: (message) {
-                  _chatBloc.add(ChatEventEditText(text: message));
-                },
-                isLoading: data.isLoading,
-                controller: _textController,
-                key: const Key('chat_bottom'),
-              ),
+                    if (widget.scrollController.hasClients) {
+                      widget.scrollController.animateTo(
+                        0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOut,
+                      );
+                    }
+                  },
+                  onEdit: (message) {
+                    _chatBloc.add(ChatEventEditText(text: message));
+                  },
+                  isLoading: data.isLoading,
+                  isChannel: data.chat.isChannel,
+                  controller: _textController,
+                  key: const Key('chat_bottom'),
+                )
+              else
+                const _ChannelChatBottom(),
             ],
           ),
         );
@@ -352,6 +353,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
         final oldData = oldState.data;
         final newData = newState.data;
         return oldData.otherUser != newData.otherUser ||
+            oldData.chat != newData.chat ||
             oldData.isLoading != newData.isLoading ||
             oldData.isConnected != newData.isConnected ||
             oldData.isTyping != newData.isTyping;
@@ -361,7 +363,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
 
         final data = state.data;
         return AppBar(
-          key: Key('chat_app_bar_${data.otherUser.id}'),
+          key: Key('chat_app_bar_${data.chat.id}'),
           leading: const KlmBackButton(),
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,
@@ -369,7 +371,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
           title: InkWell(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
-            onTap: () {
+            onTap: data.chat.isChannel ? null : () {
               AppNavigator.withKeyOf(
                 context,
                 mainNavigatorKey,
@@ -384,15 +386,18 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        data.otherUser.username,
-                        key: const Key('chat_username'),
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 20,
-                          height: 1,
+                      ChannelOfficialIconWidget(
+                        leftWidget: Text(
+                          data.chat.channelData?.name ?? data.otherUser.username,
+                          key: const Key('chat_username'),
+                          style: context.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                            height: 1,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
+                        isOfficial: data.chat.channelData?.isOfficial ?? false,
                       ),
                       if (data.isLoading || !data.isConnected)
                         Text(
@@ -403,25 +408,37 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                             fontWeight: FontWeight.w400,
                             color: Colors.grey.shade600,
                           ),
-                        ),
-                      if (!data.isLoading && data.isConnected)
-                        FittedBox(child: _UserStatusWidget(data: data)),
+                        )
+                      else if (!data.isLoading && data.isConnected)
+                        if (data.chat.isChannel)
+                          Text(
+                            '123 subscriber${ParseTime.isSingular(123) ? '' : 's'}',
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey.shade600,
+                            ),
+                          )
+                        else
+                          FittedBox(child: _UserStatusWidget(data: data)),
                     ],
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    if (!data.isConnected) return;
+                if (!data.chat.isChannel)
+                  IconButton(
+                    onPressed: () {
+                      if (!data.isConnected) return;
 
-                    AppNavigator.of(
-                      context,
-                    )!.push(CallPage(otherUser: data.otherUser, doCall: true));
-                  },
-                  style: IconButton.styleFrom(
-                    padding: EdgeInsets.zero,
+                      AppNavigator.of(
+                        context,
+                      )!.push(CallPage(otherUser: data.otherUser, doCall: true));
+                    },
+                    style: IconButton.styleFrom(padding: EdgeInsets.zero),
+                    icon: const Icon(
+                      Icons.videocam_outlined,
+                      color: KlmColors.primaryColor,
+                    ),
                   ),
-                  icon: const Icon(Icons.videocam_outlined, color: KlmColors.primaryColor),
-                ),
               ],
             ),
           ),

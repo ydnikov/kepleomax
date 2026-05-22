@@ -256,7 +256,7 @@ class _Body extends StatelessWidget {
                                 );
                               },
                             )
-                          : ChatPage(chatId: -1, otherUser: data.profile!.user),
+                          : ChatPage(chat: null, otherUser: data.profile!.user),
                     ),
                     const SizedBox(height: 10),
                   ],

@@ -4,20 +4,20 @@ part of 'chat_bloc.dart';
 abstract class ChatEvent {}
 
 class ChatEventInit implements ChatEvent {
-  const ChatEventInit({required this.chatId, required this.otherUser});
+  const ChatEventInit({required this.chat, required this.otherUser});
 
-  final int chatId;
+  final Chat? chat;
   final User otherUser;
 }
 
 class ChatEventLoad implements ChatEvent {
   const ChatEventLoad({
-    required this.chatId,
+    required this.chat,
     required this.otherUser,
     required this.withCache,
   });
 
-  final int chatId;
+  final Chat? chat;
   final User otherUser;
   final bool withCache;
 }

@@ -8,19 +8,16 @@ import 'package:webrtc_interface/src/rtc_session_description.dart';
 
 class MockRtcWebSocket implements RtcWebSocket {
   @override
-  void sendOffer(RTCSessionDescription offer, int toUserId) {}
+  void sendOffer(RTCSessionDescription offer, String callId) {}
 
   @override
-  void sendAnswer(RTCSessionDescription answer, int toUserId) {}
+  void sendAnswer(RTCSessionDescription answer, {required String callId}) {}
 
   @override
-  void sendIceCandidate(RTCIceCandidate candidate, int toUserId) {}
+  void sendIceCandidate(RTCIceCandidate candidate, String callId) {}
 
   @override
-  void sendCameraStatus(CameraStatus status, int toUserId) {}
-
-  @override
-  void endCall(int toUserId) {}
+  void sendCameraStatus(CameraStatus status, String callId) {}
 
   /// streams
   @override
@@ -36,8 +33,8 @@ class MockRtcWebSocket implements RtcWebSocket {
       StreamController<EndCallUpdate>.broadcast().stream;
 
   @override
-  Stream<CameraStatus> get remoteCameraStatusStream =>
-      StreamController<CameraStatus>.broadcast().stream;
+  Stream<CameraStatusUpdate> get remoteCameraStatusStream =>
+      StreamController<CameraStatusUpdate>.broadcast().stream;
 
   @override
   Future<void> dispose() async {}

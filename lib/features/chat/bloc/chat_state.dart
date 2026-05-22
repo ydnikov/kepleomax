@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 
@@ -35,7 +36,7 @@ abstract class ChatStateUpdateTextField
 @freezed
 abstract class ChatData with _$ChatData implements ChatState {
   const factory ChatData({
-    required int chatId,
+    required Chat chat,
     required User otherUser, // if user in chat was null, this user will be used
     required List<Message> messages,
     required int unreadCount,
@@ -47,7 +48,7 @@ abstract class ChatData with _$ChatData implements ChatState {
   }) = _ChatData;
 
   factory ChatData.initial() => ChatData(
-    chatId: -1,
+    chat: Chat.loading(),
     otherUser: User.loading(),
     unreadCount: 0,
     messages: [],

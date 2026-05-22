@@ -50,7 +50,7 @@ class _UserCard extends StatelessWidget {
                 AppNavigator.withKeyOf(
                   context,
                   mainNavigatorKey,
-                )!.push(ChatPage(chatId: -1, otherUser: user));
+                )!.push(ChatPage(chat: null, otherUser: user));
               },
               icon: const Icon(Icons.chat_outlined),
             ),

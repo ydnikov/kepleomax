@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 class ParseTime {
   ParseTime._();
 
-  static bool _isSingular(int count) {
+  static bool isSingular(int count) {
     return count % 10 == 1 && count != 11;
   }
 
@@ -17,10 +17,10 @@ class ParseTime {
       return '${(now - unixTime) ~/ 60} min ago';
     } else if (now - unixTime < 86400) {
       final count = (now - unixTime) ~/ 3600;
-      return '$count ${_isSingular(count) ? 'hour' : 'hours'} ago';
+      return '$count ${isSingular(count) ? 'hour' : 'hours'} ago';
     } else if (now - unixTime < 86400 * 7) {
       final count = (now - unixTime) ~/ 86400;
-      return '$count ${_isSingular(count) ? 'day' : 'days'} ago';
+      return '$count ${isSingular(count) ? 'day' : 'days'} ago';
     } else {
       return DateFormat(
         'MMM dd, y',
@@ -69,7 +69,7 @@ class ParseTime {
     if (duration.inMinutes == 0) {
       return '${duration.inSeconds} seconds';
     } else if (duration.inHours == 0) {
-      return '${duration.inMinutes} minute${_isSingular(duration.inMinutes) ? '' : 's'}';
+      return '${duration.inMinutes} minute${isSingular(duration.inMinutes) ? '' : 's'}';
     } else {
       return '${duration.inHours} h ${duration.inMinutes} m';
     }

@@ -6,6 +6,7 @@ class _ChatBottom extends StatefulWidget {
     required this.onSend,
     required this.onEdit,
     required this.isLoading,
+    required this.isChannel,
     super.key,
   });
 
@@ -13,6 +14,7 @@ class _ChatBottom extends StatefulWidget {
   final ValueChanged<String>? onSend;
   final ValueChanged<String>? onEdit;
   final bool isLoading;
+  final bool isChannel;
 
   @override
   State<_ChatBottom> createState() => _ChatBottomState();
@@ -54,7 +56,7 @@ class _ChatBottomState extends State<_ChatBottom> {
               child: KlmTextField(
                 key: const Key('message_input_field'),
                 controller: widget.controller,
-                hint: 'Message',
+                hint: widget.isChannel ? 'Broadcast' : 'Message',
                 onChanged: widget.onEdit,
                 multiline: true,
                 maxLength: 4000,

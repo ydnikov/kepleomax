@@ -12,6 +12,7 @@ abstract class Chat with _$Chat {
   const factory Chat({
     required int id,
     required User otherUser,
+    required ChannelData? channelData,
     required Message? lastMessage,
     required bool fromCache,
     required int unreadCount,
@@ -28,6 +29,11 @@ abstract class Chat with _$Chat {
     draft: dto.draft,
     fromCache: fromCache,
     unreadCount: dto.unreadCount,
+    channelData: dto.otherUser.id != 2 ? null : const ChannelData(
+      name: 'KepLeoMax News',
+      isOfficial: true,
+      currentUserIsOwner: false,
+    ),
   );
 
   factory Chat.loading() => Chat(
@@ -36,9 +42,10 @@ abstract class Chat with _$Chat {
     fromCache: false,
     lastMessage: Message.loading(),
     unreadCount: 0,
+    channelData: null,
   );
 
-  static const int _loadingChatId = -2;
+  static const int _loadingChatId = -1;
 
   bool get isTypingRightNow =>
       lastTypingActivityTime != null &&
@@ -48,6 +55,8 @@ abstract class Chat with _$Chat {
 
   bool get isLoadingChat => id == _loadingChatId;
 
+  bool get isChannel => channelData != null;
+
   ChatDto toDto() => ChatDto(
     id: id,
     otherUser: otherUser.toDto(),
@@ -55,4 +64,13 @@ abstract class Chat with _$Chat {
     draft: draft,
     unreadCount: unreadCount,
   );
+}
+
+@freezed
+abstract class ChannelData with _$ChannelData {
+  const factory ChannelData({
+    required String name,
+    required bool isOfficial,
+    required bool currentUserIsOwner,
+  }) = _ChannelData;
 }
