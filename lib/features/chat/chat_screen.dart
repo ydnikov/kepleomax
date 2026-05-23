@@ -28,6 +28,7 @@ import 'package:kepleomax/core/presentation/klm_textfield.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/core/services/notifications_service.dart';
+import 'package:kepleomax/features/channel/data/channel_repository.dart';
 import 'package:kepleomax/features/chat/bloc/chat_bloc.dart';
 import 'package:kepleomax/features/chat/bloc/chat_state.dart';
 import 'package:kepleomax/core/presentation/channel_official_widget.dart';
@@ -67,6 +68,10 @@ class _ChatScreenState extends State<ChatScreen> {
       messengerRepository: dp.read<MessengerRepository>(),
       connectionRepository: dp.read<ConnectionRepository>(),
       messengerWebSocket: dp.read<MessengerWebSocket>(),
+      channelRepository: ChannelRepositoryImpl(
+        channelApi: dp.channelApi,
+        initSubsStream: false,
+      ),
     )..add(ChatEventInit(chat: widget.chat, otherUser: widget.otherUser));
     super.initState();
   }
@@ -369,7 +374,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
             onTap: () {
               AppNavigator.withKeyOf(context, mainNavigatorKey)!.push(
                 data.chat.isChannel
-                    ? const ChannelPage()
+                    ? ChannelPage(channelData: data.chat.channelData!)
                     : UserPage(userId: data.otherUser.id),
               );
             },
@@ -411,7 +416,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                       else if (!data.isLoading && data.isConnected)
                         if (data.chat.isChannel)
                           Text(
-                            '123 subscriber${ParseTime.isSingular(123) ? '' : 's'}',
+                            '${data.chat.channelData!.subscribersCount ?? 0} subscriber${ParseTime.isSingular(data.chat.channelData!.subscribersCount ?? 0) ? '' : 's'}',
                             style: context.textTheme.bodyMedium?.copyWith(
                               fontSize: 13,
                               fontWeight: FontWeight.w400,

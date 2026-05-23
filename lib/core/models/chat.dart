@@ -30,7 +30,10 @@ abstract class Chat with _$Chat {
     fromCache: fromCache,
     unreadCount: dto.unreadCount,
     channelData: dto.channelData == null ? null : ChannelData(
+      id: dto.id,
       name: dto.channelData!.name,
+      description: 'TODO Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard',
+      tag: 'TODO_tag',
       imageUrl: dto.channelData!.imageUrl,
       isOfficial: dto.channelData!.isOfficial,
       currentUserIsOwner: dto.channelData!.currentUserIsOwner,
@@ -62,9 +65,13 @@ abstract class Chat with _$Chat {
 @freezed
 abstract class ChannelData with _$ChannelData {
   const factory ChannelData({
+    required int id, // equals to chat_id
     required String name,
+    required String description,
+    required String tag,
     required String? imageUrl,
     required bool isOfficial,
     required bool currentUserIsOwner,
+    int? subscribersCount
   }) = _ChannelData;
 }

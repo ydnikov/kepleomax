@@ -20,6 +20,10 @@ class DeleteChannelDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () {},
+          style: TextButton.styleFrom(
+            surfaceTintColor: Colors.red,
+            overlayColor: Colors.red,
+          ),
           child: const Text('💀Delete forever💀', style: TextStyle(color: Colors.red)),
         ),
         TextButton(

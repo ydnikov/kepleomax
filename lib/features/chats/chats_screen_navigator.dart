@@ -66,10 +66,10 @@ final class ChannelEditorPage extends AppPage {
 }
 
 final class ChannelPage extends AppPage {
-  const ChannelPage()
+  ChannelPage({required ChannelData channelData})
       : super(
     name: 'channel_page',
-    child: const ChannelScreen(),
+    child: ChannelScreen(channelData: channelData),
     key: const ValueKey('channel_page'),
   );
 }

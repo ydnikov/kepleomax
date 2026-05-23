@@ -50,6 +50,76 @@ class _ChannelApi implements ChannelApi {
     return httpResponse;
   }
 
+  @override
+  Future<HttpResponse<GetSubscribersCountResponseDto>> getSubscribersCount({
+    required int channelId,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'channel_id': channelId};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options =
+        _setStreamType<HttpResponse<GetSubscribersCountResponseDto>>(
+          Options(method: 'GET', headers: _headers, extra: _extra)
+              .compose(
+                _dio.options,
+                '/subsCount',
+                queryParameters: queryParameters,
+                data: _data,
+              )
+              .copyWith(
+                baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl),
+              ),
+        );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late GetSubscribersCountResponseDto _value;
+    try {
+      _value = GetSubscribersCountResponseDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
+  }
+
+  @override
+  Future<HttpResponse<GetSubscribersResponseDto>> getSubscribers({
+    required int channelId,
+    required int limit,
+    required int? cursor,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'channel_id': channelId,
+      r'limit': limit,
+      r'cursor': cursor,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<HttpResponse<GetSubscribersResponseDto>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/subs',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late GetSubscribersResponseDto _value;
+    try {
+      _value = GetSubscribersResponseDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

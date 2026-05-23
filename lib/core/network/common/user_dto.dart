@@ -41,7 +41,7 @@ class UserDto extends Equatable {
   );
 
   factory UserDto.empty() => const UserDto(
-    id: -1,
+    id: -2,
     username: '',
     profileImage: null,
     isCurrent: false,

@@ -382,7 +382,8 @@ $MessageDraftCopyWith<$Res>? get draft {
 /// @nodoc
 mixin _$ChannelData {
 
- String get name; String? get imageUrl; bool get isOfficial; bool get currentUserIsOwner;
+ int get id;// equals to chat_id
+ String get name; String get description; String get tag; String? get imageUrl; bool get isOfficial; bool get currentUserIsOwner; int? get subscribersCount;
 /// Create a copy of ChannelData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -393,16 +394,16 @@ $ChannelDataCopyWith<ChannelData> get copyWith => _$ChannelDataCopyWithImpl<Chan
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelData&&(identical(other.name, name) || other.name == name)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.isOfficial, isOfficial) || other.isOfficial == isOfficial)&&(identical(other.currentUserIsOwner, currentUserIsOwner) || other.currentUserIsOwner == currentUserIsOwner));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelData&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.isOfficial, isOfficial) || other.isOfficial == isOfficial)&&(identical(other.currentUserIsOwner, currentUserIsOwner) || other.currentUserIsOwner == currentUserIsOwner)&&(identical(other.subscribersCount, subscribersCount) || other.subscribersCount == subscribersCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,imageUrl,isOfficial,currentUserIsOwner);
+int get hashCode => Object.hash(runtimeType,id,name,description,tag,imageUrl,isOfficial,currentUserIsOwner,subscribersCount);
 
 @override
 String toString() {
-  return 'ChannelData(name: $name, imageUrl: $imageUrl, isOfficial: $isOfficial, currentUserIsOwner: $currentUserIsOwner)';
+  return 'ChannelData(id: $id, name: $name, description: $description, tag: $tag, imageUrl: $imageUrl, isOfficial: $isOfficial, currentUserIsOwner: $currentUserIsOwner, subscribersCount: $subscribersCount)';
 }
 
 
@@ -413,7 +414,7 @@ abstract mixin class $ChannelDataCopyWith<$Res>  {
   factory $ChannelDataCopyWith(ChannelData value, $Res Function(ChannelData) _then) = _$ChannelDataCopyWithImpl;
 @useResult
 $Res call({
- String name, String? imageUrl, bool isOfficial, bool currentUserIsOwner
+ int id, String name, String description, String tag, String? imageUrl, bool isOfficial, bool currentUserIsOwner, int? subscribersCount
 });
 
 
@@ -430,13 +431,17 @@ class _$ChannelDataCopyWithImpl<$Res>
 
 /// Create a copy of ChannelData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? imageUrl = freezed,Object? isOfficial = null,Object? currentUserIsOwner = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = null,Object? tag = null,Object? imageUrl = freezed,Object? isOfficial = null,Object? currentUserIsOwner = null,Object? subscribersCount = freezed,}) {
   return _then(_self.copyWith(
-name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String?,isOfficial: null == isOfficial ? _self.isOfficial : isOfficial // ignore: cast_nullable_to_non_nullable
 as bool,currentUserIsOwner: null == currentUserIsOwner ? _self.currentUserIsOwner : currentUserIsOwner // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,subscribersCount: freezed == subscribersCount ? _self.subscribersCount : subscribersCount // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -521,10 +526,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String? imageUrl,  bool isOfficial,  bool currentUserIsOwner)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String description,  String tag,  String? imageUrl,  bool isOfficial,  bool currentUserIsOwner,  int? subscribersCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChannelData() when $default != null:
-return $default(_that.name,_that.imageUrl,_that.isOfficial,_that.currentUserIsOwner);case _:
+return $default(_that.id,_that.name,_that.description,_that.tag,_that.imageUrl,_that.isOfficial,_that.currentUserIsOwner,_that.subscribersCount);case _:
   return orElse();
 
 }
@@ -542,10 +547,10 @@ return $default(_that.name,_that.imageUrl,_that.isOfficial,_that.currentUserIsOw
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String? imageUrl,  bool isOfficial,  bool currentUserIsOwner)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String description,  String tag,  String? imageUrl,  bool isOfficial,  bool currentUserIsOwner,  int? subscribersCount)  $default,) {final _that = this;
 switch (_that) {
 case _ChannelData():
-return $default(_that.name,_that.imageUrl,_that.isOfficial,_that.currentUserIsOwner);case _:
+return $default(_that.id,_that.name,_that.description,_that.tag,_that.imageUrl,_that.isOfficial,_that.currentUserIsOwner,_that.subscribersCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -562,10 +567,10 @@ return $default(_that.name,_that.imageUrl,_that.isOfficial,_that.currentUserIsOw
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String? imageUrl,  bool isOfficial,  bool currentUserIsOwner)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String description,  String tag,  String? imageUrl,  bool isOfficial,  bool currentUserIsOwner,  int? subscribersCount)?  $default,) {final _that = this;
 switch (_that) {
 case _ChannelData() when $default != null:
-return $default(_that.name,_that.imageUrl,_that.isOfficial,_that.currentUserIsOwner);case _:
+return $default(_that.id,_that.name,_that.description,_that.tag,_that.imageUrl,_that.isOfficial,_that.currentUserIsOwner,_that.subscribersCount);case _:
   return null;
 
 }
@@ -577,13 +582,18 @@ return $default(_that.name,_that.imageUrl,_that.isOfficial,_that.currentUserIsOw
 
 
 class _ChannelData implements ChannelData {
-  const _ChannelData({required this.name, required this.imageUrl, required this.isOfficial, required this.currentUserIsOwner});
+  const _ChannelData({required this.id, required this.name, required this.description, required this.tag, required this.imageUrl, required this.isOfficial, required this.currentUserIsOwner, this.subscribersCount});
   
 
+@override final  int id;
+// equals to chat_id
 @override final  String name;
+@override final  String description;
+@override final  String tag;
 @override final  String? imageUrl;
 @override final  bool isOfficial;
 @override final  bool currentUserIsOwner;
+@override final  int? subscribersCount;
 
 /// Create a copy of ChannelData
 /// with the given fields replaced by the non-null parameter values.
@@ -595,16 +605,16 @@ _$ChannelDataCopyWith<_ChannelData> get copyWith => __$ChannelDataCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelData&&(identical(other.name, name) || other.name == name)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.isOfficial, isOfficial) || other.isOfficial == isOfficial)&&(identical(other.currentUserIsOwner, currentUserIsOwner) || other.currentUserIsOwner == currentUserIsOwner));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelData&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.isOfficial, isOfficial) || other.isOfficial == isOfficial)&&(identical(other.currentUserIsOwner, currentUserIsOwner) || other.currentUserIsOwner == currentUserIsOwner)&&(identical(other.subscribersCount, subscribersCount) || other.subscribersCount == subscribersCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,imageUrl,isOfficial,currentUserIsOwner);
+int get hashCode => Object.hash(runtimeType,id,name,description,tag,imageUrl,isOfficial,currentUserIsOwner,subscribersCount);
 
 @override
 String toString() {
-  return 'ChannelData(name: $name, imageUrl: $imageUrl, isOfficial: $isOfficial, currentUserIsOwner: $currentUserIsOwner)';
+  return 'ChannelData(id: $id, name: $name, description: $description, tag: $tag, imageUrl: $imageUrl, isOfficial: $isOfficial, currentUserIsOwner: $currentUserIsOwner, subscribersCount: $subscribersCount)';
 }
 
 
@@ -615,7 +625,7 @@ abstract mixin class _$ChannelDataCopyWith<$Res> implements $ChannelDataCopyWith
   factory _$ChannelDataCopyWith(_ChannelData value, $Res Function(_ChannelData) _then) = __$ChannelDataCopyWithImpl;
 @override @useResult
 $Res call({
- String name, String? imageUrl, bool isOfficial, bool currentUserIsOwner
+ int id, String name, String description, String tag, String? imageUrl, bool isOfficial, bool currentUserIsOwner, int? subscribersCount
 });
 
 
@@ -632,13 +642,17 @@ class __$ChannelDataCopyWithImpl<$Res>
 
 /// Create a copy of ChannelData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? imageUrl = freezed,Object? isOfficial = null,Object? currentUserIsOwner = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = null,Object? tag = null,Object? imageUrl = freezed,Object? isOfficial = null,Object? currentUserIsOwner = null,Object? subscribersCount = freezed,}) {
   return _then(_ChannelData(
-name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String?,isOfficial: null == isOfficial ? _self.isOfficial : isOfficial // ignore: cast_nullable_to_non_nullable
 as bool,currentUserIsOwner: null == currentUserIsOwner ? _self.currentUserIsOwner : currentUserIsOwner // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,subscribersCount: freezed == subscribersCount ? _self.subscribersCount : subscribersCount // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
