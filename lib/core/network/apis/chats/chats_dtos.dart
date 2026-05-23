@@ -6,41 +6,51 @@ import 'package:kepleomax/core/network/common/user_dto.dart';
 
 part 'chats_dtos.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class ChatResponse {
-  ChatResponse({required this.data, required this.message});
+  const ChatResponse({required this.data, required this.message});
 
   factory ChatResponse.fromJson(Map<String, dynamic> json) =>
       _$ChatResponseFromJson(json);
+
   final ChatDto? data;
   final String? message;
-
-  Map<String, dynamic> toJson() => _$ChatResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class ChatsResponse {
-  ChatsResponse({required this.data, required this.message});
+  const ChatsResponse({required this.data, required this.message});
 
   factory ChatsResponse.fromJson(Map<String, dynamic> json) =>
       _$ChatsResponseFromJson(json);
+
   final List<ChatDto>? data;
   final String? message;
-
-  Map<String, dynamic> toJson() => _$ChatsResponseToJson(this);
 }
 
-@JsonSerializable()
 class ChatDto extends Equatable {
   const ChatDto({
     required this.id,
     required this.otherUser,
     required this.lastMessage,
     required this.unreadCount,
+    required this.channelData,
     this.draft,
   });
 
-  factory ChatDto.fromJson(Map<String, dynamic> json) => _$ChatDtoFromJson(json);
+  factory ChatDto.fromJson(Map<String, dynamic> json) => ChatDto(
+    id: (json['id'] as num).toInt(),
+    otherUser: json['other_user'] == null
+        ? UserDto.empty()
+        : UserDto.fromJson(json['other_user'] as Map<String, dynamic>),
+    lastMessage: json['last_message'] == null
+        ? null
+        : MessageDto.fromJson(json['last_message'] as Map<String, dynamic>),
+    channelData: json['is_channel'] == true
+        ? ChatChannelDataDto.fromJson(json)
+        : null,
+    unreadCount: (json['unread_count'] as num).toInt(),
+  );
 
   /// json['other_user'] should be map\<String, dynamic>
   factory ChatDto.fromLocalJson(Map<String, dynamic> json) => ChatDto(
@@ -50,6 +60,7 @@ class ChatDto extends Equatable {
         ? null
         : MessageDto.fromJson(json, fromCache: true),
     unreadCount: json['unread_count'] as int,
+    channelData: null,
     draft: json['draft_message'] == null
         ? null
         : MessageDraft(
@@ -64,18 +75,16 @@ class ChatDto extends Equatable {
     otherUser: otherUser,
     lastMessage: lastMessage,
     unreadCount: unreadCount,
+    channelData: channelData,
     draft: draft,
   );
 
   final int id;
-  @JsonKey(name: 'other_user')
   final UserDto otherUser;
-  @JsonKey(name: 'last_message')
   final MessageDto? lastMessage;
-  @JsonKey(name: 'unread_count')
   final int unreadCount;
-  @JsonKey(includeFromJson: false, includeToJson: false)
   final MessageDraft? draft;
+  final ChatChannelDataDto? channelData;
 
   Map<String, dynamic> toLocalJson() => {
     'id': id,
@@ -85,4 +94,26 @@ class ChatDto extends Equatable {
 
   @override
   List<Object?> get props => [id, otherUser, lastMessage, unreadCount];
+}
+
+@JsonSerializable(createToJson: false)
+class ChatChannelDataDto {
+
+  const ChatChannelDataDto({
+    required this.name,
+    required this.imageUrl,
+    required this.isOfficial,
+    required this.currentUserIsOwner,
+  });
+
+  factory ChatChannelDataDto.fromJson(Map<String, dynamic> json) =>
+      _$ChatChannelDataDtoFromJson(json);
+
+  final String name;
+  @JsonKey(name: 'image_url')
+  final String? imageUrl;
+  @JsonKey(name: 'is_official')
+  final bool isOfficial;
+  @JsonKey(name: 'current_user_is_owner')
+  final bool currentUserIsOwner;
 }

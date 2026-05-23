@@ -28,7 +28,12 @@ class ChatWidget extends StatelessWidget {
                 key: ValueKey(chat.otherUser.showOnlineStatus),
                 height: 60,
                 width: 60,
-                child: UserImage(user: chat.otherUser, showOnlineIndicator: true),
+                child: chat.isChannel
+                    ? const ChannelDefaultIconWidget()
+                    : UserImageWidget(
+                        user: chat.otherUser,
+                        showOnlineIndicator: true,
+                      ),
               ),
               const SizedBox(width: 10),
               Expanded(

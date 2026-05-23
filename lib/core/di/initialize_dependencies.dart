@@ -10,6 +10,7 @@ import 'package:kepleomax/core/data/data_sources/files_api_data_source.dart';
 import 'package:kepleomax/core/data/data_sources/profile_api_data_source.dart';
 import 'package:kepleomax/core/data/data_sources/users_api_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/drafts_local_data_source.dart';
+import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
 import 'package:kepleomax/core/network/apis/fcm/fcm_api.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
@@ -140,7 +141,8 @@ List<_InitializationStep> _steps = [
       ..postApi = PostApi(dp.dio, flavor.baseUrl)
       ..messagesApi = MessagesApi(dp.dio, flavor.baseUrl)
       ..chatsApi = ChatsApi(dp.dio, flavor.baseUrl)
-      ..callsApi = CallsApi(dp.dio, flavor.baseUrl);
+      ..callsApi = CallsApi(dp.dio, flavor.baseUrl)
+      ..channelApi = ChannelApi(dp.dio, flavor.baseUrl);
   }),
 
   _InitializationStep(DiStep.apiDataSources, (dp) async {

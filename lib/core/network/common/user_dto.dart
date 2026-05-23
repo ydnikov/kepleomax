@@ -5,7 +5,6 @@ part 'user_dto.g.dart';
 
 @JsonSerializable()
 class UserDto extends Equatable {
-
   const UserDto({
     required this.id,
     required this.username,
@@ -40,6 +39,16 @@ class UserDto extends Equatable {
     isOnline: false,
     lastActivityTime: 0,
   );
+
+  factory UserDto.empty() => const UserDto(
+    id: -1,
+    username: '',
+    profileImage: null,
+    isCurrent: false,
+    isOnline: false,
+    lastActivityTime: 0,
+  );
+
   final int id;
   final String username;
   @JsonKey(name: 'profile_image')

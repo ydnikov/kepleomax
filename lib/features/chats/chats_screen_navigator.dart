@@ -4,6 +4,7 @@ import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/features/call/call_screen.dart';
+import 'package:kepleomax/features/channel_editor/channel_editor_screen.dart';
 import 'package:kepleomax/features/chat/chat_screen.dart';
 import 'package:kepleomax/features/chats/chats_screen.dart';
 
@@ -54,13 +55,20 @@ final class ChatPage extends AppPage {
       );
 }
 
+final class ChannelEditorPage extends AppPage {
+  const ChannelEditorPage()
+      : super(
+    name: 'channel_editor_screen',
+    child: const ChannelEditorScreen(),
+    key: const ValueKey('channel_editor_screen'),
+  );
+}
+
 final class CallPage extends AppPage {
-  CallPage({
-    required User otherUser,
-    bool doCall = false,
-  }) : super(
-         name: 'call_page',
-         child: CallScreen(otherUser: otherUser, doCall: doCall),
-         key: ValueKey('call_screen_${otherUser.id}'),
-       );
+  CallPage({required User otherUser, bool doCall = false})
+    : super(
+        name: 'call_page',
+        child: CallScreen(otherUser: otherUser, doCall: doCall),
+        key: ValueKey('call_screen_${otherUser.id}'),
+      );
 }

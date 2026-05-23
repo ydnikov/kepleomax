@@ -10,7 +10,7 @@ import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
-import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:kepleomax/features/people/bloc/people_bloc.dart';
 import 'package:kepleomax/features/people/bloc/people_state.dart';

@@ -7,13 +7,14 @@ import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
+import 'package:kepleomax/core/presentation/channel_image_widget.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_text_button.dart';
 import 'package:kepleomax/core/presentation/klm_error_widget.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
-import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/core/presentation/channel_official_widget.dart';
 import 'package:kepleomax/features/chats/bloc/chats_bloc.dart';
 import 'package:kepleomax/features/chats/bloc/chats_state.dart';
@@ -202,6 +203,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
               onSelected: (value) {
                 switch (value) {
                   case ChatsAppBarCreateActions.channel:
+                    AppNavigator.push(context, const ChannelEditorPage());
                     break;
                 }
               },

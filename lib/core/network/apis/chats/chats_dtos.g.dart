@@ -13,9 +13,6 @@ ChatResponse _$ChatResponseFromJson(Map<String, dynamic> json) => ChatResponse(
   message: json['message'] as String?,
 );
 
-Map<String, dynamic> _$ChatResponseToJson(ChatResponse instance) =>
-    <String, dynamic>{'data': instance.data, 'message': instance.message};
-
 ChatsResponse _$ChatsResponseFromJson(Map<String, dynamic> json) =>
     ChatsResponse(
       data: (json['data'] as List<dynamic>?)
@@ -24,21 +21,10 @@ ChatsResponse _$ChatsResponseFromJson(Map<String, dynamic> json) =>
       message: json['message'] as String?,
     );
 
-Map<String, dynamic> _$ChatsResponseToJson(ChatsResponse instance) =>
-    <String, dynamic>{'data': instance.data, 'message': instance.message};
-
-ChatDto _$ChatDtoFromJson(Map<String, dynamic> json) => ChatDto(
-  id: (json['id'] as num).toInt(),
-  otherUser: UserDto.fromJson(json['other_user'] as Map<String, dynamic>),
-  lastMessage: json['last_message'] == null
-      ? null
-      : MessageDto.fromJson(json['last_message'] as Map<String, dynamic>),
-  unreadCount: (json['unread_count'] as num).toInt(),
-);
-
-Map<String, dynamic> _$ChatDtoToJson(ChatDto instance) => <String, dynamic>{
-  'id': instance.id,
-  'other_user': instance.otherUser,
-  'last_message': instance.lastMessage,
-  'unread_count': instance.unreadCount,
-};
+ChatChannelDataDto _$ChatChannelDataDtoFromJson(Map<String, dynamic> json) =>
+    ChatChannelDataDto(
+      name: json['name'] as String,
+      imageUrl: json['image_url'] as String?,
+      isOfficial: json['is_official'] as bool,
+      currentUserIsOwner: json['current_user_is_owner'] as bool,
+    );

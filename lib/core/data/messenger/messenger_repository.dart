@@ -179,7 +179,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
     _emitChatsCollection(ChatsCollection(chats: newList, fromCache: false));
 
     _webSocket.subscribeOnOnlineStatusUpdates(
-      usersIds: chats.map((c) => c.otherUser.id),
+      usersIds: chats.map((c) => c.otherUser.id).where((id) => id >= 0),
     );
 
     /// cache

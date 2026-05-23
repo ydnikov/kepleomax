@@ -227,7 +227,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _data = _data.copyWith(unreadCount: chat.unreadCount);
       emit(ChatStateBase(data: _data));
 
-      /// TODO now it works because we always open the chat at the very bottom
+      /// TODO now it works because we always open the chat at the very bottom of scroll list
       NotificationService.instance.closeWithChatId(chat.id);
       _connectionRepository.listenOnlineStatusUpdate(userId: _data.otherUser.id);
 

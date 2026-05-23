@@ -8,7 +8,7 @@ import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_cached_image.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
-import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/core/presentation/validators.dart';
 
 const String? Function(String) _usernameValidator = UiValidator.emptyValidator;
@@ -84,7 +84,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                       ),
                       child: ClipOval(
                         child: _imageUrl == null || _imageUrl!.isEmpty
-                            ? const DefaultUserIcon()
+                            ? const DefaultUserIconWidget()
                             : _isImageEdited
                             ? Image.file(File(_imageUrl!), fit: BoxFit.cover)
                             : KlmCachedImage(

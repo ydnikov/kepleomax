@@ -10,7 +10,7 @@ import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
-import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/features/chat/widgets/message_menu.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -69,7 +69,7 @@ class MessageWidget extends StatelessWidget {
                     mainNavigatorKey,
                   )!.push(UserPage(userId: user.id));
                 },
-                child: UserImage(
+                child: UserImageWidget(
                   size: 35,
                   isLoading: message.type == MessageType.loading,
                   user: user,

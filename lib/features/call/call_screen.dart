@@ -10,7 +10,7 @@ import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/network/websockets/models/rtc_models.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
-import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/core/services/calls_notifications_service.dart';
 import 'package:kepleomax/core/services/calls_service.dart';
 import 'package:kepleomax/features/call/bloc/call_bloc.dart';
@@ -214,7 +214,7 @@ class _BodyState extends State<_Body> {
                     if (!data.remoteCameraAvailable &&
                         !data.localCameraAvailable) ...[
                       const SizedBox(height: 80),
-                      UserImage(user: data.otherUser, size: 200),
+                      UserImageWidget(user: data.otherUser, size: 200),
                       const SizedBox(height: 10),
                       Text(
                         data.otherUser.username,

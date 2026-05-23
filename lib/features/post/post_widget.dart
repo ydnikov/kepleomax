@@ -10,7 +10,7 @@ import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_cached_image.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/photos_preview/photos_preview_screen.dart';
-import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/generated/images_keys.images_keys.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -52,7 +52,7 @@ class PostWidget extends StatelessWidget {
                     onTap: onUserTap,
                     child: Row(
                       children: [
-                        UserImage(
+                        UserImageWidget(
                           user: post.user,
                           size: 34,
                           isLoading: post.isMockLoadingPost,

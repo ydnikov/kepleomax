@@ -9,8 +9,8 @@ import 'package:kepleomax/core/presentation/klm_cached_image.dart';
 import 'package:kepleomax/generated/images_keys.images_keys.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class UserImage extends StatelessWidget {
-  const UserImage({
+class UserImageWidget extends StatelessWidget {
+  const UserImageWidget({
     required this.user,
     this.size,
     this.isLoading = false,
@@ -42,7 +42,7 @@ class UserImage extends StatelessWidget {
                 child: isLoading
                     ? const Skeletonizer(child: ColoredBox(color: Colors.grey))
                     : user?.profileImage == null || user!.profileImage!.isEmpty
-                    ? const DefaultUserIcon()
+                    ? const DefaultUserIconWidget()
                     : KlmCachedImage(
                         imageUrl: flavor.imageUrl + user!.profileImage!,
                         width: context.imageMaxWidth,
@@ -87,8 +87,8 @@ class UserImage extends StatelessWidget {
   }
 }
 
-class DefaultUserIcon extends StatelessWidget {
-  const DefaultUserIcon({super.key});
+class DefaultUserIconWidget extends StatelessWidget {
+  const DefaultUserIconWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

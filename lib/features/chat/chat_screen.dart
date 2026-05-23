@@ -19,17 +19,19 @@ import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
+import 'package:kepleomax/core/presentation/channel_image_widget.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_error_widget.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
-import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/features/chat/bloc/chat_bloc.dart';
 import 'package:kepleomax/features/chat/bloc/chat_state.dart';
 import 'package:kepleomax/core/presentation/channel_official_widget.dart';
+import 'package:kepleomax/features/chat/widgets/empty_chat_widget.dart';
 import 'package:kepleomax/features/chat/widgets/message_widget.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
@@ -40,8 +42,6 @@ part 'widgets/chat_bottom.dart';
 part 'widgets/channel_chat_bottom.dart';
 
 part 'widgets/read_button.dart';
-
-part 'widgets/tech_message.dart';
 
 /// screen
 class ChatScreen extends StatefulWidget {
@@ -220,12 +220,7 @@ class _BodyState extends State<_Body> {
                   child: data.isLoading && data.messages.isEmpty
                       ? const Center(child: CircularProgressIndicator())
                       : data.messages.isEmpty
-                      ? const Center(
-                          child: _TechMessage(
-                            key: Key('no_messages_widget'),
-                            text: '\nNo messages here yet...\n\nWrite something\n',
-                          ),
-                        )
+                      ? EmptyChatWidget(isChannel: data.chat.isChannel)
                       : ListViewObserver(
                           controller: _observerController,
                           autoTriggerObserveTypes: const [
@@ -371,15 +366,20 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
           title: InkWell(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
-            onTap: data.chat.isChannel ? null : () {
-              AppNavigator.withKeyOf(
-                context,
-                mainNavigatorKey,
-              )!.push(UserPage(userId: data.otherUser.id));
-            },
+            onTap: data.chat.isChannel
+                ? null
+                : () {
+                    AppNavigator.withKeyOf(
+                      context,
+                      mainNavigatorKey,
+                    )!.push(UserPage(userId: data.otherUser.id));
+                  },
             child: Row(
               children: [
-                UserImage(size: 40, user: data.otherUser),
+                if (data.chat.isChannel)
+                  const ChannelDefaultIconWidget(size: 40)
+                else
+                  UserImageWidget(size: 40, user: data.otherUser),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

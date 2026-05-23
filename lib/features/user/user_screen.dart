@@ -15,7 +15,7 @@ import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_text_button.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/photos_preview/photos_preview_screen.dart';
-import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/core/scopes/auth_scope.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:kepleomax/features/edit_profile/edit_profile_bottom_sheet.dart';
@@ -172,7 +172,7 @@ class _Body extends StatelessWidget {
                                   ),
                                 );
                               },
-                        child: UserImage(
+                        child: UserImageWidget(
                           user: data.profile?.user,
                           size: 130,
                           isLoading: data.isLoading,

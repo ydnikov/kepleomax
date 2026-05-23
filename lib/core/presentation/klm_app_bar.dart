@@ -3,7 +3,7 @@ import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
-import 'package:kepleomax/core/presentation/user_image.dart';
+import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/core/scopes/auth_scope.dart';
 
 class KlmAppBar extends AppBar {
@@ -28,7 +28,7 @@ class KlmAppBar extends AppBar {
                leading ??
                Container(
                  margin: const EdgeInsets.all(12),
-                 child: UserImage(user: AuthScope.userOf(context)),
+                 child: UserImageWidget(user: AuthScope.userOf(context)),
                ),
          ),
          titleSpacing: 5,
@@ -80,7 +80,7 @@ class KlmSliverAppBar extends SliverAppBar {
                leading ??
                Container(
                  margin: const EdgeInsets.all(12),
-                 child: UserImage(user: AuthScope.userOf(context)),
+                 child: UserImageWidget(user: AuthScope.userOf(context)),
                ),
          ),
          titleSpacing: 5,

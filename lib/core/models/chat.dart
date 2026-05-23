@@ -29,10 +29,11 @@ abstract class Chat with _$Chat {
     draft: dto.draft,
     fromCache: fromCache,
     unreadCount: dto.unreadCount,
-    channelData: dto.otherUser.id != 2 ? null : const ChannelData(
-      name: 'KepLeoMax News',
-      isOfficial: true,
-      currentUserIsOwner: false,
+    channelData: dto.channelData == null ? null : ChannelData(
+      name: dto.channelData!.name,
+      imageUrl: dto.channelData!.imageUrl,
+      isOfficial: dto.channelData!.isOfficial,
+      currentUserIsOwner: dto.channelData!.currentUserIsOwner,
     ),
   );
 
@@ -56,20 +57,13 @@ abstract class Chat with _$Chat {
   bool get isLoadingChat => id == _loadingChatId;
 
   bool get isChannel => channelData != null;
-
-  ChatDto toDto() => ChatDto(
-    id: id,
-    otherUser: otherUser.toDto(),
-    lastMessage: lastMessage?.toDto(),
-    draft: draft,
-    unreadCount: unreadCount,
-  );
 }
 
 @freezed
 abstract class ChannelData with _$ChannelData {
   const factory ChannelData({
     required String name,
+    required String? imageUrl,
     required bool isOfficial,
     required bool currentUserIsOwner,
   }) = _ChannelData;
