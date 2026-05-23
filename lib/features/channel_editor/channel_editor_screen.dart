@@ -33,7 +33,7 @@ class ChannelEditorScreen extends StatelessWidget {
           centerTitle: true,
           backgroundColor: Colors.white,
         ),
-        body: const _Body(),
+        body: const SafeArea(child: _Body()),
       ),
     );
   }
@@ -47,12 +47,16 @@ class _Body extends StatefulWidget {
 }
 
 class _BodyState extends State<_Body> {
-  final _textController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _tagController = TextEditingController(text: 'https://kepleomax.com/');
   bool _showNameErrors = false;
 
   @override
   void dispose() {
-    _textController.dispose();
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _tagController.dispose();
     super.dispose();
   }
 
@@ -112,9 +116,9 @@ class _BodyState extends State<_Body> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: KlmTextField(
-                      controller: _textController,
+                      controller: _nameController,
                       readOnly: data.isLoading,
-                      hint: 'Channel name',
+                      label: 'Channel name',
                       validators: [channelNameValidator],
                       onFocusLost: () {
                         setState(() {
@@ -131,9 +135,49 @@ class _BodyState extends State<_Body> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
               const Text(
-                'Choose a name and photo to your channel',
+                'Choose a name and photo for your channel',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black45,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Divider(),
+              const SizedBox(height: 24),
+              KlmTextField(
+                controller: _descriptionController,
+                readOnly: data.isLoading,
+                label: 'Description',
+                validators: [],
+                onFocusLost: () {},
+                showErrors: _showNameErrors,
+                multiline: true,
+                maxLength: 200,
+                onChanged: (v) {
+
+                },
+              ),
+              const SizedBox(height: 24),
+              KlmTextField(
+                controller: _tagController,
+                readOnly: data.isLoading,
+                hint: 'Channel tag',
+                validators: [],
+                onFocusLost: () {},
+                showErrors: _showNameErrors,
+                onChanged: (v) {
+                  if (!v.startsWith('https://kepleomax.com/')) {
+                      _tagController.text = 'https://kepleomax.com/';
+                  }
+                },
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Choose a name for the url TODO',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.black45,
@@ -148,9 +192,10 @@ class _BodyState extends State<_Body> {
                   });
 
                   context.read<ChannelEditorBloc>().add(
-                    ChannelEditorEventCreate(name: _textController.text),
+                    ChannelEditorEventCreate(name: _nameController.text),
                   );
                 },
+                enabled: channelNameValidator(_nameController.text) == null,
                 isLoading: data.isLoading,
                 text: 'Create',
               ),

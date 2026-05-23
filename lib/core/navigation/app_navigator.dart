@@ -43,8 +43,13 @@ class AppNavigator extends StatefulWidget {
 
   static void popAll(BuildContext context) => of(context)?.popAll();
 
-  static Future<void>? showGeneralDialog(BuildContext context, Widget dialog) =>
-      of(context)?.showGeneralDialog(context, dialog);
+  static Future<void>? showGeneralDialog(
+    BuildContext context,
+    Widget dialog, {
+    bool barrierDismissible = false,
+  }) => of(
+    context,
+  )?.showGeneralDialog(context, dialog, barrierDismissible: barrierDismissible);
 
   static Future<void>? showModalBottomSheet(
     BuildContext context,
@@ -126,11 +131,17 @@ class AppNavigatorState extends State<AppNavigator> with WidgetsBindingObserver 
     return true;
   }
 
-  Future<void> showGeneralDialog(BuildContext context, Widget dialog) async {
+  Future<void> showGeneralDialog(
+    BuildContext context,
+    Widget dialog, {
+    bool barrierDismissible = false,
+  }) async {
     _isDialogOpened = true;
     await material.showGeneralDialog(
       context: context,
       useRootNavigator: true,
+      barrierDismissible: barrierDismissible,
+      barrierLabel: 'Dismiss',
       pageBuilder: (context, _, _) => _PopScope(child: dialog),
     );
     _isDialogOpened = false;

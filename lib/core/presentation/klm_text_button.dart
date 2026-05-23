@@ -7,7 +7,9 @@ class KlmTextButton extends StatelessWidget {
     required this.onPressed,
     required this.text,
     this.width,
+    this.backgroundColor = KlmColors.primaryColor,
     this.isLoading = false,
+    this.enabled = true,
     this.fontSize = 16,
     super.key,
   });
@@ -17,16 +19,18 @@ class KlmTextButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
+  final bool enabled;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: isLoading || !enabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: KlmColors.primaryColor,
+          backgroundColor: backgroundColor,
           // overlayColor: WidgetStateProperty.resolveWith<Color>((
           //   Set<WidgetState> states,
           // ) {

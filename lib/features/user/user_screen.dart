@@ -29,6 +29,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 part 'widgets/primary_button.dart';
+
 part 'widgets/user_scroll_listeners.dart';
 
 const int _appBarUsernameFullShownOffset = 130;
@@ -78,13 +79,21 @@ class _UserScreenState extends State<UserScreen> {
         ),
         body: SafeArea(
           top: false,
-          child: _ScrollControllerListeners(
-            controller: _scrollController,
-            userId: widget.userId,
-            child: _Body(
-              scrollController: _scrollController,
-              scrollPadding: MediaQuery.of(context).viewPadding.top,
-              key: const Key('user_screen_body'),
+          child: BlocProvider<PostListBloc>(
+            create: (context) => PostListBloc(
+              postRepository: Dependencies.of(context).postRepository,
+              userId: widget.userId,
+            ),
+            child: AutoScrollControllerListeners(
+              controller: _scrollController,
+              onLoadMore: () {
+                context.read<PostListBloc>().add(const PostListEventLoadMore());
+              },
+              child: _Body(
+                scrollController: _scrollController,
+                scrollPadding: MediaQuery.of(context).viewPadding.top,
+                key: const Key('user_screen_body'),
+              ),
             ),
           ),
         ),

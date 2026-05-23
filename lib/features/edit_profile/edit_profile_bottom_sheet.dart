@@ -84,7 +84,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                       ),
                       child: ClipOval(
                         child: _imageUrl == null || _imageUrl!.isEmpty
-                            ? const DefaultUserIconWidget()
+                            ? const UserDefaultIconWidget()
                             : _isImageEdited
                             ? Image.file(File(_imageUrl!), fit: BoxFit.cover)
                             : KlmCachedImage(

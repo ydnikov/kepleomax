@@ -4,6 +4,7 @@ import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/features/call/call_screen.dart';
+import 'package:kepleomax/features/channel/channel_screen.dart';
 import 'package:kepleomax/features/channel_editor/channel_editor_screen.dart';
 import 'package:kepleomax/features/chat/chat_screen.dart';
 import 'package:kepleomax/features/chats/chats_screen.dart';
@@ -61,6 +62,15 @@ final class ChannelEditorPage extends AppPage {
     name: 'channel_editor_screen',
     child: const ChannelEditorScreen(),
     key: const ValueKey('channel_editor_screen'),
+  );
+}
+
+final class ChannelPage extends AppPage {
+  const ChannelPage()
+      : super(
+    name: 'channel_page',
+    child: const ChannelScreen(),
+    key: const ValueKey('channel_page'),
   );
 }
 

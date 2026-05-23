@@ -366,14 +366,13 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
           title: InkWell(
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
-            onTap: data.chat.isChannel
-                ? null
-                : () {
-                    AppNavigator.withKeyOf(
-                      context,
-                      mainNavigatorKey,
-                    )!.push(UserPage(userId: data.otherUser.id));
-                  },
+            onTap: () {
+              AppNavigator.withKeyOf(context, mainNavigatorKey)!.push(
+                data.chat.isChannel
+                    ? const ChannelPage()
+                    : UserPage(userId: data.otherUser.id),
+              );
+            },
             child: Row(
               children: [
                 if (data.chat.isChannel)

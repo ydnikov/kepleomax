@@ -42,7 +42,7 @@ class UserImageWidget extends StatelessWidget {
                 child: isLoading
                     ? const Skeletonizer(child: ColoredBox(color: Colors.grey))
                     : user?.profileImage == null || user!.profileImage!.isEmpty
-                    ? const DefaultUserIconWidget()
+                    ? const UserDefaultIconWidget()
                     : KlmCachedImage(
                         imageUrl: flavor.imageUrl + user!.profileImage!,
                         width: context.imageMaxWidth,
@@ -87,8 +87,8 @@ class UserImageWidget extends StatelessWidget {
   }
 }
 
-class DefaultUserIconWidget extends StatelessWidget {
-  const DefaultUserIconWidget({super.key});
+class UserDefaultIconWidget extends StatelessWidget {
+  const UserDefaultIconWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
