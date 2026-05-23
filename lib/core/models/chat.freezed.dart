@@ -581,8 +581,8 @@ return $default(_that.id,_that.name,_that.description,_that.tag,_that.imageUrl,_
 /// @nodoc
 
 
-class _ChannelData implements ChannelData {
-  const _ChannelData({required this.id, required this.name, required this.description, required this.tag, required this.imageUrl, required this.isOfficial, required this.currentUserIsOwner, this.subscribersCount});
+class _ChannelData extends ChannelData {
+  const _ChannelData({required this.id, required this.name, required this.description, required this.tag, required this.imageUrl, required this.isOfficial, required this.currentUserIsOwner, this.subscribersCount}): super._();
   
 
 @override final  int id;

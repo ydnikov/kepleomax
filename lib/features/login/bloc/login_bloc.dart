@@ -6,11 +6,10 @@ import 'package:kepleomax/core/presentation/user_error_message.dart';
 import 'package:kepleomax/core/presentation/validators.dart';
 import 'package:kepleomax/features/login/bloc/login_state.dart';
 
-const String? Function(String) loginEmailValidator = UiValidator.emailValidator;
-const String? Function(String) loginPasswordValidator =
-    UiValidator.passwordValidator;
+const UiValidator loginEmailValidator = UiValidators.emailValidator;
+const UiValidator loginPasswordValidator = UiValidators.passwordValidator;
 const String? Function({required String confirmPassword, required String password})
-loginConfirmPasswordValidator = UiValidator.confirmPasswordValidator;
+loginConfirmPasswordValidator = UiValidators.confirmPasswordValidator;
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({required AuthController authController})

@@ -11,7 +11,7 @@ import 'package:kepleomax/core/presentation/klm_textfield.dart';
 import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/core/presentation/validators.dart';
 
-const String? Function(String) _usernameValidator = UiValidator.emptyValidator;
+const UiValidator _usernameValidator = UiValidators.emptyValidator;
 
 class EditProfileBottomSheet extends StatefulWidget {
   const EditProfileBottomSheet({
@@ -161,19 +161,19 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
             KlmTextField(
               controller: _nameController,
               label: 'Username',
-              onChanged: (newName) {},
-              readOnly: _isClosing,
               maxLength: 20,
-              showErrors: _isButtonPressed,
+              onChanged: (newName) {},
               validators: const [_usernameValidator],
+              showErrors: _isButtonPressed,
+              readOnly: _isClosing,
             ),
             const SizedBox(height: 20),
             KlmTextField(
               controller: _descriptionController,
-              multiline: true,
-              maxLength: 200,
               label: 'Description',
+              maxLength: 200,
               onChanged: (newName) {},
+              multiline: true,
               showErrors: _isButtonPressed,
               readOnly: _isClosing,
             ),

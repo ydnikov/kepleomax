@@ -5,11 +5,18 @@ part 'channel_dtos.g.dart';
 
 @JsonSerializable(createFactory: false)
 class ChannelRequestDto {
-  const ChannelRequestDto({required this.name, required this.imageUrl});
+  const ChannelRequestDto({
+    required this.name,
+    required this.imageUrl,
+    required this.description,
+    required this.tag,
+  });
 
   final String name;
   @JsonKey(name: 'image_url')
   final String? imageUrl;
+  final String description;
+  final String tag;
 
   Map<String, dynamic> toJson() => _$ChannelRequestDtoToJson(this);
 }

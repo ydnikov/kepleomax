@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kepleomax/core/app_constants.dart';
+import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/message_draft.dart';
 import 'package:kepleomax/core/models/user.dart';
@@ -29,15 +30,17 @@ abstract class Chat with _$Chat {
     draft: dto.draft,
     fromCache: fromCache,
     unreadCount: dto.unreadCount,
-    channelData: dto.channelData == null ? null : ChannelData(
-      id: dto.id,
-      name: dto.channelData!.name,
-      description: 'TODO Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard',
-      tag: 'TODO_tag',
-      imageUrl: dto.channelData!.imageUrl,
-      isOfficial: dto.channelData!.isOfficial,
-      currentUserIsOwner: dto.channelData!.currentUserIsOwner,
-    ),
+    channelData: dto.channelData == null
+        ? null
+        : ChannelData(
+            id: dto.id,
+            name: dto.channelData!.channelName,
+            description: dto.channelData!.description,
+            tag: dto.channelData!.tag,
+            imageUrl: dto.channelData!.imageUrl,
+            isOfficial: dto.channelData!.isOfficial,
+            currentUserIsOwner: dto.channelData!.currentUserIsOwner,
+          ),
   );
 
   factory Chat.loading() => Chat(
@@ -72,6 +75,10 @@ abstract class ChannelData with _$ChannelData {
     required String? imageUrl,
     required bool isOfficial,
     required bool currentUserIsOwner,
-    int? subscribersCount
+    int? subscribersCount,
   }) = _ChannelData;
+
+  const ChannelData._();
+
+  String get fullTag => '${flavor.baseUrl}/$tag';
 }

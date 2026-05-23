@@ -4,7 +4,8 @@ import 'package:kepleomax/core/presentation/validators.dart';
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_state.dart';
 import 'package:kepleomax/features/channel_editor/data/channel_editor_repository.dart';
 
-String? Function(String) channelNameValidator = UiValidator.createLengthValidator(3);
+UiValidator channelNameValidator = UiValidators.createLengthValidator(3);
+const UiValidator channelTagValidator = UiValidators.channelTagValidator;
 
 class ChannelEditorBloc extends Bloc<ChannelEditorEvent, ChannelEditorState> {
   ChannelEditorBloc({required ChannelEditorRepository repository})
@@ -32,7 +33,11 @@ class ChannelEditorBloc extends Bloc<ChannelEditorEvent, ChannelEditorState> {
     emit(ChannelEditorStateBase(_data));
 
     try {
-      await _repository.createNewChannel(name: event.name);
+      await _repository.createNewChannel(
+        name: event.name,
+        description: event.description,
+        tag: event.tag,
+      );
 
       emit(const ChannelEditorStateExit(message: 'Channel successfully created'));
     } catch (e, st) {
@@ -58,7 +63,13 @@ class ChannelEditorEventLoad implements ChannelEditorEvent {
 }
 
 class ChannelEditorEventCreate implements ChannelEditorEvent {
-  const ChannelEditorEventCreate({required this.name});
+  const ChannelEditorEventCreate({
+    required this.name,
+    required this.description,
+    required this.tag,
+  });
 
   final String name;
+  final String description;
+  final String tag;
 }

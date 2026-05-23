@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
+import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/presentation/channel_image_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
@@ -49,8 +50,9 @@ class _Body extends StatefulWidget {
 class _BodyState extends State<_Body> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _tagController = TextEditingController(text: 'https://kepleomax.com/');
+  final _tagController = TextEditingController(text: '${flavor.baseUrl}/');
   bool _showNameErrors = false;
+  bool _showTagErrors = false;
 
   @override
   void dispose() {
@@ -126,11 +128,7 @@ class _BodyState extends State<_Body> {
                         });
                       },
                       showErrors: _showNameErrors,
-                      onChanged: (v) {
-                        setState(() {
-                          _showNameErrors = v.isEmpty;
-                        });
-                      },
+                      onChanged: (s) {},
                     ),
                   ),
                 ],
@@ -156,27 +154,29 @@ class _BodyState extends State<_Body> {
                 showErrors: _showNameErrors,
                 multiline: true,
                 maxLength: 200,
-                onChanged: (v) {
-
-                },
+                onChanged: (v) {},
               ),
               const SizedBox(height: 24),
               KlmTextField(
                 controller: _tagController,
                 readOnly: data.isLoading,
                 hint: 'Channel tag',
-                validators: [],
-                onFocusLost: () {},
-                showErrors: _showNameErrors,
+                validators: const [channelTagValidator],
+                onFocusLost: () {
+                  setState(() {
+                    _showTagErrors = true;
+                  });
+                },
+                showErrors: _showTagErrors,
                 onChanged: (v) {
-                  if (!v.startsWith('https://kepleomax.com/')) {
-                      _tagController.text = 'https://kepleomax.com/';
+                  if (!v.startsWith('${flavor.baseUrl}/')) {
+                    _tagController.text = '${flavor.baseUrl}/';
                   }
                 },
               ),
               const SizedBox(height: 6),
               const Text(
-                'Choose a name for the url TODO',
+                'Choose a tag for the url',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -189,13 +189,22 @@ class _BodyState extends State<_Body> {
                 onPressed: () {
                   setState(() {
                     _showNameErrors = true;
+                    _showTagErrors = true;
                   });
 
                   context.read<ChannelEditorBloc>().add(
-                    ChannelEditorEventCreate(name: _nameController.text),
+                    ChannelEditorEventCreate(
+                      name: _nameController.text,
+                      description: _descriptionController.text,
+                      tag: _tagController.text.substring(
+                        '${flavor.baseUrl}/'.length,
+                      ),
+                    ),
                   );
                 },
-                enabled: channelNameValidator(_nameController.text) == null,
+                enabled:
+                    channelNameValidator(_nameController.text) == null &&
+                    channelTagValidator(_tagController.text) == null,
                 isLoading: data.isLoading,
                 text: 'Create',
               ),

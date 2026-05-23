@@ -241,7 +241,7 @@ class _BodyState extends State<_Body> {
                       controller: _confirmPasswordController,
                       focusNode: _confirmPasswordFocusNode,
                       validators: [
-                        UiValidator.createConfirmPasswordValidator(
+                        UiValidators.createConfirmPasswordValidator(
                           _passwordController,
                         ),
                       ],

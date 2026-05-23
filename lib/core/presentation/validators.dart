@@ -1,8 +1,9 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:kepleomax/core/flavor.dart';
 
-class UiValidator {
-  UiValidator._();
+class UiValidators {
+  UiValidators._();
 
   static String? emailValidator(String email) {
     final emptyCheck = emptyValidator(email);
@@ -17,7 +18,7 @@ class UiValidator {
     return null;
   }
 
-  static String? Function(String) createConfirmPasswordValidator(
+  static UiValidator createConfirmPasswordValidator(
     TextEditingController passwordController,
   ) {
     String? validator(String value) {
@@ -63,7 +64,7 @@ class UiValidator {
     return createLengthValidator(6).call(value);
   }
 
-  static String? Function(String) createLengthValidator(int length) {
+  static UiValidator createLengthValidator(int length) {
     String? lengthValidator(String value) {
       if (value.length < length) {
         return 'The length must be at least $length';
@@ -74,4 +75,16 @@ class UiValidator {
 
     return lengthValidator;
   }
+
+  static String? channelTagValidator(String value) {
+    final link = '${flavor.baseUrl}/';
+    if (!value.startsWith(link)) {
+      return 'Incorrect pattern';
+    }
+    final tag = value.substring(link.length);
+
+    return createLengthValidator(3).call(tag);
+  }
 }
+
+typedef UiValidator = String? Function(String);

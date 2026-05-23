@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
+import 'package:kepleomax/core/presentation/validators.dart';
 import 'package:kepleomax/core/scopes/user_activity_scope.dart';
 
 class KlmTextField extends StatefulWidget {
@@ -34,7 +35,7 @@ class KlmTextField extends StatefulWidget {
   final bool isPassword;
   final ValueChanged<String>? onChanged;
   final bool showErrors;
-  final List<String? Function(String)> validators; // for bool showError
+  final List<UiValidator> validators; // for bool showError
   final FormFieldValidator<String>? validator; // for formKey validation
   final int? maxLength;
   final bool readOnly;

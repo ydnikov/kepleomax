@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
@@ -20,6 +21,7 @@ import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:kepleomax/features/user/user_screen.dart';
 import 'package:num_remap/num_remap.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 const int _appBarNameFullShownOffset = 130;
@@ -181,7 +183,17 @@ class _BodyState extends State<_Body> {
                       'description:',
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                     ),
-                    Text(channelData.description),
+                    if (channelData.description.isNotEmpty)
+                      Text(channelData.description)
+                    else
+                      const Text(
+                        'Empty description',
+                        style: TextStyle(
+                          color: Colors.black38,
+                          fontWeight: FontWeight.w500,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
                     const Divider(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -197,11 +209,14 @@ class _BodyState extends State<_Body> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            Text(
-                              'https://kepleomax.com/${channelData.tag}',
-                              style: const TextStyle(
-                                color: KlmColors.link,
-                                decoration: TextDecoration.underline,
+                            SizedBox(
+                              width: context.screenSize.width * 0.75,
+                              child: Text(
+                                data.channelData.fullTag,
+                                style: const TextStyle(
+                                  color: KlmColors.link,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
                             ),
                           ],
@@ -210,7 +225,11 @@ class _BodyState extends State<_Body> {
                           height: 34,
                           margin: const EdgeInsets.only(top: 10),
                           child: IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Clipboard.setData(
+                                ClipboardData(text: channelData.fullTag),
+                              );
+                            },
                             style: IconButton.styleFrom(
                               minimumSize: Size.zero,
                               padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -299,9 +318,11 @@ class _UserWidget extends StatelessWidget {
     return Skeletonizer(
       enabled: isLoading,
       child: ListTile(
-        onTap: isLoading ? null : () {
-          AppNavigator.push(context, UserPage(userId: user.id));
-        },
+        onTap: isLoading
+            ? null
+            : () {
+                AppNavigator.push(context, UserPage(userId: user.id));
+              },
         title: Row(
           children: [
             ClipOval(
@@ -400,33 +421,55 @@ class _AppBarState extends State<_AppBar> {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.white.withAlpha(
-        !widget.scrollController.hasClients
-            ? 0
-            : widget.scrollController.offset
-                  .remap(0, 90, 0, 255)
-                  .clamp(0, 255)
-                  .toInt(),
-      ),
-      surfaceTintColor: Colors.white,
-      leading: const KlmBackButton(),
-      actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.ios_share))],
-      centerTitle: true,
-      title: Opacity(
-        opacity: !widget.scrollController.hasClients
-            ? 0
-            : widget.scrollController.offset
-                  .remap(110, _appBarNameFullShownOffset, 0, 1)
-                  .clamp(0, 1),
-        child: Text(
-          'Channel name',
-          style: context.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            fontSize: 26,
+    return BlocBuilder<ChannelBloc, ChannelState>(
+      buildWhen: (oldState, newState) {
+        if (newState is! ChannelStateBase) return false;
+        if (oldState is! ChannelStateBase) return true;
+
+        return oldState.data.channelData.name != newState.data.channelData.name;
+      },
+      builder: (context, state) {
+        if (state is! ChannelStateBase) return const SizedBox();
+        final data = state.data;
+
+        return AppBar(
+          backgroundColor: Colors.white.withAlpha(
+            !widget.scrollController.hasClients
+                ? 0
+                : widget.scrollController.offset
+                      .remap(0, 90, 0, 255)
+                      .clamp(0, 255)
+                      .toInt(),
           ),
-        ),
-      ),
+          surfaceTintColor: Colors.white,
+          leading: const KlmBackButton(),
+          actions: [
+            IconButton(
+              onPressed: () {
+                SharePlus.instance.share(
+                  ShareParams(text: data.channelData.fullTag),
+                );
+              },
+              icon: const Icon(Icons.ios_share),
+            ),
+          ],
+          centerTitle: true,
+          title: Opacity(
+            opacity: !widget.scrollController.hasClients
+                ? 0
+                : widget.scrollController.offset
+                      .remap(110, _appBarNameFullShownOffset, 0, 1)
+                      .clamp(0, 1),
+            child: Text(
+              data.channelData.name,
+              style: context.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 26,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -23,8 +23,10 @@ ChatsResponse _$ChatsResponseFromJson(Map<String, dynamic> json) =>
 
 ChatChannelDataDto _$ChatChannelDataDtoFromJson(Map<String, dynamic> json) =>
     ChatChannelDataDto(
-      name: json['name'] as String,
+      channelName: json['channel_name'] as String,
+      description: json['description'] as String,
       imageUrl: json['image_url'] as String?,
       isOfficial: json['is_official'] as bool,
       currentUserIsOwner: json['current_user_is_owner'] as bool,
+      tag: json['tag'] as String,
     );
