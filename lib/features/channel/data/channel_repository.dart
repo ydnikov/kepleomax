@@ -11,6 +11,10 @@ abstract class ChannelRepository {
 
   Future<void> loadMoreSubscribers({required int channelId});
 
+  Future<void> subscribe({required int channelId});
+
+  Future<void> unsubscribe({required int channelId});
+
   Future<void> dispose();
 
   Stream<List<User>> get usersStream;
@@ -57,6 +61,32 @@ class ChannelRepositoryImpl implements ChannelRepository {
     }
 
     _usersStreamController.add(res.data.data!.map(User.fromDto).toList());
+  }
+
+  @override
+  Future<void> subscribe({required int channelId}) async {
+    final res = await _api.subscribe(channelId: channelId);
+
+    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+      throw Exception(
+        res.response.statusCode == 409
+            ? 'You are already subscribed'
+            : 'Failed to subscribe: ${res.response.statusCode}',
+      );
+    }
+  }
+
+  @override
+  Future<void> unsubscribe({required int channelId}) async {
+    final res = await _api.unsubscribe(channelId: channelId);
+
+    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+      throw Exception(
+        res.response.statusCode == 404
+            ? 'You are not a subscriber'
+            : 'Failed to unsubscribe: ${res.response.statusCode}',
+      );
+    }
   }
 
   @override

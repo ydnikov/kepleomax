@@ -20,6 +20,7 @@ import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
 import 'package:kepleomax/core/presentation/channel_image_widget.dart';
+import 'package:kepleomax/core/presentation/channel_official_widget.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
@@ -31,17 +32,14 @@ import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/features/channel/data/channel_repository.dart';
 import 'package:kepleomax/features/chat/bloc/chat_bloc.dart';
 import 'package:kepleomax/features/chat/bloc/chat_state.dart';
-import 'package:kepleomax/core/presentation/channel_official_widget.dart';
 import 'package:kepleomax/features/chat/widgets/empty_chat_widget.dart';
 import 'package:kepleomax/features/chat/widgets/message_widget.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-part 'widgets/chat_bottom.dart';
-
 part 'widgets/channel_chat_bottom.dart';
-
+part 'widgets/chat_bottom.dart';
 part 'widgets/read_button.dart';
 
 /// screen
@@ -225,7 +223,7 @@ class _BodyState extends State<_Body> {
                   child: data.isLoading && data.messages.isEmpty
                       ? const Center(child: CircularProgressIndicator())
                       : data.messages.isEmpty
-                      ? EmptyChatWidget(isChannel: data.chat.isChannel)
+                      ? EmptyChatWidget(channelRole: data.chat.channelData?.userRole)
                       : ListViewObserver(
                           controller: _observerController,
                           autoTriggerObserveTypes: const [
@@ -281,7 +279,7 @@ class _BodyState extends State<_Body> {
                         ),
                 ),
               ),
-              if (data.chat.channelData?.currentUserIsOwner ?? true)
+              if (data.chat.channelData?.userRole.isOwner ?? true)
                 _ChatBottom(
                   onSend: (message) {
                     if (data.isLoading || !data.isConnected) return;
@@ -304,7 +302,7 @@ class _BodyState extends State<_Body> {
                   key: const Key('chat_bottom'),
                 )
               else
-                const _ChannelChatBottom(),
+                _ChannelChatBottom(role: data.chat.channelData!.userRole),
             ],
           ),
         );

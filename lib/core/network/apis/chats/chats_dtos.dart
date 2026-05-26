@@ -98,19 +98,20 @@ class ChatDto extends Equatable {
 
 @JsonSerializable(createToJson: false)
 class ChatChannelDataDto {
-
   const ChatChannelDataDto({
+    required this.id,
     required this.channelName,
     required this.description,
     required this.imageUrl,
     required this.isOfficial,
-    required this.currentUserIsOwner,
+    required this.userChannelRole,
     required this.tag,
   });
 
   factory ChatChannelDataDto.fromJson(Map<String, dynamic> json) =>
       _$ChatChannelDataDtoFromJson(json);
 
+  final int id;
   @JsonKey(name: 'channel_name')
   final String channelName;
   final String description;
@@ -118,7 +119,14 @@ class ChatChannelDataDto {
   final String? imageUrl;
   @JsonKey(name: 'is_official')
   final bool isOfficial;
-  @JsonKey(name: 'current_user_is_owner')
-  final bool currentUserIsOwner;
+  @JsonKey(name: 'role')
+  final UserChannelRoleDto userChannelRole;
   final String tag;
+}
+
+@JsonEnum()
+enum UserChannelRoleDto {
+  owner,
+  subscriber,
+  none;
 }

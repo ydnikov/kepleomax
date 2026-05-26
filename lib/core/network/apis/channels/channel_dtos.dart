@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
 import 'package:kepleomax/core/network/common/user_dto.dart';
 
 part 'channel_dtos.g.dart';
@@ -23,11 +24,12 @@ class ChannelRequestDto {
 
 @JsonSerializable(createToJson: false)
 class CreateNewChannelResponseDto {
-  const CreateNewChannelResponseDto({required this.message});
+  const CreateNewChannelResponseDto({required this.data, required this.message});
 
   factory CreateNewChannelResponseDto.fromJson(Map<String, dynamic> json) =>
       _$CreateNewChannelResponseDtoFromJson(json);
 
+  final ChatChannelDataDto? data;
   final String? message;
 }
 

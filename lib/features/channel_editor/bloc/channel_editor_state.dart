@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:kepleomax/core/models/chat.dart';
 
 part 'channel_editor_state.freezed.dart';
 
@@ -29,8 +30,10 @@ abstract class ChannelEditorStateMessage
 abstract class ChannelEditorStateExit
     with _$ChannelEditorStateExit
     implements ChannelEditorState {
-  const factory ChannelEditorStateExit({String? message}) =
-      _ChannelEditorStateExit;
+  const factory ChannelEditorStateExit({
+    required ChannelData newChannelData,
+    String? message,
+  }) = _ChannelEditorStateExit;
 }
 
 @freezed
@@ -41,4 +44,24 @@ abstract class ChannelEditorData
       _ChannelEditorData;
 
   factory ChannelEditorData.initial() => const ChannelEditorData();
+}
+
+@freezed
+abstract class ChannelEditingUiData with _$ChannelEditingUiData {
+  const factory ChannelEditingUiData({
+    required String name,
+    required String description,
+    required String tag,
+  }) = _ChannelEditingUiData;
+
+  factory ChannelEditingUiData.fromChannelData(ChannelData? data) => data == null
+      ? ChannelEditingUiData.initial()
+      : ChannelEditingUiData(
+          name: data.name,
+          description: data.description,
+          tag: data.tag,
+        );
+
+  factory ChannelEditingUiData.initial() =>
+      const ChannelEditingUiData(name: '', description: '', tag: '');
 }

@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
+import 'package:kepleomax/core/models/chat.dart';
 
 class EmptyChatWidget extends StatelessWidget {
-  const EmptyChatWidget({required this.isChannel, super.key});
+  const EmptyChatWidget({required this.channelRole, super.key});
 
-  final bool isChannel;
+  final UserChannelRole? channelRole;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: _TechMessage(
         key: const Key('no_messages_widget'),
-        text: isChannel
+        text: channelRole == null
+            ? 'No messages here yet...\n\nWrite something'
+            : channelRole!.isOwner
             ? 'This is your channel\n\nWrite something'
-            : 'No messages here yet...\n\nWrite something',
+            : 'You are subscribed\n\nNo messages yet',
       ),
     );
   }

@@ -24,6 +24,10 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+part 'widgets/channel_buttons_widget.dart';
+
+part 'widgets/channel_user_widget.dart';
+
 const int _appBarNameFullShownOffset = 130;
 
 class ChannelScreen extends StatefulWidget {
@@ -151,31 +155,9 @@ class _BodyState extends State<_Body> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: KlmTextButton(
-                            onPressed: () {
-                              AppNavigator.push(context, const ChannelEditorPage());
-                            },
-                            text: 'Edit',
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: KlmTextButton(
-                            onPressed: () {
-                              AppNavigator.showGeneralDialog(
-                                context,
-                                const DeleteChannelDialog(),
-                                barrierDismissible: true,
-                              );
-                            },
-                            text: 'Delete',
-                            backgroundColor: Colors.red,
-                          ),
-                        ),
-                      ],
+                    _ChannelButtonsWidget(
+                      channelData: channelData,
+                      isLoading: data.isLoading,
                     ),
                     const SizedBox(height: 12),
                     const Divider(),
@@ -247,130 +229,64 @@ class _BodyState extends State<_Body> {
                 ),
               ),
               const Divider(),
-              const Padding(
-                padding: EdgeInsets.only(left: 16),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Subscribers',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              if (data.subs.isNotEmpty)
-                MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  child: ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: data.subs.length,
-                    itemBuilder: (context, i) => _UserWidget(
-                      user: data.subs[i],
-                      key: Key('channel_subscriber_${data.subs[i].id}'),
-                    ),
-                  ),
-                )
-              else if (data.isLoading)
-                Column(
-                  children: [
-                    _UserWidget(user: User.loading(), isLoading: true),
-                    _UserWidget(user: User.loading(), isLoading: true),
-                    _UserWidget(user: User.loading(), isLoading: true),
-                  ],
-                )
-              else
-                Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Failed to load subscribers list :(',
+              if (channelData.userRole.isOwner) ...[
+                const Padding(
+                  padding: EdgeInsets.only(left: 16),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Subscribers',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                     ),
-                    const SizedBox(height: 6),
-                    KlmTextButton(
-                      onPressed: () {
-                        context.read<ChannelBloc>().add(const ChannelEventLoad());
-                      },
-                      text: 'Retry',
-                      width: 200,
-                    ),
-                  ],
+                  ),
                 ),
+                const SizedBox(height: 12),
+                if (data.subs.isNotEmpty)
+                  MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: data.subs.length,
+                      itemBuilder: (context, i) => _ChannelUserWidget(
+                        user: data.subs[i],
+                        key: Key('channel_subscriber_${data.subs[i].id}'),
+                      ),
+                    ),
+                  )
+                else if (data.isLoading)
+                  Column(
+                    children: [
+                      _ChannelUserWidget(user: User.loading(), isLoading: true),
+                      _ChannelUserWidget(user: User.loading(), isLoading: true),
+                      _ChannelUserWidget(user: User.loading(), isLoading: true),
+                    ],
+                  )
+                else
+                  Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Failed to load subscribers list :(',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 6),
+                      KlmTextButton(
+                        onPressed: () {
+                          context.read<ChannelBloc>().add(const ChannelEventLoad());
+                        },
+                        text: 'Retry',
+                        width: 200,
+                      ),
+                    ],
+                  ),
+              ],
               const SizedBox(height: 12),
             ],
           ),
         );
       },
-    );
-  }
-}
-
-class _UserWidget extends StatelessWidget {
-  const _UserWidget({required this.user, this.isLoading = false, super.key});
-
-  final User user;
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    return Skeletonizer(
-      enabled: isLoading,
-      child: ListTile(
-        onTap: isLoading
-            ? null
-            : () {
-                AppNavigator.push(context, UserPage(userId: user.id));
-              },
-        title: Row(
-          children: [
-            ClipOval(
-              child: SizedBox(
-                height: 40,
-                width: 40,
-                child: isLoading
-                    ? const ColoredBox(color: Colors.grey)
-                    : user.profileImage == null
-                    ? const UserDefaultIconWidget()
-                    : UserImageWidget(user: user),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                user.username,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (user.isCurrent)
-              Container(
-                margin: const EdgeInsets.only(left: 8, right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.purple.shade50,
-                ),
-                child: const Text(
-                  'owner',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.purple,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        contentPadding: const EdgeInsets.only(left: 16),
-        trailing: user.isCurrent || isLoading
-            ? const SizedBox(width: 2)
-            : IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.clear, color: Colors.red),
-              ),
-      ),
     );
   }
 }

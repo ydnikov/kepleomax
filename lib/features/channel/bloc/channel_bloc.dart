@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/chat.dart';
+import 'package:kepleomax/core/presentation/user_error_message.dart';
 import 'package:kepleomax/features/channel/bloc/channel_state.dart';
 import 'package:kepleomax/features/channel/data/channel_repository.dart';
 
@@ -20,6 +21,9 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     });
 
     on<ChannelEventLoad>(_onLoad);
+    on<ChannelEventEdited>(_onEdited);
+    on<ChannelEventSubscribe>(_onSubscribe);
+    on<ChannelEventUnsubscribe>(_onUnsubscribe);
     on<_ChannelEventEmit>(_onEmit);
   }
 
@@ -32,6 +36,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     emit(ChannelStateBase(_data));
 
     try {
+      /// TODO start loading subsCount and subs at the same time
       final subsCount = await _channelRepository.getSubscribersCount(
         channelId: _data.channelData.id,
       );
@@ -40,19 +45,85 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
       );
       emit(ChannelStateBase(_data));
 
-      await _channelRepository.loadSubscribers(channelId: _data.channelData.id);
+      if (_data.channelData.userRole.isOwner) {
+        await _channelRepository.loadSubscribers(channelId: _data.channelData.id);
+      }
     } catch (e, st) {
       logger.e(e, stackTrace: st);
-      emit(
-        const ChannelStateMessage(
-          message: 'Failed to get actual data',
-          isError: true,
-        ),
-      );
+      emit(ChannelStateMessage(message: e.userErrorMessage, isError: true));
     } finally {
       _data = _data.copyWith(isLoading: false);
       emit(ChannelStateBase(_data));
     }
+  }
+
+  Future<void> _onSubscribe(
+    ChannelEventSubscribe event,
+    Emitter<ChannelState> emit,
+  ) async {
+    if (_data.channelData.subscribersCount == null) return;
+
+    _data = _data.copyWith(isLoading: true);
+    emit(ChannelStateBase(_data));
+
+    try {
+      final fakeDelay = Future<void>.delayed(const Duration(milliseconds: 750));
+
+      await _channelRepository.subscribe(channelId: _data.channelData.id);
+      _data = _data.copyWith(
+        channelData: _data.channelData.copyWith(
+          userRole: UserChannelRole.subscriber,
+          subscribersCount: _data.channelData.subscribersCount! + 1,
+        ),
+      );
+
+      await fakeDelay;
+    } catch (e, st) {
+      logger.e(e, stackTrace: st);
+      emit(ChannelStateMessage(message: e.userErrorMessage, isError: true));
+    } finally {
+      _data = _data.copyWith(isLoading: false);
+      emit(ChannelStateBase(_data));
+    }
+  }
+
+  Future<void> _onUnsubscribe(
+    ChannelEventUnsubscribe event,
+    Emitter<ChannelState> emit,
+  ) async {
+    if (_data.channelData.subscribersCount == null) return;
+
+    _data = _data.copyWith(isLoading: true);
+    emit(ChannelStateBase(_data));
+
+    try {
+      final fakeDelay = Future<void>.delayed(const Duration(milliseconds: 750));
+
+      await _channelRepository.unsubscribe(channelId: _data.channelData.id);
+      _data = _data.copyWith(
+        channelData: _data.channelData.copyWith(
+          userRole: UserChannelRole.none,
+          subscribersCount: _data.channelData.subscribersCount! - 1,
+        ),
+      );
+
+      await fakeDelay;
+    } catch (e, st) {
+      logger.e(e, stackTrace: st);
+      emit(ChannelStateMessage(message: e.userErrorMessage, isError: true));
+    } finally {
+      _data = _data.copyWith(isLoading: false);
+      emit(ChannelStateBase(_data));
+    }
+  }
+
+  void _onEdited(ChannelEventEdited event, Emitter<ChannelState> emit) {
+    _data = _data.copyWith(
+      channelData: event.newChannelData.copyWith(
+        subscribersCount: _data.channelData.subscribersCount,
+      ),
+    );
+    emit(ChannelStateBase(_data));
   }
 
   void _onEmit(_ChannelEventEmit event, Emitter<ChannelState> emit) {
@@ -71,7 +142,23 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
 abstract class ChannelEvent {}
 
 class ChannelEventLoad implements ChannelEvent {
-  const ChannelEventLoad();
+  const ChannelEventLoad({this.full = false});
+
+  final bool full;
+}
+
+class ChannelEventEdited implements ChannelEvent {
+  ChannelEventEdited(this.newChannelData);
+
+  final ChannelData newChannelData;
+}
+
+class ChannelEventSubscribe implements ChannelEvent {
+  const ChannelEventSubscribe();
+}
+
+class ChannelEventUnsubscribe implements ChannelEvent {
+  const ChannelEventUnsubscribe();
 }
 
 class _ChannelEventEmit implements ChannelEvent {

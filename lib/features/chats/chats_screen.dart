@@ -203,7 +203,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
               onSelected: (value) {
                 switch (value) {
                   case ChatsAppBarCreateActions.channel:
-                    AppNavigator.push(context, const ChannelEditorPage());
+                    AppNavigator.push(context, ChannelEditorPage(channelData: null));
                     break;
                 }
               },

@@ -57,21 +57,23 @@ final class ChatPage extends AppPage {
 }
 
 final class ChannelEditorPage extends AppPage {
-  const ChannelEditorPage()
-      : super(
-    name: 'channel_editor_screen',
-    child: const ChannelEditorScreen(),
-    key: const ValueKey('channel_editor_screen'),
-  );
+  ChannelEditorPage({
+    required ChannelData? channelData,
+    ValueChanged<ChannelData>? onSave,
+  }) : super(
+         name: 'channel_editor_screen',
+         child: ChannelEditorScreen(channelData: channelData, onSave: onSave),
+         key: const ValueKey('channel_editor_screen'),
+       );
 }
 
 final class ChannelPage extends AppPage {
   ChannelPage({required ChannelData channelData})
-      : super(
-    name: 'channel_page',
-    child: ChannelScreen(channelData: channelData),
-    key: const ValueKey('channel_page'),
-  );
+    : super(
+        name: 'channel_page',
+        child: ChannelScreen(channelData: channelData),
+        key: const ValueKey('channel_page'),
+      );
 }
 
 final class CallPage extends AppPage {

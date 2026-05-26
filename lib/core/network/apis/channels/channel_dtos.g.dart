@@ -16,7 +16,12 @@ Map<String, dynamic> _$ChannelRequestDtoToJson(ChannelRequestDto instance) =>
 
 CreateNewChannelResponseDto _$CreateNewChannelResponseDtoFromJson(
   Map<String, dynamic> json,
-) => CreateNewChannelResponseDto(message: json['message'] as String?);
+) => CreateNewChannelResponseDto(
+  data: json['data'] == null
+      ? null
+      : ChatChannelDataDto.fromJson(json['data'] as Map<String, dynamic>),
+  message: json['message'] as String?,
+);
 
 GetSubscribersCountResponseDto _$GetSubscribersCountResponseDtoFromJson(
   Map<String, dynamic> json,

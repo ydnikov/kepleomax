@@ -32,15 +32,7 @@ abstract class Chat with _$Chat {
     unreadCount: dto.unreadCount,
     channelData: dto.channelData == null
         ? null
-        : ChannelData(
-            id: dto.id,
-            name: dto.channelData!.channelName,
-            description: dto.channelData!.description,
-            tag: dto.channelData!.tag,
-            imageUrl: dto.channelData!.imageUrl,
-            isOfficial: dto.channelData!.isOfficial,
-            currentUserIsOwner: dto.channelData!.currentUserIsOwner,
-          ),
+        : ChannelData.fromDto(dto.channelData!),
   );
 
   factory Chat.loading() => Chat(
@@ -74,11 +66,44 @@ abstract class ChannelData with _$ChannelData {
     required String tag,
     required String? imageUrl,
     required bool isOfficial,
-    required bool currentUserIsOwner,
+    required UserChannelRole userRole,
     int? subscribersCount,
   }) = _ChannelData;
+
+  factory ChannelData.fromDto(ChatChannelDataDto dto) => ChannelData(
+    id: dto.id,
+    name: dto.channelName,
+    description: dto.description,
+    tag: dto.tag,
+    imageUrl: dto.imageUrl,
+    isOfficial: dto.isOfficial,
+    userRole: UserChannelRole.fromDto(dto.userChannelRole),
+  );
 
   const ChannelData._();
 
   String get fullTag => '${flavor.baseUrl}/$tag';
+}
+
+enum UserChannelRole {
+  owner,
+  subscriber,
+  none;
+
+  factory UserChannelRole.fromDto(UserChannelRoleDto dto) {
+    switch (dto) {
+      case UserChannelRoleDto.owner:
+        return owner;
+      case UserChannelRoleDto.subscriber:
+        return subscriber;
+      case UserChannelRoleDto.none:
+        return none;
+    }
+  }
+
+  bool get isOwner => this == owner;
+
+  bool get isSubscriber => this == subscriber;
+
+  bool get isNone => this == none;
 }

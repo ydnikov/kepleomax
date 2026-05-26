@@ -15,8 +15,8 @@ class Flavor {
        assert(imageUrl.isNotEmpty, "imageUrl can't be empty");
 
   factory Flavor.release() => Flavor(
-    baseUrl: 'http://kepleomax.com',
-    imageUrl: 'http://kepleomax.com/api/files/',
+    baseUrl: 'https://kepleomax.com',
+    imageUrl: 'https://kepleomax.com/api/files/',
     type: FlavorType.release,
     constants: AppConstantsType.release(),
     versionName: ''

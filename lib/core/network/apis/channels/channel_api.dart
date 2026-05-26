@@ -14,6 +14,12 @@ abstract class ChannelApi {
     @Body() required ChannelRequestDto body,
   });
 
+  @PUT('/edit')
+  Future<HttpResponse<CreateNewChannelResponseDto>> editChannel({
+    @Query('channel_id') required int channelId,
+    @Body() required ChannelRequestDto body,
+  });
+
   @GET('/subsCount')
   Future<HttpResponse<GetSubscribersCountResponseDto>> getSubscribersCount({
     @Query('channel_id') required int channelId,
@@ -24,5 +30,15 @@ abstract class ChannelApi {
     @Query('channel_id') required int channelId,
     @Query('limit') required int limit,
     @Query('cursor') required int? cursor,
+  });
+
+  @POST('/subscribe')
+  Future<HttpResponse<void>> subscribe({
+    @Query('channel_id') required int channelId,
+  });
+
+  @DELETE('/unsubscribe')
+  Future<HttpResponse<void>> unsubscribe({
+    @Query('channel_id') required int channelId,
   });
 }

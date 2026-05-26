@@ -23,10 +23,17 @@ ChatsResponse _$ChatsResponseFromJson(Map<String, dynamic> json) =>
 
 ChatChannelDataDto _$ChatChannelDataDtoFromJson(Map<String, dynamic> json) =>
     ChatChannelDataDto(
+      id: (json['id'] as num).toInt(),
       channelName: json['channel_name'] as String,
       description: json['description'] as String,
       imageUrl: json['image_url'] as String?,
       isOfficial: json['is_official'] as bool,
-      currentUserIsOwner: json['current_user_is_owner'] as bool,
+      userChannelRole: $enumDecode(_$UserChannelRoleDtoEnumMap, json['role']),
       tag: json['tag'] as String,
     );
+
+const _$UserChannelRoleDtoEnumMap = {
+  UserChannelRoleDto.owner: 'owner',
+  UserChannelRoleDto.subscriber: 'subscriber',
+  UserChannelRoleDto.none: 'none',
+};

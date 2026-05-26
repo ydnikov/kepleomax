@@ -42,14 +42,16 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
   @override
   void listenOnlineStatusUpdates({required List<int> usersIds}) => _webSocket.emit(
     'subscribe_on_online_status_updates',
-    {'users_ids': usersIds.toList()},
+    {'users_ids': usersIds.where((id) => id > 0).toList()},
   );
 
   @override
-  void listenOnlineStatusUpdate({required int userId}) =>
-      _webSocket.emit('subscribe_on_online_status_updates', {
-        'users_ids': [userId].toList(),
-      });
+  void listenOnlineStatusUpdate({required int userId}) {
+    if (userId <= 0) return;
+    _webSocket.emit('subscribe_on_online_status_updates', {
+      'users_ids': [userId].toList(),
+    });
+  }
 
   @override
   void activityDetected() {
