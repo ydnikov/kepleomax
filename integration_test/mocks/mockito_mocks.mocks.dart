@@ -56,7 +56,7 @@ class MockChatsApi extends _i1.Mock implements _i3.ChatsApi {
 
   @override
   _i4.Future<_i2.HttpResponse<_i5.ChatResponse>> getChatWithId({
-    required int? chatId,
+    required String? chatId,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getChatWithId, [], {#chatId: chatId}),

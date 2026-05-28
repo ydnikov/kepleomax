@@ -8,13 +8,15 @@ abstract class AppConstants {
       _constants.markAsOfflineAfterInactivity;
   static final Duration showTypingAfterActivity = _constants.showTypingAfterActivity;
   static final Duration callingTimeout = _constants.callingTimeout;
+  static final Future<void> fakeDelay = _constants.fakeDelay;
 
   static final int msgPagingLimit = _constants.msgPagingLimit;
   static final int postsPagingLimit = _constants.postsPagingLimit;
   static final int peoplePagingLimit = _constants.peoplePagingLimit;
 }
 
-/// default constants (for develop). You can override any of there values for release and testing
+/// TODO make default "release" instead of "develop" (so ovveride only for develop and testing)
+/// default constants (for develop). You can override any of these values for release and testing
 abstract class AppConstantsType {
   const AppConstantsType();
 
@@ -33,6 +35,8 @@ abstract class AppConstantsType {
   Duration get showTypingAfterActivity => const Duration(seconds: 3);
 
   Duration get callingTimeout => const Duration(seconds: 15);
+
+  Future<void> get fakeDelay => Future.delayed(const Duration(milliseconds: 750));
 
   int get msgPagingLimit => 15;
 

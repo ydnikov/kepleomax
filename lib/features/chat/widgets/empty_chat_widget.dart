@@ -16,7 +16,9 @@ class EmptyChatWidget extends StatelessWidget {
             ? 'No messages here yet...\n\nWrite something'
             : channelRole!.isOwner
             ? 'This is your channel\n\nWrite something'
-            : 'You are subscribed\n\nNo messages yet',
+            : channelRole!.isSubscriber
+            ? 'You are subscribed\n\nNo messages yet'
+            : 'This is a channel\n\nNo messages yet',
       ),
     );
   }

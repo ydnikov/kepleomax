@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/presentation/user_error_message.dart';
@@ -67,7 +68,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     emit(ChannelStateBase(_data));
 
     try {
-      final fakeDelay = Future<void>.delayed(const Duration(milliseconds: 750));
+      final fakeDelay = AppConstants.fakeDelay;
 
       await _channelRepository.subscribe(channelId: _data.channelData.id);
       _data = _data.copyWith(
@@ -97,7 +98,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     emit(ChannelStateBase(_data));
 
     try {
-      final fakeDelay = Future<void>.delayed(const Duration(milliseconds: 750));
+      final fakeDelay = AppConstants.fakeDelay;
 
       await _channelRepository.unsubscribe(channelId: _data.channelData.id);
       _data = _data.copyWith(

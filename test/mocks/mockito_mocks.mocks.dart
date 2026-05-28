@@ -56,7 +56,7 @@ class MockChatsApiDataSource extends _i1.Mock
           as _i3.Future<Iterable<_i4.ChatDto>>);
 
   @override
-  _i3.Future<_i4.ChatDto?> getChatWithId(int? chatId) =>
+  _i3.Future<_i4.ChatDto?> getChatWithId(String? chatId) =>
       (super.noSuchMethod(
             Invocation.method(#getChatWithId, [chatId]),
             returnValue: _i3.Future<_i4.ChatDto?>.value(),

@@ -8,6 +8,7 @@ import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
+import 'package:kepleomax/core/navigation/launch_url_extension.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
@@ -26,10 +27,8 @@ import 'package:kepleomax/features/user/bloc/user_states.dart';
 import 'package:num_remap/num_remap.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 part 'widgets/primary_button.dart';
-
 part 'widgets/user_scroll_listeners.dart';
 
 const int _appBarUsernameFullShownOffset = 130;
@@ -227,7 +226,7 @@ class _Body extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Linkify(
                         onOpen: (link) async {
-                          await launchUrl(Uri.parse(link.url));
+                          await context.launchUrl(Uri.parse(link.url));
                         },
                         text: data.isLoading
                             ? '-------------'

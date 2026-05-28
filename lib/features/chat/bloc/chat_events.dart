@@ -57,6 +57,11 @@ class ChatEventEditText implements ChatEvent {
   final String text;
 }
 
+class ChatEventSubscribeOnChannel implements ChatEvent {
+  const ChatEventSubscribeOnChannel();
+}
+
+/// private events
 class _ChatEventConnectingChanged implements ChatEvent {
   const _ChatEventConnectingChanged(this.isConnected);
 

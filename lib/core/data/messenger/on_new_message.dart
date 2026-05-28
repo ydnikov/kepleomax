@@ -51,7 +51,7 @@ extension _OnNewMessageUpdateExtension on MessengerRepositoryImpl {
         _emitChatsCollection(ChatsCollection(chats: newChats));
       } else {
         /// it's a new chat
-        final newChat = await _chatsApi.getChatWithId(messageDto.chatId);
+        final newChat = await _chatsApi.getChatWithId(messageDto.chatId.toString());
         if (newChat == null) return;
         _chatsLocal.insert(newChat);
         _emitChatsCollection(

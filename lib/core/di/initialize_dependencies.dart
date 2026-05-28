@@ -10,6 +10,7 @@ import 'package:kepleomax/core/data/data_sources/files_api_data_source.dart';
 import 'package:kepleomax/core/data/data_sources/profile_api_data_source.dart';
 import 'package:kepleomax/core/data/data_sources/users_api_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/drafts_local_data_source.dart';
+import 'package:kepleomax/core/navigation/url_launcher.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
 import 'package:kepleomax/core/network/apis/fcm/fcm_api.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
@@ -227,6 +228,15 @@ List<_InitializationStep> _steps = [
       ));
   }),
 
+  _InitializationStep(DiStep.navigation, (dp) async {
+    dp.klmUrlLauncher = KlmUrlLauncher(
+      chatsRepository: ChatsRepositoryImpl(
+        chatsApiDataSource: dp.chatsApiDataSource,
+        chatsLocalDataSource: dp.chatsLocalDataSource,
+      ),
+    );
+  }),
+
   _InitializationStep(DiStep.firebase, (_) async {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   }),
@@ -256,6 +266,7 @@ enum DiStep {
   apis,
   apiDataSources,
   repositories,
+  navigation,
   firebase,
   globalSettings,
 }

@@ -36,7 +36,9 @@ class _GeneralMessageWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: (message.isCurrentUser ? KlmColors.currentUserBg : Colors.white)
-                  .withGreen(message.fromCache && highlightCacheMessages ? 150 : 255),
+                  .withGreen(
+                    message.fromCache && highlightCacheMessages ? 150 : 255,
+                  ),
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(16),
                 topRight: const Radius.circular(16),
@@ -60,7 +62,7 @@ class _GeneralMessageWidget extends StatelessWidget {
                 // ),
                 Linkify(
                   onOpen: (link) async {
-                    await launchUrl(Uri.parse(link.url));
+                    await context.launchUrl(Uri.parse(link.url));
                   },
                   text:
                       '${message.message}${message.isCurrentUser ? '     ' : ' '}         ',

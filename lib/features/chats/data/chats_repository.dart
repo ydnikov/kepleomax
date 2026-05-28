@@ -9,7 +9,8 @@ abstract class ChatsRepository {
   /// api
   Future<Chat?> getChatWithUser(int otherUserId);
 
-  Future<Chat?> getChatWithId(int chatId);
+  /// string cause can be user for the channels via url
+  Future<Chat?> getChatWithId(String chatId);
 
   /// cache
   Future<Chat?> getChatWithUserFromCache(int otherUserId);
@@ -37,13 +38,13 @@ class ChatsRepositoryImpl implements ChatsRepository {
   }
 
   @override
-  Future<Chat?> getChatWithId(int chatId) async {
+  Future<Chat?> getChatWithId(String chatId) async {
     final dto = await _chatsApi
         .getChatWithId(chatId);
 
     if (dto == null) return null;
 
-    _chatsLocal.insert(dto);
+    _chatsLocal.insert(dto).ignore();
     return Chat.fromDto(dto, fromCache: false);
   }
 

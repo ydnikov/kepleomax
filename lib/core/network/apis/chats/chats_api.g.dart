@@ -49,17 +49,17 @@ class _ChatsApi implements ChatsApi {
 
   @override
   Future<HttpResponse<ChatResponse>> getChatWithId({
-    required int chatId,
+    required String chatId,
   }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'chatId': chatId};
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<HttpResponse<ChatResponse>>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/withId',
+            '/${chatId}',
             queryParameters: queryParameters,
             data: _data,
           )

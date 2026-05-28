@@ -39,7 +39,9 @@ import 'package:scrollview_observer/scrollview_observer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 part 'widgets/channel_chat_bottom.dart';
+
 part 'widgets/chat_bottom.dart';
+
 part 'widgets/read_button.dart';
 
 /// screen
@@ -181,6 +183,7 @@ class _BodyState extends State<_Body> {
           }
           return oldData.isLoading != newData.isLoading ||
               oldData.isConnected != newData.isConnected ||
+              oldData.chat != newData.chat ||
               !listEquals(oldData.messages, newData.messages) ||
               oldData.isAllMessagesLoaded != newData.isAllMessagesLoaded;
         }
@@ -302,7 +305,14 @@ class _BodyState extends State<_Body> {
                   key: const Key('chat_bottom'),
                 )
               else
-                _ChannelChatBottom(role: data.chat.channelData!.userRole),
+                _ChannelChatBottom(
+                  role: data.chat.channelData!.userRole,
+                  isLoading: data.isBottomBarLoading,
+                  isSubscribeClickable: !data.isLoading && data.isConnected,
+                  onSubscribeTap: () {
+                    _chatBloc.add(const ChatEventSubscribeOnChannel());
+                  },
+                ),
             ],
           ),
         );

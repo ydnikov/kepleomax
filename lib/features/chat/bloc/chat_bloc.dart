@@ -95,6 +95,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<ChatEventDeleteMessage>(_onDeleteMessage);
     on<ChatEventReadAllMessages>(_onReadAllMessages);
     on<ChatEventEditText>(_onEditText);
+    on<ChatEventSubscribeOnChannel>(_onSubscribeOnChannel);
 
     /// local events
     on<_ChatEventTypingUpdate>(_onTypingUpdate, transformer: restartable());
@@ -210,7 +211,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       } else {
         unawaited(
           Future(() async {
-            final newChat = await _chatsRepository.getChatWithId(chat.id);
+            final newChat = await _chatsRepository.getChatWithId(chat.id.toString());
             if (newChat == null) {
               /// chat with chatId is no longer exists
               logger.d('chat with id ${chat.id} is no longer exists');
@@ -316,6 +317,41 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
+  Future<void> _onSubscribeOnChannel(
+    ChatEventSubscribeOnChannel event,
+    Emitter<ChatState> emit,
+  ) async {
+    if (_data.isLoading || !_data.isConnected) return;
+
+    _data = _data.copyWith(isBottomBarLoading: true);
+    emit(ChatStateBase(data: _data));
+
+    try {
+      if (!_data.chat.isChannel) {
+        throw Exception('Failed to subscribe: chat is not a channel');
+      }
+
+      final fakeDelay = AppConstants.fakeDelay;
+      await _channelRepository.subscribe(channelId: _data.chat.channelData!.id);
+
+      _data = _data.copyWith(
+        chat: _data.chat.copyWith(
+          channelData: _data.chat.channelData!.copyWith(
+            userRole: UserChannelRole.subscriber,
+            subscribersCount: _data.chat.channelData!.subscribersCount! + 1,
+          ),
+        ),
+      );
+
+      await fakeDelay;
+    } catch (e, st) {
+      add(_ChatEventEmitError(e, stackTrace: st));
+    } finally {
+      _data = _data.copyWith(isBottomBarLoading: false);
+      emit(ChatStateBase(data: _data));
+    }
+  }
+
   /// private events
   Future<void> _onEmitMessages(
     _ChatEventEmitMessages event,
@@ -393,7 +429,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         print(
           'event.data.chatId: ${event.data.chatId}, _data.chat.id: ${_data.chat.id}',
         );
-        final chat = await _chatsRepository.getChatWithId(event.data.chatId);
+        final chat = await _chatsRepository.getChatWithId(
+          event.data.chatId.toString(),
+        );
         _data = _data.copyWith(chat: chat ?? Chat.loading());
       }
 

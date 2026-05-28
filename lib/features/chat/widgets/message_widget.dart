@@ -7,13 +7,13 @@ import 'package:kepleomax/core/models/call_model.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
+import 'package:kepleomax/core/navigation/launch_url_extension.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
 import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/features/chat/widgets/message_menu.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 part 'call_widget.dart';
 part 'date_widget.dart';

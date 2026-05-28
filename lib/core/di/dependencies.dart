@@ -19,6 +19,7 @@ import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.d
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/logger.dart';
+import 'package:kepleomax/core/navigation/url_launcher.dart';
 import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
 import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
@@ -51,6 +52,9 @@ class Dependencies {
   late final PrettyDioLogger prettyDioLogger;
   late final Database database;
   late final AppSettings appSettings;
+
+  /// navigation
+  late final KlmUrlLauncher klmUrlLauncher;
 
   /// apis
   late final Dio dio;
