@@ -6,7 +6,7 @@ import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/di/dependencies_multi_provider.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
-import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
+import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/features/chats/bloc/chats_bloc.dart';
 

@@ -18,7 +18,7 @@ import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
-import 'package:kepleomax/core/network/websockets/messages_web_socket.dart';
+import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/presentation/channel_image_widget.dart';
 import 'package:kepleomax/core/presentation/channel_official_widget.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
