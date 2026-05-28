@@ -49,7 +49,7 @@ class ChatDto extends Equatable {
     channelData: json['is_channel'] == true
         ? ChatChannelDataDto.fromJson(json)
         : null,
-    unreadCount: (json['unread_count'] as num).toInt(),
+    unreadCount: (json['unread_count'] as num? ?? 0).toInt(),
   );
 
   /// json['other_user'] should be map\<String, dynamic>

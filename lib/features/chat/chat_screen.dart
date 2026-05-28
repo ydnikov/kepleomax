@@ -183,6 +183,7 @@ class _BodyState extends State<_Body> {
           }
           return oldData.isLoading != newData.isLoading ||
               oldData.isConnected != newData.isConnected ||
+              oldData.isBottomBarLoading != newData.isBottomBarLoading ||
               oldData.chat != newData.chat ||
               !listEquals(oldData.messages, newData.messages) ||
               oldData.isAllMessagesLoaded != newData.isAllMessagesLoaded;

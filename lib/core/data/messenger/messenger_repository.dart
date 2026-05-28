@@ -17,6 +17,8 @@ import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/message_draft.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
+import 'package:kepleomax/core/network/websockets/models/channel_subscription_update.dart';
+import 'package:kepleomax/core/network/websockets/models/channel_unsubscription_update.dart';
 import 'package:kepleomax/core/network/websockets/models/deleted_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/new_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart';
@@ -34,6 +36,10 @@ part 'on_online_update.dart';
 part 'on_read_messages.dart';
 
 part 'on_typing_update.dart';
+
+part 'on_channel_sub.dart';
+
+part 'on_channel_unsub.dart';
 
 abstract class MessengerRepository {
   /// api/db calls
@@ -91,6 +97,8 @@ class MessengerRepositoryImpl implements MessengerRepository {
       _webSocket.deletedMessageStream.listen(_onDeletedMessage),
       _webSocket.onlineUpdatesStream.listen(_onOnlineUpdate),
       _webSocket.typingUpdatesStream.listen(_onTypingUpdate),
+      _webSocket.channelSubscriptionUpdatesStream.listen(_onChannelSub),
+      _webSocket.channelUnsubscriptionUpdatesStream.listen(_onChannelUnsub),
     ]);
   }
 

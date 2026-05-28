@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
+import 'package:kepleomax/core/network/websockets/models/channel_subscription_update.dart';
+import 'package:kepleomax/core/network/websockets/models/channel_unsubscription_update.dart';
 import 'package:kepleomax/core/network/websockets/models/deleted_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/new_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart';
@@ -32,6 +34,10 @@ abstract class MessengerWebSocket {
 
   Stream<TypingActivityUpdate> get typingUpdatesStream;
 
+  Stream<ChannelSubscriptionUpdate> get channelSubscriptionUpdatesStream;
+
+  Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream;
+
   /// other
   Future<void> dispose();
 }
@@ -40,16 +46,31 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
   MessengerWebSocketImpl({required KlmWebSocket klmWebSocket})
     : _klmWebSocket = klmWebSocket {
     _eventsSub = _klmWebSocket.eventsStream.listen((event) {
-      final data = event.$2;
+      final data = event.$2 as Map<String, dynamic>;
       switch (event.$1) {
-        case 'new_message': _onNewMessage(NewMessageUpdate.fromJson(data as Map<String, dynamic>));
-        case 'read_messages': _onReadMessages(ReadMessagesUpdate.fromJson(data as Map<String, dynamic>));
-        case 'deleted_message': _onDeletedMessage(DeletedMessageUpdate.fromJson(data as Map<String, dynamic>));
-        case 'online_status_update': _onOnlineStatusUpdate(OnlineStatusUpdate.fromJson(data as Map<String, dynamic>));
-        case 'typing_activity': _onTypingActivity(TypingActivityUpdate.fromJson(
-          data as Map<String, dynamic>,
-          isTyping: true,
-        ));
+        case 'new_message':
+          _onNewMessage(NewMessageUpdate.fromJson(data));
+        case 'read_messages':
+          _onReadMessages(ReadMessagesUpdate.fromJson(data));
+        case 'deleted_message':
+          _onDeletedMessage(
+            DeletedMessageUpdate.fromJson(data),
+          );
+        case 'online_status_update':
+          _onOnlineStatusUpdate(
+            OnlineStatusUpdate.fromJson(data),
+          );
+        case 'typing_activity':
+          _onTypingActivity(
+            TypingActivityUpdate.fromJson(
+              data,
+              isTyping: true,
+            ),
+          );
+        case 'subscribe_on_channel':
+          _onSubscribeOnChannel(ChannelSubscriptionUpdate.fromJson(data));
+        case 'unsubscribe_from_channel':
+          _onUnsubscribeOnChannel(ChannelUnsubscriptionUpdate.fromJson(data));
       }
     });
   }
@@ -68,6 +89,10 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
       StreamController.broadcast();
   final StreamController<TypingActivityUpdate> _typingUpdatesController =
       StreamController.broadcast();
+  final StreamController<ChannelSubscriptionUpdate> _channelSubUpdatesController =
+      StreamController.broadcast();
+  final StreamController<ChannelUnsubscriptionUpdate>
+  _channelUnsubUpdatesController = StreamController.broadcast();
 
   /// streams
   @override
@@ -89,6 +114,14 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
   Stream<TypingActivityUpdate> get typingUpdatesStream =>
       _typingUpdatesController.stream;
 
+  @override
+  Stream<ChannelSubscriptionUpdate> get channelSubscriptionUpdatesStream =>
+      _channelSubUpdatesController.stream;
+
+  @override
+  Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream =>
+      _channelUnsubUpdatesController.stream;
+
   /// events handlers
   void _onNewMessage(NewMessageUpdate messageUpdate) {
     _messagesController.add(messageUpdate);
@@ -101,7 +134,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
     }
   }
 
-  void _onReadMessages(ReadMessagesUpdate update){
+  void _onReadMessages(ReadMessagesUpdate update) {
     _readMessagesController.add(update);
   }
 
@@ -115,6 +148,14 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
 
   void _onTypingActivity(TypingActivityUpdate update) {
     _typingUpdatesController.add(update);
+  }
+
+  void _onSubscribeOnChannel(ChannelSubscriptionUpdate update) {
+    _channelSubUpdatesController.add(update);
+  }
+
+  void _onUnsubscribeOnChannel(ChannelUnsubscriptionUpdate update) {
+    _channelUnsubUpdatesController.add(update);
   }
 
   /// events

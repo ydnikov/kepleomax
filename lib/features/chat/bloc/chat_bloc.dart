@@ -333,6 +333,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       final fakeDelay = AppConstants.fakeDelay;
       await _channelRepository.subscribe(channelId: _data.chat.channelData!.id);
+      await fakeDelay;
 
       _data = _data.copyWith(
         chat: _data.chat.copyWith(
@@ -342,8 +343,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           ),
         ),
       );
-
-      await fakeDelay;
     } catch (e, st) {
       add(_ChatEventEmitError(e, stackTrace: st));
     } finally {
