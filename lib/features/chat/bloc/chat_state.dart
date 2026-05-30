@@ -9,9 +9,9 @@ abstract class ChatState {}
 
 @freezed
 abstract class ChatStateBase with _$ChatStateBase implements ChatState {
-  const factory ChatStateBase({required ChatData data}) = _ChatStateBase;
+  const factory ChatStateBase(ChatData data, {int? forceRebuildKey}) = _ChatStateBase;
 
-  factory ChatStateBase.initial() => ChatStateBase(data: ChatData.initial());
+  factory ChatStateBase.initial() => ChatStateBase(ChatData.initial());
 }
 
 @freezed

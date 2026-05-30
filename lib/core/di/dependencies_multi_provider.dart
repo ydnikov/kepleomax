@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 
 class DependenciesMultiProvider extends StatefulWidget {
-  const DependenciesMultiProvider({required this.providers, required this.child, super.key});
+  const DependenciesMultiProvider({
+    required this.providers,
+    required this.child,
+    super.key,
+  });
 
   final Map<Type, Object> providers;
   final Widget child;
@@ -14,22 +18,22 @@ class DependenciesMultiProvider extends StatefulWidget {
 
 class _DependenciesMultiProviderState extends State<DependenciesMultiProvider> {
   late final Dependencies _dp;
-  
+
   @override
   void initState() {
+    print('KlmLog dpProvider initState: ${widget.providers.keys}');
     _dp = Dependencies.of(context);
     _dp.provideAll(widget.providers);
     super.initState();
   }
-  
+
   @override
   void dispose() {
+    print('KlmLog dpProvider dispose: ${widget.providers.keys}');
     _dp.removeAll(widget.providers.keys.toList());
     super.dispose();
   }
-  
+
   @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 }

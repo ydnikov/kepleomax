@@ -27,19 +27,13 @@ import 'package:kepleomax/core/network/websockets/models/typing_activity_update.
 import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/core/utils/stateful_stream.dart';
 
-part 'on_delete_message.dart';
-
-part 'on_new_message.dart';
-
-part 'on_online_update.dart';
-
-part 'on_read_messages.dart';
-
-part 'on_typing_update.dart';
-
 part 'on_channel_sub.dart';
-
 part 'on_channel_unsub.dart';
+part 'on_delete_message.dart';
+part 'on_new_message.dart';
+part 'on_online_update.dart';
+part 'on_read_messages.dart';
+part 'on_typing_update.dart';
 
 abstract class MessengerRepository {
   /// api/db calls
@@ -148,7 +142,6 @@ class MessengerRepositoryImpl implements MessengerRepository {
   /// api calls
   @override
   Future<void> loadCachedChats() async {
-    // final stopWatch = Stopwatch()..start();
     final cache = await _chatsLocal.getChats();
     _emitChatsCollection(
       ChatsCollection(
@@ -156,8 +149,6 @@ class MessengerRepositoryImpl implements MessengerRepository {
         fromCache: true,
       ),
     );
-    // print('KlmLog loadCachedChats: ${stopWatch.elapsedMilliseconds}ms');
-    // stopWatch.stop();
   }
 
   @override

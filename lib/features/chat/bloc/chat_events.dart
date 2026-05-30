@@ -61,6 +61,10 @@ class ChatEventSubscribeOnChannel implements ChatEvent {
   const ChatEventSubscribeOnChannel();
 }
 
+class ChatEventForceRebuild implements ChatEvent {
+  const ChatEventForceRebuild();
+}
+
 /// private events
 class _ChatEventConnectingChanged implements ChatEvent {
   const _ChatEventConnectingChanged(this.isConnected);
@@ -103,4 +107,10 @@ class _ChatEventEmitError implements ChatEvent {
 
   final Object? error;
   final StackTrace? stackTrace;
+}
+
+class _ChatEventEmitChannelUpdate implements ChatEvent {
+  _ChatEventEmitChannelUpdate({required this.update});
+
+  final ChannelOnChatScreenUpdate update;
 }

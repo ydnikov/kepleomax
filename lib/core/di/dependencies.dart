@@ -36,6 +36,7 @@ import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/settings/app_settings.dart';
 import 'package:kepleomax/features/call/data/calls_repository.dart';
+import 'package:kepleomax/features/channel/data/channel_repository.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/features/people/data/people_repository.dart';
 import 'package:kepleomax/features/post/data/post_repository.dart';
@@ -101,8 +102,10 @@ class Dependencies {
   /// multi place use repositories
   late final ConnectionRepository Function() connectionRepositoryBuilder;
   late final MessengerRepository Function() messengerRepositoryBuilder;
+  late final ChannelRepositoryImpl Function() channelRepositoryBuilder;
 
   final _map = HashMap<Type, Object>();
+  final _referenceCounts = HashMap<Type, int>();
 
   T read<T>() {
     if (_map[T] == null) {
@@ -111,29 +114,41 @@ class Dependencies {
     return _map[T] as T;
   }
 
-  void provide<T extends Object>(T value) => _map[T] = value;
+  void provideByType(Type type, Object value) {
+    // if (value is! type) {
+    //   throw Exception('Failed to provide dependency: type mismatch');
+    // } // TODO
 
-  void provideAll(Map<Type, Object> values) => _map.addAll(values);
+    _map[type] = value;
+    _referenceCounts[type] = (_referenceCounts[type] ?? 0) + 1;
+  }
 
-  void remove<T>() {
-    if (!_map.containsKey(T)) {
+  void provide<T extends Object>(T value) => provideByType(T, value);
+
+  void provideAll(Map<Type, Object> values) {
+    for (final entry in values.entries) {
+      provideByType(entry.key, entry.value);
+    }
+  }
+
+  void removeByType(Type type) {
+    if (!_map.containsKey(type)) {
       logger.w(
-        "Attempt to remove the $T from dependencies, but it doesn't contain it",
+        "Attempt to remove the $type from dependencies, but it doesn't contain it",
       );
       return;
     }
-    _map.remove(T);
+    _referenceCounts[type] = _referenceCounts[type]! - 1;
+    if (_referenceCounts[type] == 0) {
+      _map.remove(type);
+    }
   }
+
+  void remove<T>() => removeByType(T);
 
   void removeAll(List<Type> types) {
     for (final type in types) {
-      if (!_map.containsKey(type)) {
-        logger.w(
-          "Attempt to remove the $type from dependencies, but it doesn't contain it",
-        );
-        return;
-      }
-      _map.remove(type);
+      removeByType(type);
     }
   }
 

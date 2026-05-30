@@ -19,7 +19,7 @@ class Flavor {
     imageUrl: 'https://kepleomax.com/api/files/',
     type: FlavorType.release,
     constants: AppConstantsType.release(),
-    versionName: ''
+    versionName: '',
   );
 
   factory Flavor.devPublic() => Flavor(
@@ -27,15 +27,15 @@ class Flavor {
     imageUrl: 'http://178.141.12.67/api/files/',
     type: FlavorType.develop,
     constants: AppConstantsType.develop(),
-    versionName: 'dev-pub'
+    versionName: 'dev-pub',
   );
 
   factory Flavor.devLocal() => Flavor(
-    baseUrl: 'http://192.168.0.104:13000',
-    imageUrl: 'http://192.168.0.104:13000/api/files/',
+    baseUrl: 'http://192.168.0.102:13000',
+    imageUrl: 'http://192.168.0.102:13000/api/files/',
     type: FlavorType.develop,
     constants: AppConstantsType.develop(),
-    versionName: 'dev-local'
+    versionName: 'dev-local',
   );
 
   factory Flavor.testing() => Flavor(
@@ -43,7 +43,7 @@ class Flavor {
     imageUrl: '_no_urls_in_tests_',
     type: FlavorType.testing,
     constants: AppConstantsType.testing(),
-    versionName: 'testing'
+    versionName: 'testing',
   );
 
   final String baseUrl;

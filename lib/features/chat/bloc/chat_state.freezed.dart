@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatStateBase {
 
- ChatData get data;
+ ChatData get data; int? get forceRebuildKey;
 /// Create a copy of ChatStateBase
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ChatStateBaseCopyWith<ChatStateBase> get copyWith => _$ChatStateBaseCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatStateBase&&(identical(other.data, data) || other.data == data));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatStateBase&&(identical(other.data, data) || other.data == data)&&(identical(other.forceRebuildKey, forceRebuildKey) || other.forceRebuildKey == forceRebuildKey));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,data);
+int get hashCode => Object.hash(runtimeType,data,forceRebuildKey);
 
 @override
 String toString() {
-  return 'ChatStateBase(data: $data)';
+  return 'ChatStateBase(data: $data, forceRebuildKey: $forceRebuildKey)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ChatStateBaseCopyWith<$Res>  {
   factory $ChatStateBaseCopyWith(ChatStateBase value, $Res Function(ChatStateBase) _then) = _$ChatStateBaseCopyWithImpl;
 @useResult
 $Res call({
- ChatData data
+ ChatData data, int? forceRebuildKey
 });
 
 
@@ -62,10 +62,11 @@ class _$ChatStateBaseCopyWithImpl<$Res>
 
 /// Create a copy of ChatStateBase
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? data = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? data = null,Object? forceRebuildKey = freezed,}) {
   return _then(_self.copyWith(
 data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as ChatData,
+as ChatData,forceRebuildKey: freezed == forceRebuildKey ? _self.forceRebuildKey : forceRebuildKey // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 /// Create a copy of ChatStateBase
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ChatData data)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ChatData data,  int? forceRebuildKey)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatStateBase() when $default != null:
-return $default(_that.data);case _:
+return $default(_that.data,_that.forceRebuildKey);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.data);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ChatData data)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ChatData data,  int? forceRebuildKey)  $default,) {final _that = this;
 switch (_that) {
 case _ChatStateBase():
-return $default(_that.data);case _:
+return $default(_that.data,_that.forceRebuildKey);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.data);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ChatData data)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ChatData data,  int? forceRebuildKey)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatStateBase() when $default != null:
-return $default(_that.data);case _:
+return $default(_that.data,_that.forceRebuildKey);case _:
   return null;
 
 }
@@ -215,10 +216,11 @@ return $default(_that.data);case _:
 
 
 class _ChatStateBase implements ChatStateBase {
-  const _ChatStateBase({required this.data});
+  const _ChatStateBase(this.data, {this.forceRebuildKey});
   
 
 @override final  ChatData data;
+@override final  int? forceRebuildKey;
 
 /// Create a copy of ChatStateBase
 /// with the given fields replaced by the non-null parameter values.
@@ -230,16 +232,16 @@ _$ChatStateBaseCopyWith<_ChatStateBase> get copyWith => __$ChatStateBaseCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatStateBase&&(identical(other.data, data) || other.data == data));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatStateBase&&(identical(other.data, data) || other.data == data)&&(identical(other.forceRebuildKey, forceRebuildKey) || other.forceRebuildKey == forceRebuildKey));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,data);
+int get hashCode => Object.hash(runtimeType,data,forceRebuildKey);
 
 @override
 String toString() {
-  return 'ChatStateBase(data: $data)';
+  return 'ChatStateBase(data: $data, forceRebuildKey: $forceRebuildKey)';
 }
 
 
@@ -250,7 +252,7 @@ abstract mixin class _$ChatStateBaseCopyWith<$Res> implements $ChatStateBaseCopy
   factory _$ChatStateBaseCopyWith(_ChatStateBase value, $Res Function(_ChatStateBase) _then) = __$ChatStateBaseCopyWithImpl;
 @override @useResult
 $Res call({
- ChatData data
+ ChatData data, int? forceRebuildKey
 });
 
 
@@ -267,10 +269,11 @@ class __$ChatStateBaseCopyWithImpl<$Res>
 
 /// Create a copy of ChatStateBase
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? data = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? data = null,Object? forceRebuildKey = freezed,}) {
   return _then(_ChatStateBase(
-data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as ChatData,
+null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as ChatData,forceRebuildKey: freezed == forceRebuildKey ? _self.forceRebuildKey : forceRebuildKey // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

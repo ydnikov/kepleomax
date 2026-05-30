@@ -78,6 +78,7 @@ abstract class ChannelData with _$ChannelData {
     imageUrl: dto.imageUrl,
     isOfficial: dto.isOfficial,
     userRole: UserChannelRole.fromDto(dto.userChannelRole),
+    subscribersCount: dto.subscribersCount,
   );
 
   const ChannelData._();

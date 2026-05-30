@@ -10,6 +10,7 @@ import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
+import 'package:kepleomax/core/di/dependencies_multi_provider.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
@@ -61,22 +62,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// callbacks
   @override
-  void initState() {
-    final dp = Dependencies.of(context);
-    _chatBloc = ChatBloc(
-      chatsRepository: dp.chatsRepositoryBuilder(),
-      messengerRepository: dp.read<MessengerRepository>(),
-      connectionRepository: dp.read<ConnectionRepository>(),
-      messengerWebSocket: dp.read<MessengerWebSocket>(),
-      channelRepository: ChannelRepositoryImpl(
-        channelApi: dp.channelApi,
-        initSubsStream: false,
-      ),
-    )..add(ChatEventInit(chat: widget.chat, otherUser: widget.otherUser));
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
@@ -85,28 +70,47 @@ class _ChatScreenState extends State<ChatScreen> {
   /// build
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => _chatBloc,
-      lazy: false,
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        floatingActionButton: _ReadButton(
-          scrollController: _scrollController,
-          chatId: widget.chat?.id ?? -1, // TODO
-        ),
-        appBar: const _AppBar(key: Key('chat_appbar')),
-        body: _Body(
-          scrollController: _scrollController,
-          onRetry: () {
-            _chatBloc.add(
-              ChatEventLoad(
-                chat: widget.chat,
-                otherUser: widget.otherUser,
-                withCache: false,
-              ),
-            );
+    return DependenciesMultiProvider(
+      providers: {
+        ChannelRepository: Dependencies.of(context).channelRepositoryBuilder(),
+      },
+      child: BlocProvider(
+        create: (context) {
+          final dp = Dependencies.of(context);
+          return _chatBloc = ChatBloc(
+            chatsRepository: dp.chatsRepositoryBuilder(),
+            messengerRepository: dp.read<MessengerRepository>(),
+            connectionRepository: dp.read<ConnectionRepository>(),
+            messengerWebSocket: dp.read<MessengerWebSocket>(),
+            channelRepository: dp.read<ChannelRepository>(),
+          )..add(ChatEventInit(chat: widget.chat, otherUser: widget.otherUser));
+        },
+        lazy: false,
+        child: FocusDetector(
+          onFocusGained: () {
+            _chatBloc.add(const ChatEventForceRebuild());
           },
-          key: const Key('chat_body'),
+          child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            floatingActionButton: _ReadButton(
+              scrollController: _scrollController,
+              chatId: widget.chat?.id ?? -1, // TODO
+            ),
+            appBar: const _AppBar(key: Key('chat_appbar')),
+            body: _Body(
+              scrollController: _scrollController,
+              onRetry: () {
+                _chatBloc.add(
+                  ChatEventLoad(
+                    chat: widget.chat,
+                    otherUser: widget.otherUser,
+                    withCache: false,
+                  ),
+                );
+              },
+              key: const Key('chat_body'),
+            ),
+          ),
         ),
       ),
     );
@@ -181,7 +185,8 @@ class _BodyState extends State<_Body> {
               oldData.messages.firstOrNull != newData.messages.firstOrNull) {
             _chatObserver.standby();
           }
-          return oldData.isLoading != newData.isLoading ||
+          return oldState.forceRebuildKey != newState.forceRebuildKey ||
+              oldData.isLoading != newData.isLoading ||
               oldData.isConnected != newData.isConnected ||
               oldData.isBottomBarLoading != newData.isBottomBarLoading ||
               oldData.chat != newData.chat ||

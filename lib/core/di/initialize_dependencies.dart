@@ -13,6 +13,7 @@ import 'package:kepleomax/core/data/local_data_sources/drafts_local_data_source.
 import 'package:kepleomax/core/navigation/url_launcher.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
 import 'package:kepleomax/core/network/apis/fcm/fcm_api.dart';
+import 'package:kepleomax/features/channel/data/channel_repository.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
@@ -225,6 +226,10 @@ List<_InitializationStep> _steps = [
         callsApi: dp.callsApi,
         rtcWebSocket: dp.read<RtcWebSocket>(),
         peerConnectionController: PeerConnectionControllerImpl(),
+      ))
+      ..channelRepositoryBuilder = (() => ChannelRepositoryImpl(
+        channelApi: dp.channelApi,
+        messengerWebSocket: dp.read<MessengerWebSocket>(),
       ));
   }),
 

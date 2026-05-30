@@ -30,6 +30,7 @@ ChatChannelDataDto _$ChatChannelDataDtoFromJson(Map<String, dynamic> json) =>
       isOfficial: json['is_official'] as bool,
       userChannelRole: $enumDecode(_$UserChannelRoleDtoEnumMap, json['role']),
       tag: json['tag'] as String,
+      subscribersCount: (json['subs_count'] as num?)?.toInt(),
     );
 
 const _$UserChannelRoleDtoEnumMap = {

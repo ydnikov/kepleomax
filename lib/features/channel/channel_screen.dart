@@ -53,9 +53,9 @@ class _ChannelScreenState extends State<ChannelScreen> {
     return BlocProvider<ChannelBloc>(
       create: (context) => ChannelBloc(
         channelData: widget.channelData,
-        channelRepository: ChannelRepositoryImpl(
-          channelApi: Dependencies.of(context).channelApi,
-        ),
+
+        /// should be opened from chat_screen, for having this in dp
+        channelRepository: Dependencies.of(context).read<ChannelRepository>(),
       )..add(const ChannelEventLoad()),
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -127,7 +127,7 @@ class _BodyState extends State<_Body> {
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
+                child: SelectableText(
                   channelData.name,
                   textAlign: TextAlign.center,
                   style: context.textTheme.bodyLarge?.copyWith(
@@ -166,7 +166,7 @@ class _BodyState extends State<_Body> {
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                     ),
                     if (channelData.description.isNotEmpty)
-                      Text(channelData.description)
+                      SelectableText(channelData.description)
                     else
                       const Text(
                         'Empty description',
@@ -193,7 +193,7 @@ class _BodyState extends State<_Body> {
                             ),
                             SizedBox(
                               width: context.screenSize.width * 0.75,
-                              child: Text(
+                              child: SelectableText(
                                 data.channelData.fullTag,
                                 style: const TextStyle(
                                   color: KlmColors.link,
@@ -252,6 +252,11 @@ class _BodyState extends State<_Body> {
                       itemBuilder: (context, i) => _ChannelUserWidget(
                         user: data.subs[i],
                         key: Key('channel_subscriber_${data.subs[i].id}'),
+                        onDelete: () {
+                          context.read<ChannelBloc>().add(
+                            ChannelEventUnsubscribe(userId: data.subs[i].id),
+                          );
+                        },
                       ),
                     ),
                   )

@@ -38,13 +38,15 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
 
     try {
       /// TODO start loading subsCount and subs at the same time
-      final subsCount = await _channelRepository.getSubscribersCount(
-        channelId: _data.channelData.id,
-      );
-      _data = _data.copyWith(
-        channelData: _data.channelData.copyWith(subscribersCount: subsCount),
-      );
-      emit(ChannelStateBase(_data));
+      if (_data.channelData.subscribersCount == null) {
+        final subsCount = await _channelRepository.getSubscribersCount(
+          channelId: _data.channelData.id,
+        );
+        _data = _data.copyWith(
+          channelData: _data.channelData.copyWith(subscribersCount: subsCount),
+        );
+        emit(ChannelStateBase(_data));
+      }
 
       if (_data.channelData.userRole.isOwner) {
         await _channelRepository.loadSubscribers(channelId: _data.channelData.id);
@@ -99,16 +101,27 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
 
     try {
       final fakeDelay = AppConstants.fakeDelay;
-
-      await _channelRepository.unsubscribe(channelId: _data.channelData.id);
-      _data = _data.copyWith(
-        channelData: _data.channelData.copyWith(
-          userRole: UserChannelRole.none,
-          subscribersCount: _data.channelData.subscribersCount! - 1,
-        ),
+      await _channelRepository.unsubscribe(
+        channelId: _data.channelData.id,
+        userId: event.userId,
       );
-
       await fakeDelay;
+
+      if (event.userId == null) {
+        _data = _data.copyWith(
+          channelData: _data.channelData.copyWith(
+            userRole: UserChannelRole.none,
+            subscribersCount: _data.channelData.subscribersCount! - 1,
+          ),
+        );
+      } else {
+        _data = _data.copyWith(
+          subs: _data.subs.where((user) => user.id != event.userId).toList(),
+          channelData: _data.channelData.copyWith(
+            subscribersCount: _data.channelData.subscribersCount! - 1,
+          ),
+        );
+      }
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       emit(ChannelStateMessage(message: e.userErrorMessage, isError: true));
@@ -134,7 +147,6 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
   @override
   Future<void> close() async {
     await _usersSub.cancel();
-    await _channelRepository.dispose();
     return super.close();
   }
 }
@@ -149,7 +161,7 @@ class ChannelEventLoad implements ChannelEvent {
 }
 
 class ChannelEventEdited implements ChannelEvent {
-  ChannelEventEdited(this.newChannelData);
+  const ChannelEventEdited(this.newChannelData);
 
   final ChannelData newChannelData;
 }
@@ -159,7 +171,9 @@ class ChannelEventSubscribe implements ChannelEvent {
 }
 
 class ChannelEventUnsubscribe implements ChannelEvent {
-  const ChannelEventUnsubscribe();
+  const ChannelEventUnsubscribe({this.userId});
+
+  final int? userId;
 }
 
 class _ChannelEventEmit implements ChannelEvent {

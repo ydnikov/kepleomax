@@ -4,22 +4,23 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/app_constants.dart';
-import 'package:kepleomax/core/models/chat.dart';
-import 'package:kepleomax/features/channel/data/channel_repository.dart';
-import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
+import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
 import 'package:kepleomax/core/data/models/messages_collection.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
+import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart';
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
-import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/core/presentation/user_error_message.dart';
+import 'package:kepleomax/core/services/notifications_service.dart';
+import 'package:kepleomax/features/channel/data/channel_repository.dart';
 import 'package:kepleomax/features/chat/bloc/chat_state.dart';
+import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
 part 'chat_events.dart';
@@ -37,34 +38,40 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
        _connectionRepository = connectionRepository,
        _messagesWebSocket = messengerWebSocket,
        super(ChatStateBase.initial()) {
-    /// subscribes
-    _messagesUpdatesSub = _messengerRepository.messagesUpdatesStream.listen(
-      (data) {
-        add(_ChatEventEmitMessages(data: data));
-      },
-      onError: (Object e, StackTrace st) {
-        add(_ChatEventEmitError(e, stackTrace: st));
-      },
-    );
-    _chatUpdatesSub = _messengerRepository.chatsUpdatesStream.listen((newList) {
-      final currentChat = newList.chats
-          .where((e) => e.id == _data.chat.id)
-          .firstOrNull;
-      if (currentChat != null) {
-        add(_ChatEventEmitUnreadCount(newCount: currentChat.unreadCount));
-      }
-    });
-    _connectionStateSub = _connectionRepository.connectionStateStream.listen(
-      (isConnected) => add(_ChatEventConnectingChanged(isConnected)),
-    );
-    _onlineUpdatesSub = _messagesWebSocket.onlineUpdatesStream.listen((update) {
-      if (update.userId != _data.otherUser.id) return;
-      add(_ChatEventOnlineStatusUpdate(update));
-    });
-    _typingUpdatesSub = _messagesWebSocket.typingUpdatesStream.listen((update) {
-      if (_data.chat.id != update.chatId) return;
-      add(_ChatEventTypingUpdate(update));
-    });
+    /// subscriptions
+    _subs.addAll([
+      _messengerRepository.messagesUpdatesStream.listen(
+        (data) {
+          add(_ChatEventEmitMessages(data: data));
+        },
+        onError: (Object e, StackTrace st) {
+          add(_ChatEventEmitError(e, stackTrace: st));
+        },
+      ),
+      _messengerRepository.chatsUpdatesStream.listen((newList) {
+        final currentChat = newList.chats
+            .where((e) => e.id == _data.chat.id)
+            .firstOrNull;
+        if (currentChat != null) {
+          add(_ChatEventEmitUnreadCount(newCount: currentChat.unreadCount));
+        }
+      }),
+      _connectionRepository.connectionStateStream.listen(
+        (isConnected) => add(_ChatEventConnectingChanged(isConnected)),
+      ),
+      _messagesWebSocket.onlineUpdatesStream.listen((update) {
+        if (update.userId != _data.otherUser.id) return;
+        add(_ChatEventOnlineStatusUpdate(update));
+      }),
+      _messagesWebSocket.typingUpdatesStream.listen((update) {
+        if (_data.chat.id != update.chatId) return;
+        add(_ChatEventTypingUpdate(update));
+      }),
+      _channelRepository.channelOnChatScreenUpdatesStream.listen((update) {
+        if (_data.chat.id != update.channelId) return;
+        add(_ChatEventEmitChannelUpdate(update: update));
+      }),
+    ]);
 
     /// events
     on<ChatEvent>(
@@ -96,6 +103,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<ChatEventReadAllMessages>(_onReadAllMessages);
     on<ChatEventEditText>(_onEditText);
     on<ChatEventSubscribeOnChannel>(_onSubscribeOnChannel);
+    on<ChatEventForceRebuild>(_onForceRebuild);
 
     /// local events
     on<_ChatEventTypingUpdate>(_onTypingUpdate, transformer: restartable());
@@ -105,6 +113,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<_ChatEventEmitMessages>(_onEmitMessages);
     on<_ChatEventConnectingChanged>(_onConnectionChanged);
     on<_ChatEventEmitUnreadCount>(_onEmitUnreadCount);
+    on<_ChatEventEmitChannelUpdate>(_onEmitChannelUpdate);
   }
 
   final MessengerRepository _messengerRepository;
@@ -112,11 +121,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ConnectionRepository _connectionRepository;
   final ChannelRepository _channelRepository;
   final MessengerWebSocket _messagesWebSocket;
-  late final StreamSubscription<void> _messagesUpdatesSub;
-  late final StreamSubscription<void> _connectionStateSub;
-  late final StreamSubscription<void> _chatUpdatesSub;
-  late final StreamSubscription<void> _onlineUpdatesSub;
-  late final StreamSubscription<void> _typingUpdatesSub;
+  final List<StreamSubscription<void>> _subs = [];
   late ChatData _data = ChatData.initial();
 
   void _onInit(ChatEventInit event, Emitter<ChatState> emit) {
@@ -124,7 +129,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       chat: event.chat ?? Chat.loading(),
       otherUser: event.otherUser,
     );
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
 
     add(
       ChatEventLoad(
@@ -152,7 +157,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       isLoading: true,
       isAllMessagesLoaded: false,
     );
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
 
     try {
       Chat chat = event.chat ?? Chat.loading();
@@ -182,7 +187,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             isLoading: false,
             messages: [],
           );
-          emit(ChatStateBase(data: _data));
+          emit(ChatStateBase(_data));
           _messengerRepository.listenToMessagesWithOtherUserId(
             otherUserId: event.otherUser.id,
           );
@@ -236,7 +241,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         }
         _data = _data.copyWith(unreadCount: chat.unreadCount);
       }
-      emit(ChatStateBase(data: _data));
+      emit(ChatStateBase(_data));
 
       /// TODO now it works because we always open the chat at the very bottom of scroll list
       NotificationService.instance.closeWithChatId(chat.id);
@@ -245,7 +250,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final draft = await _messengerRepository.getDraft(chatId: chat.id);
       if (draft != null) {
         emit(ChatStateUpdateTextField(draft));
-        emit(ChatStateBase(data: _data));
+        emit(ChatStateBase(_data));
       }
 
       await _messengerRepository.loadMessages(
@@ -324,22 +329,20 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (_data.isLoading || !_data.isConnected) return;
 
     _data = _data.copyWith(isBottomBarLoading: true);
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
 
     try {
       if (!_data.chat.isChannel) {
         throw Exception('Failed to subscribe: chat is not a channel');
       }
 
-      final fakeDelay = AppConstants.fakeDelay;
       await _channelRepository.subscribe(channelId: _data.chat.channelData!.id);
-      await fakeDelay;
 
+      /// don't set subsCount, cause it will be set via ws update
       _data = _data.copyWith(
         chat: _data.chat.copyWith(
           channelData: _data.chat.channelData!.copyWith(
             userRole: UserChannelRole.subscriber,
-            subscribersCount: _data.chat.channelData!.subscribersCount! + 1,
           ),
         ),
       );
@@ -347,8 +350,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       add(_ChatEventEmitError(e, stackTrace: st));
     } finally {
       _data = _data.copyWith(isBottomBarLoading: false);
-      emit(ChatStateBase(data: _data));
+      emit(ChatStateBase(_data));
     }
+  }
+
+  void _onForceRebuild(ChatEventForceRebuild event, Emitter<ChatState> emit) {
+    emit(
+      ChatStateBase(_data, forceRebuildKey: DateTime.now().millisecondsSinceEpoch),
+    );
   }
 
   /// private events
@@ -444,7 +453,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (event.data.chatId == -1) {
         _data = _data.copyWith(unreadMessagesValue: UnreadMessagesValue.initial());
       }
-      emit(ChatStateBase(data: _data));
+      emit(ChatStateBase(_data));
     } catch (e, st) {
       add(_ChatEventEmitError(e, stackTrace: st));
     }
@@ -455,7 +464,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     Emitter<ChatState> emit,
   ) {
     _data = _data.copyWith(isConnected: event.isConnected);
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
 
     if (event.isConnected && _data.chat.id != -1) {
       add(
@@ -472,17 +481,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         isError: true,
       ),
     );
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
   }
 
   void _onEmitOtherUser(_ChatEventEmitOtherUser event, Emitter<ChatState> emit) {
     _data = _data.copyWith(otherUser: event.otherUser);
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
   }
 
   void _onEmitUnreadCount(_ChatEventEmitUnreadCount event, Emitter<ChatState> emit) {
     _data = _data.copyWith(unreadCount: event.newCount);
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
   }
 
   void _onOnlineStatusUpdate(
@@ -495,7 +504,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         lastActivityTime: event.update.lastActivityTime,
       ),
     );
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
   }
 
   Future<void> _onTypingUpdate(
@@ -503,22 +512,47 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     Emitter<ChatState> emit,
   ) async {
     _data = _data.copyWith(isTyping: event.update.isTyping);
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
     if (!event.update.isTyping) return;
 
     await Future<void>.delayed(AppConstants.showTypingAfterActivity);
     _data = _data.copyWith(isTyping: false);
-    emit(ChatStateBase(data: _data));
+    emit(ChatStateBase(_data));
+  }
+
+  void _onEmitChannelUpdate(
+    _ChatEventEmitChannelUpdate event,
+    Emitter<ChatState> emit,
+  ) {
+    final update = event.update;
+
+    if (update.newChannelData != null) {
+      _data = _data.copyWith(
+        chat: _data.chat.copyWith(channelData: update.newChannelData),
+      );
+    } else {
+      final currentChannelData = _data.chat.channelData!;
+      print('KlmLog newSubsCount: ${update.newSubsCount}');
+      _data = _data.copyWith(
+        chat: _data.chat.copyWith(
+          channelData: currentChannelData.copyWith(
+            userRole: update.newUserRole ?? currentChannelData.userRole,
+            subscribersCount:
+                update.newSubsCount ?? currentChannelData.subscribersCount,
+          ),
+        ),
+      );
+    }
+    emit(ChatStateBase(_data));
   }
 
   @override
   Future<void> close() {
-    _messagesUpdatesSub.cancel();
-    _connectionStateSub.cancel();
-    _chatUpdatesSub.cancel();
-    _onlineUpdatesSub.cancel();
-    _typingUpdatesSub.cancel();
+    for (final sub in _subs) {
+      sub.cancel();
+    }
     _messengerRepository.listenToMessagesWithOtherUserId(otherUserId: null);
+    _channelRepository.dispose();
     return super.close();
   }
 }

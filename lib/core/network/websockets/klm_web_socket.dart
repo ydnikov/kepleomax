@@ -52,9 +52,9 @@ class KlmWebSocketImpl implements KlmWebSocket {
       _baseUrl,
       OptionBuilder()
           .enableForceNew()
+          .setTransports(['websocket'])
           .setAuth({'token': 'Bearer $accessToken', 'fcm_token': fcmToken})
           .enableAutoConnect()
-          .setTransports(['websocket'])
           .build(),
     );
 

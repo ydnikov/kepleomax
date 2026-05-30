@@ -40,5 +40,6 @@ abstract class ChannelApi {
   @DELETE('/unsubscribe')
   Future<HttpResponse<void>> unsubscribe({
     @Query('channel_id') required int channelId,
+    @Query('user_id') int? userId,
   });
 }

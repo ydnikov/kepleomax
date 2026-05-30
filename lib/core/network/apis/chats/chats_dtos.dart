@@ -106,6 +106,7 @@ class ChatChannelDataDto {
     required this.isOfficial,
     required this.userChannelRole,
     required this.tag,
+    this.subscribersCount,
   });
 
   factory ChatChannelDataDto.fromJson(Map<String, dynamic> json) =>
@@ -122,6 +123,8 @@ class ChatChannelDataDto {
   @JsonKey(name: 'role')
   final UserChannelRoleDto userChannelRole;
   final String tag;
+  @JsonKey(name: 'subs_count')
+  final int? subscribersCount;
 }
 
 @JsonEnum()

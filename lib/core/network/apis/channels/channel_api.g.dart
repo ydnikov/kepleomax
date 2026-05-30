@@ -174,9 +174,16 @@ class _ChannelApi implements ChannelApi {
   }
 
   @override
-  Future<HttpResponse<void>> unsubscribe({required int channelId}) async {
+  Future<HttpResponse<void>> unsubscribe({
+    required int channelId,
+    int? userId,
+  }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'channel_id': channelId};
+    final queryParameters = <String, dynamic>{
+      r'channel_id': channelId,
+      r'user_id': userId,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<HttpResponse<void>>(
