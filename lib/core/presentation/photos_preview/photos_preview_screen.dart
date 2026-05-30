@@ -38,7 +38,7 @@ const double _scaleFactorOnDoubleTap = 2.5;
 class PhotosPreviewScreen extends StatefulWidget {
   const PhotosPreviewScreen({
     required this.urls,
-    required this.initialIndex,
+    this.initialIndex = 0,
     this.isOnePictureMode = false,
     super.key,
   });

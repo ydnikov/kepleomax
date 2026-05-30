@@ -185,13 +185,6 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
   }
 
   /// actions
-  Future<void> _removeImage() async {
-    setState(() {
-      _imageUrl = null;
-      _isImageEdited = true;
-    });
-  }
-
   Future<void> _editImage() async {
     final picker = ImagePicker();
     XFile? image = await picker.pickImage(
@@ -206,13 +199,19 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
       }
     }
 
-    print('KlmLog image: $image');
     if (image != null) {
       setState(() {
         _imageUrl = image!.path;
         _isImageEdited = true;
       });
     }
+  }
+
+  Future<void> _removeImage() async {
+    setState(() {
+      _imageUrl = null;
+      _isImageEdited = true;
+    });
   }
 }
 

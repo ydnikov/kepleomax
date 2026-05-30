@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
 import 'package:kepleomax/core/di/disposable.dart';
@@ -6,6 +7,7 @@ import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_dtos.dart';
+import 'package:kepleomax/core/network/apis/files/files_api.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/utils/stateful_stream.dart';
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_state.dart';
@@ -43,8 +45,10 @@ abstract class ChannelEditorRepository {
 class ChannelRepositoryImpl implements ChannelRepository {
   ChannelRepositoryImpl({
     required ChannelApi channelApi,
+    required FilesApi filesApi,
     required MessengerWebSocket messengerWebSocket,
-  }) : _webSocket = messengerWebSocket,
+  }) : _filesApi = filesApi,
+       _webSocket = messengerWebSocket,
        _api = channelApi {
     _usersStreamController = StatefulStreamController<List<User>>(initialValue: []);
     _channelUpdatesController =
@@ -75,6 +79,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
   }
 
   final ChannelApi _api;
+  final FilesApi _filesApi;
   final MessengerWebSocket _webSocket;
   late final StatefulStreamController<List<User>> _usersStreamController;
   late final StatefulStreamController<ChannelOnChatScreenUpdate>
@@ -171,11 +176,25 @@ class ChannelRepositoryImpl implements ChannelRepository {
     required int channelId,
     required ChannelEditingUiData channelUiData,
   }) async {
+    String? imageUrl;
+    if (channelUiData.imagePath != null) {
+      final imageRes = await _filesApi.uploadFile(File(channelUiData.imagePath!));
+      if (imageRes.response.statusCode! < 200 ||
+          imageRes.response.statusCode! > 299) {
+        throw Exception(
+          imageRes.data.message ??
+              'Failed to upload image: ${imageRes.response.statusCode}',
+        );
+      }
+
+      imageUrl = imageRes.data.data!.path;
+    }
+
     final res = await _api.editChannel(
       channelId: channelId,
       body: ChannelRequestDto(
         name: channelUiData.name,
-        image: null,
+        image: imageUrl,
         description: channelUiData.description,
         tag: channelUiData.tag,
       ),

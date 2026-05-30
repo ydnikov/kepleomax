@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
@@ -15,10 +18,7 @@ import 'package:kepleomax/features/channel_editor/bloc/channel_editor_bloc.dart'
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_state.dart';
 
 class ChannelEditorScreen extends StatelessWidget {
-  const ChannelEditorScreen({
-    required this.channelData,
-    super.key,
-  });
+  const ChannelEditorScreen({required this.channelData, super.key});
 
   final ChannelData? channelData;
 
@@ -47,9 +47,7 @@ class ChannelEditorScreen extends StatelessWidget {
             centerTitle: true,
             backgroundColor: Colors.white,
           ),
-          body: SafeArea(
-            child: _Body(initialChannelData: channelData),
-          ),
+          body: SafeArea(child: _Body(initialChannelData: channelData)),
         ),
       ),
     );
@@ -97,6 +95,8 @@ class _BodyState extends State<_Body> {
   final _tagController = TextEditingController(text: '${flavor.baseUrl}/');
   bool _showNameErrors = false;
   bool _showTagErrors = false;
+  String? _imagePath;
+  bool _isImageEdited = false;
 
   @override
   void initState() {
@@ -151,11 +151,12 @@ class _BodyState extends State<_Body> {
           name: _nameController.text,
           description: _descriptionController.text,
           tag: _tagController.text.substring('${flavor.baseUrl}/'.length),
+          imagePath: _imagePath,
         );
         final initialValues = ChannelEditingUiData.fromChannelData(
           widget.initialChannelData,
         );
-        final bool hasChanges = currentValues != initialValues;
+        final bool hasChanges = currentValues != initialValues || _isImageEdited;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -164,22 +165,22 @@ class _BodyState extends State<_Body> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                    height: 60,
-                    width: 60,
-                    child: ClipOval(
-                      child: ChannelDefaultIconWidget(),
-                      // child: _imageUrl == null || _imageUrl!.isEmpty
-                      //     ? const DefaultChannelIconWidget()
-                      //     : _isImageEdited
-                      //     ? Image.file(File(_imageUrl!), fit: BoxFit.cover)
-                      //     : KlmCachedImage(
-                      //   imageUrl: flavor.imageUrl + _imageUrl!,
-                      //   width: context.imageMaxWidth,
-                      //   fit: BoxFit.cover,
-                      // ),
+                  if (_isImageEdited && _imagePath != null)
+                    ClipOval(
+                      child: Image.file(
+                        File(_imagePath!),
+                        fit: BoxFit.cover,
+                        width: 60,
+                        height: 60,
+                      ),
+                    )
+                  else if (_isImageEdited)
+                    const ChannelDefaultIconWidget(size: 60)
+                  else
+                    ChannelImageWidget(
+                      image: widget.initialChannelData?.image,
+                      size: 60,
                     ),
-                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: KlmTextField(
@@ -201,15 +202,21 @@ class _BodyState extends State<_Body> {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
-              const Text(
-                'Choose a name and photo for your channel',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black45,
-                  fontWeight: FontWeight.w500,
-                ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  _EditImageButton(
+                    text: 'Set New Photo',
+                    icon: Icons.photo,
+                    onPressed: _editImage,
+                  ),
+                  const SizedBox(width: 4),
+                  _EditImageButton(
+                    text: 'Delete Current Photo',
+                    icon: Icons.delete_forever,
+                    onPressed: _removeImage,
+                  ),
+                ],
               ),
               const Divider(),
               const SizedBox(height: 24),
@@ -285,6 +292,66 @@ class _BodyState extends State<_Body> {
           ),
         );
       },
+    );
+  }
+
+  /// actions
+  Future<void> _editImage() async {
+    final picker = ImagePicker();
+    XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
+
+    if (image == null && Platform.isAndroid) {
+      final LostDataResponse response = await picker.retrieveLostData();
+      if (!response.isEmpty && response.file != null) {
+        image = response.file;
+      }
+    }
+
+    if (image != null) {
+      setState(() {
+        _isImageEdited = true;
+        _imagePath = image!.path;
+      });
+    }
+  }
+
+  Future<void> _removeImage() async {
+    setState(() {
+      _isImageEdited = true;
+      _imagePath = null;
+    });
+  }
+}
+
+class _EditImageButton extends StatelessWidget {
+  const _EditImageButton({
+    required this.text,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String text;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(shape: LinearBorder.none),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon),
+            const SizedBox(width: 2),
+            Text(text, style: const TextStyle(fontSize: 13)),
+          ],
+        ),
+      ),
     );
   }
 }

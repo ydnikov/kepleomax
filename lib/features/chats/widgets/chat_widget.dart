@@ -29,7 +29,7 @@ class ChatWidget extends StatelessWidget {
                 height: 60,
                 width: 60,
                 child: chat.isChannel
-                    ? const ChannelDefaultIconWidget()
+                    ? ChannelImageWidget(image: chat.channelData!.image, size: 40)
                     : UserImageWidget(
                         user: chat.otherUser,
                         showOnlineIndicator: true,

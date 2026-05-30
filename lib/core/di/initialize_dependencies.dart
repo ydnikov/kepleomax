@@ -229,6 +229,7 @@ List<_InitializationStep> _steps = [
       ))
       ..channelRepositoryBuilder = (() => ChannelRepositoryImpl(
         channelApi: dp.channelApi,
+        filesApi: dp.filesApi,
         messengerWebSocket: dp.read<MessengerWebSocket>(),
       ));
   }),

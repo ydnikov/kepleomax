@@ -122,7 +122,11 @@ class _BodyState extends State<_Body> {
                 key: const Key('top_scroll_tag'),
                 controller: widget.scrollController,
                 index: 0,
-                child: const ChannelDefaultIconWidget(size: 130),
+                child: ChannelImageWidget(
+                  image: channelData.image,
+                  openImageViewerOnTap: true,
+                  size: 130,
+                ),
               ),
 
               const SizedBox(height: 16),
@@ -131,6 +135,7 @@ class _BodyState extends State<_Body> {
                 child: ChannelOfficialIconWidget(
                   isOfficial: channelData.isOfficial,
                   widthPadding: 0,
+                  showHintOnTap: true,
                   leftWidget: SelectableText(
                     channelData.name,
                     textAlign: TextAlign.center,

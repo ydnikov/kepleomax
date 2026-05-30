@@ -5,7 +5,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
+import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/presentation/klm_cached_image.dart';
+import 'package:kepleomax/core/presentation/photos_preview/photos_preview_screen.dart';
 import 'package:kepleomax/generated/images_keys.images_keys.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -14,6 +16,7 @@ class UserImageWidget extends StatelessWidget {
     required this.user,
     this.size,
     this.isLoading = false,
+    this.openImageViewerOnTap = false,
     this.onlineIconSize = 10,
     this.onlineIconPadding = 4,
     this.showOnlineIndicator = false,
@@ -23,6 +26,7 @@ class UserImageWidget extends StatelessWidget {
   final User? user;
   final double? size;
   final bool isLoading;
+  final bool openImageViewerOnTap;
 
   /// online
   final bool showOnlineIndicator;
@@ -43,13 +47,26 @@ class UserImageWidget extends StatelessWidget {
                     ? const Skeletonizer(child: ColoredBox(color: Colors.grey))
                     : user?.profileImage == null || user!.profileImage!.isEmpty
                     ? const UserDefaultIconWidget()
-                    : KlmCachedImage(
-                        imageUrl: flavor.imageUrl + user!.profileImage!,
-                        width: context.imageMaxWidth,
-                        fit: BoxFit.cover,
+                    : GestureDetector(
+                        onTap: openImageViewerOnTap ? () {
+                          AppNavigator.showGeneralDialog(
+                            context,
+                            PhotosPreviewScreen(
+                              urls: [user!.profileImage!],
+                              isOnePictureMode: true,
+                            ),
+                          );
+                        } : null,
+                        child: KlmCachedImage(
+                          imageUrl: flavor.imageUrl + user!.profileImage!,
+                          width: context.imageMaxWidth,
+                          fit: BoxFit.cover,
+                        ),
                       ),
               ),
             ),
+
+            /// TODO maybe use it, looks nice
             // Positioned(
             //   bottom: onlineIconPadding / 4,
             //   right: 0,
@@ -129,6 +146,7 @@ class _OnlineIndicatorState extends State<_OnlineIndicator> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (widget.user.showOnlineStatus != _isOnline) {
         setState(() {});
+
         /// isOnline will be changed in build()
       }
     });

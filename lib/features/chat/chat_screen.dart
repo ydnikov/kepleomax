@@ -395,7 +395,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Row(
               children: [
                 if (data.chat.isChannel)
-                  const ChannelDefaultIconWidget(size: 40)
+                  ChannelImageWidget(image: data.chat.channelData!.image, size: 40)
                 else
                   UserImageWidget(size: 40, user: data.otherUser),
                 const SizedBox(width: 12),

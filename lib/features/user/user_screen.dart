@@ -15,7 +15,6 @@ import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_text_button.dart';
 import 'package:kepleomax/core/presentation/parse_time.dart';
-import 'package:kepleomax/core/presentation/photos_preview/photos_preview_screen.dart';
 import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/core/scopes/auth_scope.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
@@ -29,7 +28,6 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 part 'widgets/primary_button.dart';
-
 part 'widgets/user_scroll_listeners.dart';
 
 const int _appBarUsernameFullShownOffset = 130;
@@ -170,31 +168,14 @@ class _Body extends StatelessWidget {
                     index: 0,
                     highlightColor: Colors.red,
                     child: Center(
-                      child: InkWell(
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap:
-                            data.profile == null ||
-                                data.profile?.user.profileImage == null
-                            ? null
-                            : () {
-                                AppNavigator.showGeneralDialog(
-                                  context,
-                                  PhotosPreviewScreen(
-                                    urls: [data.profile!.user.profileImage!],
-                                    initialIndex: 0,
-                                    isOnePictureMode: true,
-                                  ),
-                                );
-                              },
-                        child: UserImageWidget(
-                          user: data.profile?.user,
-                          size: 130,
-                          isLoading: data.isLoading,
-                          showOnlineIndicator: true,
-                          onlineIconSize: 18,
-                          onlineIconPadding: 10,
-                        ),
+                      child: UserImageWidget(
+                        user: data.profile?.user,
+                        size: 130,
+                        isLoading: data.isLoading,
+                        openImageViewerOnTap: true,
+                        showOnlineIndicator: true,
+                        onlineIconSize: 18,
+                        onlineIconPadding: 10,
                       ),
                     ),
                   ),

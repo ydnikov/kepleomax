@@ -4,7 +4,7 @@ import 'package:kepleomax/core/network/common/user_dto.dart';
 
 part 'channel_dtos.g.dart';
 
-@JsonSerializable(createFactory: false)
+@JsonSerializable(createFactory: false, includeIfNull: false)
 class ChannelRequestDto {
   const ChannelRequestDto({
     required this.name,

@@ -1084,7 +1084,7 @@ as bool,
 /// @nodoc
 mixin _$ChannelEditingUiData {
 
- String get name; String get description; String get tag;
+ String get name; String get description; String get tag; String? get imagePath;
 /// Create a copy of ChannelEditingUiData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1095,16 +1095,16 @@ $ChannelEditingUiDataCopyWith<ChannelEditingUiData> get copyWith => _$ChannelEdi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelEditingUiData&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelEditingUiData&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,description,tag);
+int get hashCode => Object.hash(runtimeType,name,description,tag,imagePath);
 
 @override
 String toString() {
-  return 'ChannelEditingUiData(name: $name, description: $description, tag: $tag)';
+  return 'ChannelEditingUiData(name: $name, description: $description, tag: $tag, imagePath: $imagePath)';
 }
 
 
@@ -1115,7 +1115,7 @@ abstract mixin class $ChannelEditingUiDataCopyWith<$Res>  {
   factory $ChannelEditingUiDataCopyWith(ChannelEditingUiData value, $Res Function(ChannelEditingUiData) _then) = _$ChannelEditingUiDataCopyWithImpl;
 @useResult
 $Res call({
- String name, String description, String tag
+ String name, String description, String tag, String? imagePath
 });
 
 
@@ -1132,12 +1132,13 @@ class _$ChannelEditingUiDataCopyWithImpl<$Res>
 
 /// Create a copy of ChannelEditingUiData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? description = null,Object? tag = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? description = null,Object? tag = null,Object? imagePath = freezed,}) {
   return _then(_self.copyWith(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
-as String,
+as String,imagePath: freezed == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -1222,10 +1223,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String description,  String tag)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String description,  String tag,  String? imagePath)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChannelEditingUiData() when $default != null:
-return $default(_that.name,_that.description,_that.tag);case _:
+return $default(_that.name,_that.description,_that.tag,_that.imagePath);case _:
   return orElse();
 
 }
@@ -1243,10 +1244,10 @@ return $default(_that.name,_that.description,_that.tag);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String description,  String tag)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String description,  String tag,  String? imagePath)  $default,) {final _that = this;
 switch (_that) {
 case _ChannelEditingUiData():
-return $default(_that.name,_that.description,_that.tag);case _:
+return $default(_that.name,_that.description,_that.tag,_that.imagePath);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1263,10 +1264,10 @@ return $default(_that.name,_that.description,_that.tag);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String description,  String tag)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String description,  String tag,  String? imagePath)?  $default,) {final _that = this;
 switch (_that) {
 case _ChannelEditingUiData() when $default != null:
-return $default(_that.name,_that.description,_that.tag);case _:
+return $default(_that.name,_that.description,_that.tag,_that.imagePath);case _:
   return null;
 
 }
@@ -1278,12 +1279,13 @@ return $default(_that.name,_that.description,_that.tag);case _:
 
 
 class _ChannelEditingUiData implements ChannelEditingUiData {
-  const _ChannelEditingUiData({required this.name, required this.description, required this.tag});
+  const _ChannelEditingUiData({required this.name, required this.description, required this.tag, required this.imagePath});
   
 
 @override final  String name;
 @override final  String description;
 @override final  String tag;
+@override final  String? imagePath;
 
 /// Create a copy of ChannelEditingUiData
 /// with the given fields replaced by the non-null parameter values.
@@ -1295,16 +1297,16 @@ _$ChannelEditingUiDataCopyWith<_ChannelEditingUiData> get copyWith => __$Channel
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelEditingUiData&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelEditingUiData&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,description,tag);
+int get hashCode => Object.hash(runtimeType,name,description,tag,imagePath);
 
 @override
 String toString() {
-  return 'ChannelEditingUiData(name: $name, description: $description, tag: $tag)';
+  return 'ChannelEditingUiData(name: $name, description: $description, tag: $tag, imagePath: $imagePath)';
 }
 
 
@@ -1315,7 +1317,7 @@ abstract mixin class _$ChannelEditingUiDataCopyWith<$Res> implements $ChannelEdi
   factory _$ChannelEditingUiDataCopyWith(_ChannelEditingUiData value, $Res Function(_ChannelEditingUiData) _then) = __$ChannelEditingUiDataCopyWithImpl;
 @override @useResult
 $Res call({
- String name, String description, String tag
+ String name, String description, String tag, String? imagePath
 });
 
 
@@ -1332,12 +1334,13 @@ class __$ChannelEditingUiDataCopyWithImpl<$Res>
 
 /// Create a copy of ChannelEditingUiData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? description = null,Object? tag = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? description = null,Object? tag = null,Object? imagePath = freezed,}) {
   return _then(_ChannelEditingUiData(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
-as String,
+as String,imagePath: freezed == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -52,6 +52,7 @@ abstract class ChannelEditingUiData with _$ChannelEditingUiData {
     required String name,
     required String description,
     required String tag,
+    required String? imagePath,
   }) = _ChannelEditingUiData;
 
   factory ChannelEditingUiData.fromChannelData(ChannelData? data) => data == null
@@ -60,8 +61,9 @@ abstract class ChannelEditingUiData with _$ChannelEditingUiData {
           name: data.name,
           description: data.description,
           tag: data.tag,
+          imagePath: null,
         );
 
   factory ChannelEditingUiData.initial() =>
-      const ChannelEditingUiData(name: '', description: '', tag: '');
+      const ChannelEditingUiData(name: '', description: '', tag: '', imagePath: null);
 }
