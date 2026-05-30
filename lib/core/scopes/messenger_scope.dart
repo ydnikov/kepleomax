@@ -47,14 +47,6 @@ class _MessengerScopeState extends State<MessengerScope> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    _connectionRepository.dispose();
-    _messengerRepository.dispose();
-
-    super.dispose();
-  }
-
   void _onResume() {
     if (!_isScreenInit) {
       _isScreenInit = true;

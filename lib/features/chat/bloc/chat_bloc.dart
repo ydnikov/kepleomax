@@ -294,7 +294,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   void _onSendMessage(ChatEventSendMessage event, Emitter<ChatState> emit) {
-    _messengerRepository.safeDraft(message: '', chatId: _data.chat.id);
+    _messengerRepository.saveDraft(message: '', chatId: _data.chat.id);
 
     _messagesWebSocket.sendMessage(
       message: event.value,
@@ -310,7 +310,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   void _onEditText(ChatEventEditText event, Emitter<ChatState> emit) {
     print('KlmLog chatBloc onEditText: ${event.text}');
-    _messengerRepository.safeDraft(message: event.text, chatId: _data.chat.id);
+    _messengerRepository.saveDraft(message: event.text, chatId: _data.chat.id);
 
     /// sent typingActivity
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -528,7 +528,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     if (update.newChannelData != null) {
       _data = _data.copyWith(
-        chat: _data.chat.copyWith(channelData: update.newChannelData),
+        chat: _data.chat.copyWith(
+          channelData: update.newChannelData!.copyWith(
+            userRole: update.newChannelData!.userRole.isKeepCurrent
+                ? _data.chat.channelData!.userRole
+                : update.newChannelData!.userRole,
+          ),
+        ),
       );
     } else {
       final currentChannelData = _data.chat.channelData!;
@@ -552,7 +558,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       sub.cancel();
     }
     _messengerRepository.listenToMessagesWithOtherUserId(otherUserId: null);
-    _channelRepository.dispose();
     return super.close();
   }
 }

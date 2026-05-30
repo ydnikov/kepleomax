@@ -37,4 +37,5 @@ const _$UserChannelRoleDtoEnumMap = {
   UserChannelRoleDto.owner: 'owner',
   UserChannelRoleDto.subscriber: 'subscriber',
   UserChannelRoleDto.none: 'none',
+  UserChannelRoleDto.keepCurrent: 'keep_current',
 };

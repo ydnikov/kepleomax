@@ -10,8 +10,10 @@ import 'package:kepleomax/core/data/local_data_sources/drafts_local_data_source.
 import 'package:kepleomax/core/data/local_data_sources/messages_local_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart';
 import 'package:kepleomax/core/data/messenger/combine_cache_and_api.dart';
+import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
 import 'package:kepleomax/core/data/models/chats_collection.dart';
 import 'package:kepleomax/core/data/models/messages_collection.dart';
+import 'package:kepleomax/core/di/disposable.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/message_draft.dart';
@@ -28,14 +30,22 @@ import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/core/utils/stateful_stream.dart';
 
 part 'on_channel_sub.dart';
+
 part 'on_channel_unsub.dart';
+
+part 'on_channel_update.dart';
+
 part 'on_delete_message.dart';
+
 part 'on_new_message.dart';
+
 part 'on_online_update.dart';
+
 part 'on_read_messages.dart';
+
 part 'on_typing_update.dart';
 
-abstract class MessengerRepository {
+abstract class MessengerRepository implements Disposable {
   /// api/db calls
   /// on BlocInit call loadChatsFromCache(); on ws connected call loadChats()
   Future<void> loadCachedChats();
@@ -50,14 +60,12 @@ abstract class MessengerRepository {
 
   Future<void> loadMoreMessages({required int chatId, required int? toMessageId});
 
-  Future<void> safeDraft({required String message, required int chatId});
-
   Future<String?> getDraft({required int chatId});
 
-  /// subscribes on messages from that userId, uses when chatId == -1
-  void listenToMessagesWithOtherUserId({required int? otherUserId});
+  Future<void> saveDraft({required String message, required int chatId});
 
-  Future<void> dispose();
+  /// subscribes on messages from that userId, is used when chatId == -1
+  void listenToMessagesWithOtherUserId({required int? otherUserId});
 
   /// ws streams
   Stream<MessagesCollection> get messagesUpdatesStream;
@@ -93,6 +101,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
       _webSocket.typingUpdatesStream.listen(_onTypingUpdate),
       _webSocket.channelSubscriptionUpdatesStream.listen(_onChannelSub),
       _webSocket.channelUnsubscriptionUpdatesStream.listen(_onChannelUnsub),
+      _webSocket.channelUpdatesStream.listen(_onChannelUpdate),
     ]);
   }
 
@@ -175,11 +184,18 @@ class MessengerRepositoryImpl implements MessengerRepository {
       newList.add(Chat.fromDto(chat, fromCache: false));
     }
 
+    /// emit
     _emitChatsCollection(ChatsCollection(chats: newList, fromCache: false));
 
-    _webSocket.subscribeOnOnlineStatusUpdates(
-      usersIds: chats.map((c) => c.otherUser.id).where((id) => id >= 0),
-    );
+    /// subscribe on updates
+    _webSocket
+      ..subscribeOnOnlineStatusUpdates(
+        usersIds: chats.map((c) => c.otherUser.id).where((id) => id >= 0).toList(),
+      )
+      /// now only on channels
+      ..subscribeOnChatsUpdates(
+        ids: chats.where((c) => c.channelData != null).map((c) => c.id).toList(),
+      );
 
     /// cache
     unawaited(_chatsLocal.clearAndInsertChatsAndLastMessages(chats));
@@ -318,7 +334,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
   }
 
   @override
-  Future<void> safeDraft({required String message, required int chatId}) async {
+  Future<void> saveDraft({required String message, required int chatId}) async {
     if (message.isEmpty) {
       await _draftsLocal.deleteByChatId(chatId);
     } else {

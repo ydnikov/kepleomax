@@ -1,12 +1,11 @@
 import 'dart:async';
 
+import 'package:kepleomax/core/di/disposable.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 
 /// TODO rename, maybe baseWsRepository
-abstract class ConnectionRepository {
+abstract class ConnectionRepository implements Disposable {
   Future<void> connect();
-
-  Future<void> dispose();
 
   void reconnect({bool onlyIfDisconnected = false});
 

@@ -18,6 +18,7 @@ import 'package:kepleomax/core/data/local_data_sources/messages_local_data_sourc
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
+import 'package:kepleomax/core/di/disposable.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/navigation/url_launcher.dart';
 import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
@@ -102,7 +103,7 @@ class Dependencies {
   /// multi place use repositories
   late final ConnectionRepository Function() connectionRepositoryBuilder;
   late final MessengerRepository Function() messengerRepositoryBuilder;
-  late final ChannelRepositoryImpl Function() channelRepositoryBuilder;
+  late final ChannelRepository Function() channelRepositoryBuilder;
 
   final _map = HashMap<Type, Object>();
   final _referenceCounts = HashMap<Type, int>();
@@ -119,7 +120,9 @@ class Dependencies {
     //   throw Exception('Failed to provide dependency: type mismatch');
     // } // TODO
 
-    _map[type] = value;
+    if (!_map.containsKey(type)) {
+      _map[type] = value;
+    }
     _referenceCounts[type] = (_referenceCounts[type] ?? 0) + 1;
   }
 
@@ -140,6 +143,10 @@ class Dependencies {
     }
     _referenceCounts[type] = _referenceCounts[type]! - 1;
     if (_referenceCounts[type] == 0) {
+      final object = _map[type]!;
+      if (object is Disposable) {
+        object.dispose();
+      }
       _map.remove(type);
     }
   }

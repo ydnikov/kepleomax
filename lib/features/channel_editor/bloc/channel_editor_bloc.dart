@@ -2,8 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/presentation/user_error_message.dart';
 import 'package:kepleomax/core/presentation/validators.dart';
+import 'package:kepleomax/features/channel/data/channel_repository.dart';
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_state.dart';
-import 'package:kepleomax/features/channel_editor/data/channel_editor_repository.dart';
 
 UiValidator channelNameValidator = UiValidators.createLengthValidator(3);
 UiValidator channelTagValidator = UiValidators.channelTagValidator;
@@ -11,15 +11,16 @@ UiValidator channelTagValidator = UiValidators.channelTagValidator;
 class ChannelEditorBloc extends Bloc<ChannelEditorEvent, ChannelEditorState> {
   ChannelEditorBloc({
     required ChannelEditorRepository repository,
-    required this.channelId,
-  }) : _repository = repository,
+    required int? channelId,
+  }) : _channelId = channelId,
+       _editorRepository = repository,
        super(ChannelEditorStateBase.initial()) {
     on<ChannelEditorEventCreate>(_onCreate);
     on<ChannelEditorEventSaveChanges>(_onSaveChanges);
   }
 
-  final ChannelEditorRepository _repository;
-  final int? channelId;
+  final ChannelEditorRepository _editorRepository;
+  final int? _channelId;
   ChannelEditorData _data = ChannelEditorData.initial();
 
   Future<void> _onCreate(
@@ -30,8 +31,8 @@ class ChannelEditorBloc extends Bloc<ChannelEditorEvent, ChannelEditorState> {
     emit(ChannelEditorStateBase(_data));
 
     try {
-      final channelData = await _repository.createNewChannel(
-        channelData: event.channelEditingData,
+      final channelData = await _editorRepository.createNewChannel(
+        channelUiData: event.channelEditingData,
       );
 
       emit(
@@ -57,9 +58,9 @@ class ChannelEditorBloc extends Bloc<ChannelEditorEvent, ChannelEditorState> {
     emit(ChannelEditorStateBase(_data));
 
     try {
-      final channelData = await _repository.editChannel(
-        channelId: channelId!,
-        channelData: event.channelEditingData,
+      final channelData = await _editorRepository.editChannel(
+        channelId: _channelId!,
+        channelUiData: event.channelEditingData,
       );
 
       emit(

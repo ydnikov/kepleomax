@@ -10,19 +10,17 @@ import 'package:kepleomax/core/presentation/channel_image_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_text_button.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
+import 'package:kepleomax/features/channel/data/channel_repository.dart';
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_bloc.dart';
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_state.dart';
-import 'package:kepleomax/features/channel_editor/data/channel_editor_repository.dart';
 
 class ChannelEditorScreen extends StatelessWidget {
   const ChannelEditorScreen({
     required this.channelData,
-    required this.onSave,
     super.key,
   });
 
   final ChannelData? channelData;
-  final ValueChanged<ChannelData>? onSave;
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +34,7 @@ class ChannelEditorScreen extends StatelessWidget {
       },
       child: BlocProvider<ChannelEditorBloc>(
         create: (context) => ChannelEditorBloc(
-          repository: ChannelEditorRepositoryImpl(
-            channelApi: Dependencies.of(context).channelApi,
-          ),
+          repository: Dependencies.of(context).read<ChannelRepository>(),
           channelId: channelData?.id,
         ),
         child: Scaffold(
@@ -52,7 +48,7 @@ class ChannelEditorScreen extends StatelessWidget {
             backgroundColor: Colors.white,
           ),
           body: SafeArea(
-            child: _Body(initialChannelData: channelData, onSave: onSave),
+            child: _Body(initialChannelData: channelData),
           ),
         ),
       ),
@@ -87,10 +83,9 @@ class ChannelEditorScreen extends StatelessWidget {
 }
 
 class _Body extends StatefulWidget {
-  const _Body({required this.initialChannelData, required this.onSave});
+  const _Body({required this.initialChannelData});
 
   final ChannelData? initialChannelData;
-  final ValueChanged<ChannelData>? onSave;
 
   @override
   State<_Body> createState() => _BodyState();
@@ -139,8 +134,6 @@ class _BodyState extends State<_Body> {
           }
 
           AppNavigator.pop(context);
-
-          widget.onSave?.call(state.newChannelData);
         }
       },
       buildWhen: (oldState, newState) {

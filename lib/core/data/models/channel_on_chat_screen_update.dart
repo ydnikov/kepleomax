@@ -3,6 +3,7 @@ import 'package:kepleomax/core/models/chat.dart';
 
 part 'channel_on_chat_screen_update.freezed.dart';
 
+/// TODO rename?
 @freezed
 abstract class ChannelOnChatScreenUpdate with _$ChannelOnChatScreenUpdate {
   @Assert(

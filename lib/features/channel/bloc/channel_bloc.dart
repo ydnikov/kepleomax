@@ -16,19 +16,31 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
        super(ChannelStateBase.initial(channelData: channelData)) {
     _data = ChannelScreenData.initial(channelData: channelData);
 
-    _usersSub = _channelRepository.usersStream.listen((list) {
-      _data = _data.copyWith(subs: list);
-      add(const _ChannelEventEmit());
-    });
+    _subs.addAll([
+      _channelRepository.usersStream.listen((list) {
+        _data = _data.copyWith(subs: list);
+        add(const _ChannelEventEmit());
+      }),
+      _channelRepository.channelOnChatScreenUpdatesStream.listen((update) {
+        if (update.channelId != _data.channelData.id) return;
+        _data = _data.copyWith(
+          channelData: update.newChannelData!.copyWith(
+            userRole: update.newChannelData!.userRole.isKeepCurrent
+                ? _data.channelData.userRole
+                : update.newChannelData!.userRole,
+          ),
+        );
+        add(const _ChannelEventEmit());
+      }),
+    ]);
 
     on<ChannelEventLoad>(_onLoad);
-    on<ChannelEventEdited>(_onEdited);
     on<ChannelEventSubscribe>(_onSubscribe);
     on<ChannelEventUnsubscribe>(_onUnsubscribe);
     on<_ChannelEventEmit>(_onEmit);
   }
 
-  late final StreamSubscription<void> _usersSub;
+  final List<StreamSubscription<void>> _subs = [];
   final ChannelRepository _channelRepository;
   late ChannelScreenData _data;
 
@@ -131,22 +143,15 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     }
   }
 
-  void _onEdited(ChannelEventEdited event, Emitter<ChannelState> emit) {
-    _data = _data.copyWith(
-      channelData: event.newChannelData.copyWith(
-        subscribersCount: _data.channelData.subscribersCount,
-      ),
-    );
-    emit(ChannelStateBase(_data));
-  }
-
   void _onEmit(_ChannelEventEmit event, Emitter<ChannelState> emit) {
     emit(ChannelStateBase(_data));
   }
 
   @override
   Future<void> close() async {
-    await _usersSub.cancel();
+    for (final sub in _subs) {
+      unawaited(sub.cancel());
+    }
     return super.close();
   }
 }
@@ -158,12 +163,6 @@ class ChannelEventLoad implements ChannelEvent {
   const ChannelEventLoad({this.full = false});
 
   final bool full;
-}
-
-class ChannelEventEdited implements ChannelEvent {
-  const ChannelEventEdited(this.newChannelData);
-
-  final ChannelData newChannelData;
 }
 
 class ChannelEventSubscribe implements ChannelEvent {

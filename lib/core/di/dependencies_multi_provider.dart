@@ -21,7 +21,6 @@ class _DependenciesMultiProviderState extends State<DependenciesMultiProvider> {
 
   @override
   void initState() {
-    print('KlmLog dpProvider initState: ${widget.providers.keys}');
     _dp = Dependencies.of(context);
     _dp.provideAll(widget.providers);
     super.initState();
@@ -29,7 +28,6 @@ class _DependenciesMultiProviderState extends State<DependenciesMultiProvider> {
 
   @override
   void dispose() {
-    print('KlmLog dpProvider dispose: ${widget.providers.keys}');
     _dp.removeAll(widget.providers.keys.toList());
     super.dispose();
   }

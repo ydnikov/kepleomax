@@ -131,5 +131,7 @@ class ChatChannelDataDto {
 enum UserChannelRoleDto {
   owner,
   subscriber,
-  none;
+  none,
+  @JsonValue('keep_current')
+  keepCurrent,
 }

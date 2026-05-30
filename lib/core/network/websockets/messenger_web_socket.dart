@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
+import 'package:kepleomax/core/di/disposable.dart';
+import 'package:kepleomax/core/models/chat.dart';
+import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/channel_subscription_update.dart';
 import 'package:kepleomax/core/network/websockets/models/channel_unsubscription_update.dart';
@@ -9,7 +13,7 @@ import 'package:kepleomax/core/network/websockets/models/online_status_update.da
 import 'package:kepleomax/core/network/websockets/models/read_messages_update.dart';
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
 
-abstract class MessengerWebSocket {
+abstract class MessengerWebSocket implements Disposable {
   /// actions
   void sendMessage({required String message, required int recipientId});
 
@@ -19,7 +23,9 @@ abstract class MessengerWebSocket {
 
   void readMessagesBeforeTime({required int chatId, required DateTime time});
 
-  void subscribeOnOnlineStatusUpdates({required Iterable<int> usersIds});
+  void subscribeOnOnlineStatusUpdates({required List<int> usersIds});
+
+  void subscribeOnChatsUpdates({required List<int> ids});
 
   void typingActivityDetected({required int chatId});
 
@@ -38,8 +44,7 @@ abstract class MessengerWebSocket {
 
   Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream;
 
-  /// other
-  Future<void> dispose();
+  Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream;
 }
 
 class MessengerWebSocketImpl implements MessengerWebSocket {
@@ -53,24 +58,23 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
         case 'read_messages':
           _onReadMessages(ReadMessagesUpdate.fromJson(data));
         case 'deleted_message':
-          _onDeletedMessage(
-            DeletedMessageUpdate.fromJson(data),
-          );
+          _onDeletedMessage(DeletedMessageUpdate.fromJson(data));
         case 'online_status_update':
-          _onOnlineStatusUpdate(
-            OnlineStatusUpdate.fromJson(data),
-          );
+          _onOnlineStatusUpdate(OnlineStatusUpdate.fromJson(data));
         case 'typing_activity':
-          _onTypingActivity(
-            TypingActivityUpdate.fromJson(
-              data,
-              isTyping: true,
-            ),
-          );
+          _onTypingActivity(TypingActivityUpdate.fromJson(data, isTyping: true));
         case 'subscribe_on_channel':
           _onSubscribeOnChannel(ChannelSubscriptionUpdate.fromJson(data));
         case 'unsubscribe_from_channel':
           _onUnsubscribeOnChannel(ChannelUnsubscriptionUpdate.fromJson(data));
+        case 'channel_edited':
+          _onChannelEdited(
+            ChannelData.fromDto(
+              ChatChannelDataDto.fromJson(
+                data['new_channel'] as Map<String, dynamic>,
+              ),
+            ),
+          );
       }
     });
   }
@@ -93,6 +97,8 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
       StreamController.broadcast();
   final StreamController<ChannelUnsubscriptionUpdate>
   _channelUnsubUpdatesController = StreamController.broadcast();
+  final StreamController<ChannelOnChatScreenUpdate> _channelUpdatesController =
+      StreamController.broadcast();
 
   /// streams
   @override
@@ -121,6 +127,10 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
   @override
   Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream =>
       _channelUnsubUpdatesController.stream;
+
+  @override
+  Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream =>
+      _channelUpdatesController.stream;
 
   /// events handlers
   void _onNewMessage(NewMessageUpdate messageUpdate) {
@@ -158,6 +168,15 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
     _channelUnsubUpdatesController.add(update);
   }
 
+  void _onChannelEdited(ChannelData channelData) {
+    _channelUpdatesController.add(
+      ChannelOnChatScreenUpdate(
+        channelId: channelData.id,
+        newChannelData: channelData,
+      ),
+    );
+  }
+
   /// events
   @override
   void sendMessage({required String message, required int recipientId}) {
@@ -183,10 +202,16 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
   }
 
   @override
-  void subscribeOnOnlineStatusUpdates({required Iterable<int> usersIds}) {
+  void subscribeOnOnlineStatusUpdates({required List<int> usersIds}) {
     _klmWebSocket.emit('subscribe_on_online_status_updates', {
-      'users_ids': usersIds.toList(),
+      'users_ids': usersIds,
     });
+  }
+
+  @override
+  void subscribeOnChatsUpdates({required List<int> ids}) {
+    print('KlmLog subscribeOnChatsUpdates: $ids');
+    _klmWebSocket.emit('subscribe_on_chats_updates', {'ids': ids});
   }
 
   @override
@@ -196,6 +221,14 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
 
   @override
   Future<void> dispose() async {
-    await _eventsSub.cancel();
+    _messagesController.close();
+    _readMessagesController.close();
+    _deletedMessageController.close();
+    _onlineUpdatesController.close();
+    _typingUpdatesController.close();
+    _channelSubUpdatesController.close();
+    _channelUnsubUpdatesController.close();
+    _channelUpdatesController.close();
+    _eventsSub.cancel();
   }
 }

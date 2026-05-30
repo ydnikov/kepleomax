@@ -59,10 +59,9 @@ final class ChatPage extends AppPage {
 final class ChannelEditorPage extends AppPage {
   ChannelEditorPage({
     required ChannelData? channelData,
-    ValueChanged<ChannelData>? onSave,
   }) : super(
          name: 'channel_editor_screen',
-         child: ChannelEditorScreen(channelData: channelData, onSave: onSave),
+         child: ChannelEditorScreen(channelData: channelData),
          key: const ValueKey('channel_editor_screen'),
        );
 }

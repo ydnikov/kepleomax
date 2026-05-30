@@ -18,12 +18,7 @@ class _ChannelButtonsWidget extends StatelessWidget {
               onPressed: () {
                 AppNavigator.push(
                   context,
-                  ChannelEditorPage(
-                    channelData: channelData,
-                    onSave: (value) {
-                      context.read<ChannelBloc>().add(ChannelEventEdited(value));
-                    },
-                  ),
+                  ChannelEditorPage(channelData: channelData),
                 );
               },
               text: 'Edit',

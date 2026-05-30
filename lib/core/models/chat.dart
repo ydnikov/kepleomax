@@ -89,7 +89,8 @@ abstract class ChannelData with _$ChannelData {
 enum UserChannelRole {
   owner,
   subscriber,
-  none;
+  none,
+  keepCurrent;
 
   factory UserChannelRole.fromDto(UserChannelRoleDto dto) {
     switch (dto) {
@@ -99,6 +100,8 @@ enum UserChannelRole {
         return subscriber;
       case UserChannelRoleDto.none:
         return none;
+      case UserChannelRoleDto.keepCurrent:
+        return keepCurrent;
     }
   }
 
@@ -107,4 +110,6 @@ enum UserChannelRole {
   bool get isSubscriber => this == subscriber;
 
   bool get isNone => this == none;
+
+  bool get isKeepCurrent => this == keepCurrent;
 }

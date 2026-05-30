@@ -1,15 +1,18 @@
 import 'dart:async';
 
 import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
+import 'package:kepleomax/core/di/disposable.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
+import 'package:kepleomax/core/network/apis/channels/channel_dtos.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/utils/stateful_stream.dart';
+import 'package:kepleomax/features/channel_editor/bloc/channel_editor_state.dart';
 
 const int _channelSubsPagingLimit = 10;
 
-abstract class ChannelRepository {
+abstract class ChannelRepository implements ChannelEditorRepository, Disposable {
   Future<int> getSubscribersCount({required int channelId});
 
   Future<void> loadSubscribers({required int channelId});
@@ -21,22 +24,28 @@ abstract class ChannelRepository {
   /// userId is used when owner tries to delete subscriber
   Future<void> unsubscribe({required int channelId, int? userId});
 
-  Future<void> dispose();
-
   Stream<List<User>> get usersStream;
 
   Stream<ChannelOnChatScreenUpdate> get channelOnChatScreenUpdatesStream;
+}
+
+abstract class ChannelEditorRepository {
+  Future<ChannelData> createNewChannel({
+    required ChannelEditingUiData channelUiData,
+  });
+
+  Future<ChannelData> editChannel({
+    required int channelId,
+    required ChannelEditingUiData channelUiData,
+  });
 }
 
 class ChannelRepositoryImpl implements ChannelRepository {
   ChannelRepositoryImpl({
     required ChannelApi channelApi,
     required MessengerWebSocket messengerWebSocket,
-    bool initStreams = true,
   }) : _webSocket = messengerWebSocket,
        _api = channelApi {
-    if (!initStreams) return;
-
     _usersStreamController = StatefulStreamController<List<User>>(initialValue: []);
     _channelUpdatesController =
         StatefulStreamController<ChannelOnChatScreenUpdate>();
@@ -58,6 +67,9 @@ class ChannelRepositoryImpl implements ChannelRepository {
             newSubsCount: update.subsCount,
           ),
         );
+      }),
+      _webSocket.channelUpdatesStream.listen((update) {
+        _channelUpdatesController.add(update);
       }),
     ]);
   }
@@ -132,11 +144,67 @@ class ChannelRepositoryImpl implements ChannelRepository {
   }
 
   @override
+  Future<ChannelData> createNewChannel({
+    required ChannelEditingUiData channelUiData,
+  }) async {
+    final res = await _api.createNewChannel(
+      body: ChannelRequestDto(
+        name: channelUiData.name,
+        imageUrl: null,
+        description: channelUiData.description,
+        tag: channelUiData.tag,
+      ),
+    );
+
+    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+      throw Exception(
+        res.data.message ??
+            'Failed to create new channel, code: ${res.response.statusCode}',
+      );
+    }
+
+    return ChannelData.fromDto(res.data.data!);
+  }
+
+  @override
+  Future<ChannelData> editChannel({
+    required int channelId,
+    required ChannelEditingUiData channelUiData,
+  }) async {
+    final res = await _api.editChannel(
+      channelId: channelId,
+      body: ChannelRequestDto(
+        name: channelUiData.name,
+        imageUrl: null,
+        description: channelUiData.description,
+        tag: channelUiData.tag,
+      ),
+    );
+
+    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+      throw Exception(
+        res.data.message ??
+            'Failed to create new channel, code: ${res.response.statusCode}',
+      );
+    }
+
+    final channelData = ChannelData.fromDto(res.data.data!);
+    // _channelUpdatesController.add(
+    //   ChannelOnChatScreenUpdate(
+    //     channelId: channelData.id,
+    //     newChannelData: channelData,
+    //   ),
+    // ); // TODO need?
+    return channelData;
+  }
+
+  @override
   Future<void> dispose() async {
     for (final sub in _subs) {
       unawaited(sub.cancel());
     }
     await _usersStreamController.close();
+    await _channelUpdatesController.close();
   }
 
   @override
