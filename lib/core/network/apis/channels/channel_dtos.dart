@@ -8,14 +8,14 @@ part 'channel_dtos.g.dart';
 class ChannelRequestDto {
   const ChannelRequestDto({
     required this.name,
-    required this.imageUrl,
+    required this.image,
     required this.description,
     required this.tag,
   });
 
   final String name;
-  @JsonKey(name: 'image_url')
-  final String? imageUrl;
+  @JsonKey(name: 'image')
+  final String? image;
   final String description;
   final String tag;
 

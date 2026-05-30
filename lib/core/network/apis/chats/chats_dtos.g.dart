@@ -26,7 +26,7 @@ ChatChannelDataDto _$ChatChannelDataDtoFromJson(Map<String, dynamic> json) =>
       id: (json['id'] as num).toInt(),
       channelName: json['channel_name'] as String,
       description: json['description'] as String,
-      imageUrl: json['image_url'] as String?,
+      image: json['image'] as String?,
       isOfficial: json['is_official'] as bool,
       userChannelRole: $enumDecode(_$UserChannelRoleDtoEnumMap, json['role']),
       tag: json['tag'] as String,

@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/user_profile.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
-import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/presentation/klm_cached_image.dart';
 import 'package:kepleomax/core/presentation/klm_textfield.dart';
 import 'package:kepleomax/core/presentation/user_image_widget.dart';
@@ -194,14 +194,22 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
   Future<void> _editImage() async {
     final picker = ImagePicker();
-    final image = await picker.pickImage(
+    XFile? image = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
     );
 
+    if (image == null && Platform.isAndroid) {
+      final LostDataResponse response = await picker.retrieveLostData();
+      if (!response.isEmpty && response.file != null) {
+        image = response.file;
+      }
+    }
+
+    print('KlmLog image: $image');
     if (image != null) {
       setState(() {
-        _imageUrl = image.path;
+        _imageUrl = image!.path;
         _isImageEdited = true;
       });
     }

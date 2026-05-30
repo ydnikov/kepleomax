@@ -160,7 +160,7 @@ class CallsService {
   void checkActiveCalls(UserRepository userRepository, CallsApi callsApi) {
     FlutterCallkitIncoming.activeCalls().then((calls) async {
       try {
-        if (calls is List && calls.isNotEmpty) return;
+        if (calls is! List || calls.isEmpty) return;
         final activeCall = calls[0];
 
         if (activeCall['isAccepted'] == true) {

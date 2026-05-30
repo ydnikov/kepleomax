@@ -150,7 +150,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
     final res = await _api.createNewChannel(
       body: ChannelRequestDto(
         name: channelUiData.name,
-        imageUrl: null,
+        image: null,
         description: channelUiData.description,
         tag: channelUiData.tag,
       ),
@@ -175,7 +175,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
       channelId: channelId,
       body: ChannelRequestDto(
         name: channelUiData.name,
-        imageUrl: null,
+        image: null,
         description: channelUiData.description,
         tag: channelUiData.tag,
       ),

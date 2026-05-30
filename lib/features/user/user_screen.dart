@@ -29,6 +29,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 part 'widgets/primary_button.dart';
+
 part 'widgets/user_scroll_listeners.dart';
 
 const int _appBarUsernameFullShownOffset = 130;
@@ -59,43 +60,49 @@ class _UserScreenState extends State<UserScreen> {
   /// build
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<UserBloc>(
-      create: (context) {
-        final dp = Dependencies.of(context);
-        return UserBloc(
-          userRepository: dp.userRepository,
-          connectionRepository: dp.read<ConnectionRepository>(),
-          messengerWebSocket: dp.read<MessengerWebSocket>(),
-          userId: widget.userId,
-        )..add(const UserEventLoad());
-      },
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: _AppBar(
-          scrollController: _scrollController,
-          userId: widget.userId,
-          key: const Key('user_app_bar'),
-        ),
-        body: SafeArea(
-          top: false,
-          child: BlocProvider<PostListBloc>(
-            create: (context) => PostListBloc(
-              postRepository: Dependencies.of(context).postRepository,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<UserBloc>(
+          create: (context) {
+            final dp = Dependencies.of(context);
+            return UserBloc(
+              userRepository: dp.userRepository,
+              connectionRepository: dp.read<ConnectionRepository>(),
+              messengerWebSocket: dp.read<MessengerWebSocket>(),
               userId: widget.userId,
+            )..add(const UserEventLoad());
+          },
+        ),
+        BlocProvider<PostListBloc>(
+          create: (context) => PostListBloc(
+            postRepository: Dependencies.of(context).postRepository,
+            userId: widget.userId,
+          )..add(const PostListEventLoad()),
+        ),
+      ],
+      child: Builder(
+        builder: (builderContext) => Scaffold(
+            extendBodyBehindAppBar: true,
+            appBar: _AppBar(
+              scrollController: _scrollController,
+              userId: widget.userId,
+              key: const Key('user_app_bar'),
             ),
-            child: AutoScrollControllerListeners(
-              controller: _scrollController,
-              onLoadMore: () {
-                context.read<PostListBloc>().add(const PostListEventLoadMore());
-              },
-              child: _Body(
-                scrollController: _scrollController,
-                scrollPadding: MediaQuery.of(context).viewPadding.top,
-                key: const Key('user_screen_body'),
+            body: SafeArea(
+              top: false,
+              child: AutoScrollControllerListeners(
+                controller: _scrollController,
+                onLoadMore: () {
+                  builderContext.read<PostListBloc>().add(const PostListEventLoadMore());
+                },
+                child: _Body(
+                  scrollController: _scrollController,
+                  scrollPadding: MediaQuery.of(context).viewPadding.top,
+                  key: const Key('user_screen_body'),
+                ),
               ),
             ),
           ),
-        ),
       ),
     );
   }

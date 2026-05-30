@@ -9,7 +9,7 @@ part of 'channel_dtos.dart';
 Map<String, dynamic> _$ChannelRequestDtoToJson(ChannelRequestDto instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'image_url': instance.imageUrl,
+      'image': instance.image,
       'description': instance.description,
       'tag': instance.tag,
     };

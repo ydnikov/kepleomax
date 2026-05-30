@@ -13,7 +13,7 @@ import 'package:kepleomax/features/post/bloc/post_list_state.dart';
 import 'package:kepleomax/features/post/post_widget.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-/// must be BlocProvider above with PostListBloc
+/// BlocProvider must be above with PostListBloc
 class PostListWidget extends StatelessWidget {
   const PostListWidget({required this.isUserPage, super.key});
 
@@ -33,7 +33,6 @@ class PostListWidget extends StatelessWidget {
       },
       builder: (context, state) {
         if (state is PostListStateLoading) {
-          /// loading
           return Skeletonizer(
             child: Column(
               children: [
@@ -44,16 +43,18 @@ class PostListWidget extends StatelessWidget {
               ],
             ),
           );
-        } else if (state is PostListStateError) {
-          /// error
+        }
+
+        if (state is PostListStateError) {
           return KlmErrorWidget(
             errorMessage: state.message,
             onRetry: () {
               context.read<PostListBloc>().add(const PostListEventLoad());
             },
           );
-        } else if (state is PostListStateBase) {
-          /// base
+        }
+
+        if (state is PostListStateBase) {
           final data = state.data;
           return Column(
             children: [

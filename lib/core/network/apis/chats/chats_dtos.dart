@@ -102,7 +102,7 @@ class ChatChannelDataDto {
     required this.id,
     required this.channelName,
     required this.description,
-    required this.imageUrl,
+    required this.image,
     required this.isOfficial,
     required this.userChannelRole,
     required this.tag,
@@ -116,8 +116,8 @@ class ChatChannelDataDto {
   @JsonKey(name: 'channel_name')
   final String channelName;
   final String description;
-  @JsonKey(name: 'image_url')
-  final String? imageUrl;
+  @JsonKey(name: 'image')
+  final String? image;
   @JsonKey(name: 'is_official')
   final bool isOfficial;
   @JsonKey(name: 'role')

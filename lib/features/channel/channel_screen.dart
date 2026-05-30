@@ -8,6 +8,7 @@ import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/channel_image_widget.dart';
+import 'package:kepleomax/core/presentation/channel_official_widget.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_text_button.dart';
@@ -127,12 +128,16 @@ class _BodyState extends State<_Body> {
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: SelectableText(
-                  channelData.name,
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 26,
+                child: ChannelOfficialIconWidget(
+                  isOfficial: channelData.isOfficial,
+                  widthPadding: 0,
+                  leftWidget: SelectableText(
+                    channelData.name,
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 26,
+                    ),
                   ),
                 ),
               ),

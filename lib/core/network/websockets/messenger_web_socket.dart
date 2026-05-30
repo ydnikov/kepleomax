@@ -210,7 +210,6 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
 
   @override
   void subscribeOnChatsUpdates({required List<int> ids}) {
-    print('KlmLog subscribeOnChatsUpdates: $ids');
     _klmWebSocket.emit('subscribe_on_chats_updates', {'ids': ids});
   }
 
