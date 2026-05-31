@@ -34,6 +34,7 @@ class ChatDto extends Equatable {
     required this.otherUser,
     required this.lastMessage,
     required this.unreadCount,
+    required this.createdAt,
     required this.channelData,
     this.draft,
   });
@@ -50,6 +51,7 @@ class ChatDto extends Equatable {
         ? ChatChannelDataDto.fromJson(json)
         : null,
     unreadCount: (json['unread_count'] as num? ?? 0).toInt(),
+    createdAt: json['created_at'] as int,
   );
 
   /// json['other_user'] should be map\<String, dynamic>
@@ -68,6 +70,7 @@ class ChatDto extends Equatable {
             chatId: json['id'] as int,
             createdAt: json['draft_created_at'] as int,
           ),
+    createdAt: 0, // TODO
   );
 
   ChatDto copyWithNewDraft(MessageDraft? draft) => ChatDto(
@@ -76,6 +79,7 @@ class ChatDto extends Equatable {
     lastMessage: lastMessage,
     unreadCount: unreadCount,
     channelData: channelData,
+    createdAt: createdAt,
     draft: draft,
   );
 
@@ -83,6 +87,7 @@ class ChatDto extends Equatable {
   final UserDto otherUser;
   final MessageDto? lastMessage;
   final int unreadCount;
+  final int createdAt;
   final MessageDraft? draft;
   final ChatChannelDataDto? channelData;
 
@@ -116,7 +121,6 @@ class ChatChannelDataDto {
   @JsonKey(name: 'channel_name')
   final String channelName;
   final String description;
-  @JsonKey(name: 'image')
   final String? image;
   @JsonKey(name: 'is_official')
   final bool isOfficial;

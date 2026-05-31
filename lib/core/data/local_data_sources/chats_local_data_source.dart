@@ -113,7 +113,9 @@ class ChatsLocalDataSourceImpl implements ChatsLocalDataSource {
     });
 
     return result.sorted(
-      (a, b) => (b.lastMessage?.createdAt ?? 0) - (a.lastMessage?.createdAt ?? 0),
+      (a, b) =>
+          (b.lastMessage?.createdAt ?? b.createdAt) -
+          (a.lastMessage?.createdAt ?? a.createdAt),
     );
   }
 

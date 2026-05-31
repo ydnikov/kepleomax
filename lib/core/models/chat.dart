@@ -17,6 +17,7 @@ abstract class Chat with _$Chat {
     required Message? lastMessage,
     required bool fromCache,
     required int unreadCount,
+    required int createdAt,
     MessageDraft? draft,
     DateTime? lastTypingActivityTime,
   }) = _Chat;
@@ -30,6 +31,7 @@ abstract class Chat with _$Chat {
     draft: dto.draft,
     fromCache: fromCache,
     unreadCount: dto.unreadCount,
+    createdAt: dto.createdAt,
     channelData: dto.channelData == null
         ? null
         : ChannelData.fromDto(dto.channelData!),
@@ -41,6 +43,7 @@ abstract class Chat with _$Chat {
     fromCache: false,
     lastMessage: Message.loading(),
     unreadCount: 0,
+    createdAt: 0,
     channelData: null,
   );
 

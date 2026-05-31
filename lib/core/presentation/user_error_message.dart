@@ -1,18 +1,17 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:kepleomax/core/flavor.dart';
 
 extension UserErrorMessage on Object {
   String get userErrorMessage {
     if (this is DioException) {
       return (this as DioException).dioUserErrorMessage;
-    } else if (flavor.isDevelop) {
-      return toString();
     } else if (this is TimeoutException) {
       return 'Timeout';
     } else {
-      return 'Something went wrong';
+      return this is Exception
+          ? toString().replaceAll('Exception: ', '')
+          : toString();
     }
   }
 }

@@ -18,8 +18,17 @@ abstract class ChannelStateBase with _$ChannelStateBase implements ChannelState 
 abstract class ChannelStateMessage
     with _$ChannelStateMessage
     implements ChannelState {
-  const factory ChannelStateMessage({required String message, @Default(
-      false) bool isError}) = _ChannelStateMessage;
+  const factory ChannelStateMessage({
+    required String message,
+    @Default(false) bool isError,
+  }) = _ChannelStateMessage;
+}
+
+@freezed
+abstract class ChannelStateDeleted
+    with _$ChannelStateDeleted
+    implements ChannelState {
+  const factory ChannelStateDeleted() = _ChannelStateDeleted;
 }
 
 @freezed

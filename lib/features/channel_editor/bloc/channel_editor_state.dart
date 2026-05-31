@@ -31,7 +31,6 @@ abstract class ChannelEditorStateExit
     with _$ChannelEditorStateExit
     implements ChannelEditorState {
   const factory ChannelEditorStateExit({
-    required ChannelData newChannelData,
     String? message,
   }) = _ChannelEditorStateExit;
 }

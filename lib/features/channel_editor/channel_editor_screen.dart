@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
+import 'package:kepleomax/core/di/dependencies_multi_provider.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/chat.dart';
@@ -32,22 +33,31 @@ class ChannelEditorScreen extends StatelessWidget {
 
         _showGoBackDialog(context);
       },
-      child: BlocProvider<ChannelEditorBloc>(
-        create: (context) => ChannelEditorBloc(
-          repository: Dependencies.of(context).read<ChannelRepository>(),
-          channelId: channelData?.id,
-        ),
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(
-              channelData == null ? 'Create Channel' : 'Edit Channel',
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-            leading: KlmBackButton(onPressed: () => _showGoBackDialog(context)),
-            centerTitle: true,
-            backgroundColor: Colors.white,
+      child: DependenciesMultiProvider(
+        providers: Dependencies.of(context).has<ChannelRepository>()
+            ? {}
+            : {
+                ChannelRepository: Dependencies.of(
+                  context,
+                ).channelRepositoryBuilder(),
+              },
+        child: BlocProvider<ChannelEditorBloc>(
+          create: (context) => ChannelEditorBloc(
+            repository: Dependencies.of(context).read<ChannelRepository>(),
+            channelId: channelData?.id,
           ),
-          body: SafeArea(child: _Body(initialChannelData: channelData)),
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(
+                channelData == null ? 'Create Channel' : 'Edit Channel',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              leading: KlmBackButton(onPressed: () => _showGoBackDialog(context)),
+              centerTitle: true,
+              backgroundColor: Colors.white,
+            ),
+            body: SafeArea(child: _Body(initialChannelData: channelData)),
+          ),
         ),
       ),
     );
@@ -63,7 +73,7 @@ class ChannelEditorScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              AppNavigator.pop(context);
+              Navigator.pop(context);
             },
             style: TextButton.styleFrom(overlayColor: Colors.red),
             child: const Text('Discard', style: TextStyle(color: Colors.red)),

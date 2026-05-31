@@ -8,6 +8,7 @@ import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
 import 'package:kepleomax/core/data/models/messages_collection.dart';
+import 'package:kepleomax/core/extensions/fake_delay_extension.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/chat.dart';
@@ -336,7 +337,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         throw Exception('Failed to subscribe: chat is not a channel');
       }
 
-      await _channelRepository.subscribe(channelId: _data.chat.channelData!.id);
+      await _channelRepository
+          .subscribe(channelId: _data.chat.channelData!.id)
+          .withFakeDelay();
 
       /// don't set subsCount, cause it will be set via ws update
       _data = _data.copyWith(
@@ -538,7 +541,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       );
     } else {
       final currentChannelData = _data.chat.channelData!;
-      print('KlmLog newSubsCount: ${update.newSubsCount}');
       _data = _data.copyWith(
         chat: _data.chat.copyWith(
           channelData: currentChannelData.copyWith(

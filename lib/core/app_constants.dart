@@ -8,7 +8,7 @@ abstract class AppConstants {
       _constants.markAsOfflineAfterInactivity;
   static final Duration showTypingAfterActivity = _constants.showTypingAfterActivity;
   static final Duration callingTimeout = _constants.callingTimeout;
-  static final Future<void> fakeDelay = _constants.fakeDelay;
+  static final Duration fakeDelayDuration = _constants.fakeDelayDuration;
 
   static final int msgPagingLimit = _constants.msgPagingLimit;
   static final int postsPagingLimit = _constants.postsPagingLimit;
@@ -36,7 +36,7 @@ abstract class AppConstantsType {
 
   Duration get callingTimeout => const Duration(seconds: 15);
 
-  Future<void> get fakeDelay => Future.delayed(const Duration(milliseconds: 750));
+  Duration get fakeDelayDuration => const Duration(milliseconds: 500);
 
   int get msgPagingLimit => 15;
 

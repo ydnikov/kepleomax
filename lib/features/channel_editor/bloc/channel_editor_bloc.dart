@@ -31,16 +31,11 @@ class ChannelEditorBloc extends Bloc<ChannelEditorEvent, ChannelEditorState> {
     emit(ChannelEditorStateBase(_data));
 
     try {
-      final channelData = await _editorRepository.createNewChannel(
+      await _editorRepository.createNewChannel(
         channelUiData: event.channelEditingData,
       );
 
-      emit(
-        ChannelEditorStateExit(
-          message: 'Channel successfully created',
-          newChannelData: channelData,
-        ),
-      );
+      emit(const ChannelEditorStateExit(message: 'Channel successfully created'));
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       emit(ChannelEditorStateMessage(message: e.userErrorMessage, isError: true));
@@ -58,17 +53,12 @@ class ChannelEditorBloc extends Bloc<ChannelEditorEvent, ChannelEditorState> {
     emit(ChannelEditorStateBase(_data));
 
     try {
-      final channelData = await _editorRepository.editChannel(
+      await _editorRepository.editChannel(
         channelId: _channelId!,
         channelUiData: event.channelEditingData,
       );
 
-      emit(
-        ChannelEditorStateExit(
-          message: 'Changes are saved',
-          newChannelData: channelData,
-        ),
-      );
+      emit(const ChannelEditorStateExit(message: 'Changes are saved'));
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       emit(ChannelEditorStateMessage(message: e.userErrorMessage, isError: true));

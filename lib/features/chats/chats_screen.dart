@@ -23,6 +23,10 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 part 'widgets/chat_widget.dart';
 
+part 'widgets/chat_message_widget.dart';
+
+part 'widgets/chat_empty_message_widget.dart';
+
 /// screen
 class ChatsScreen extends StatefulWidget {
   const ChatsScreen({super.key});

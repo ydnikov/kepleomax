@@ -6,12 +6,14 @@ class _ChannelChatBottom extends StatelessWidget {
     required this.isLoading,
     required this.isSubscribeClickable,
     required this.onSubscribeTap,
+    required this.onGoToChannelTap,
   });
 
   final UserChannelRole role;
   final bool isLoading;
   final bool isSubscribeClickable;
   final VoidCallback? onSubscribeTap;
+  final VoidCallback? onGoToChannelTap;
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +24,9 @@ class _ChannelChatBottom extends StatelessWidget {
       left: false,
       right: false,
       child: InkWell(
-        onTap: isSubscriber || isLoading || !isSubscribeClickable
+        onTap: isLoading || !isSubscribeClickable
             ? null
-            : onSubscribeTap,
+            : isSubscriber ? onGoToChannelTap : onSubscribeTap,
         child: Container(
           width: context.screenSize.width,
           height: 50,
@@ -37,7 +39,7 @@ class _ChannelChatBottom extends StatelessWidget {
                     child: CircularProgressIndicator(),
                   )
                 : Text(
-                    isSubscriber ? 'Subscribed' : 'Subscribe',
+                    isSubscriber ? 'Go to channel' : 'Subscribe',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,

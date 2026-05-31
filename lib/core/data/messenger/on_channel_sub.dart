@@ -5,11 +5,8 @@ extension _OnChannelSubUpdateExtension on MessengerRepositoryImpl {
     if (_currentChatsCollection == null) return;
 
     final currentChats = _currentChatsCollection!.chats;
-    final newChats = [update.chat, ...currentChats].sorted(
-      (a, b) =>
-          (b.lastMessage?.createdAt.millisecondsSinceEpoch ?? 0) -
-          (a.lastMessage?.createdAt.millisecondsSinceEpoch ?? 0),
-    );
+    final newChats = [update.chat, ...currentChats];
+
     _emitChatsCollection(
       ChatsCollection(
         chats: newChats,

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kepleomax/core/app.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
+import 'package:kepleomax/core/presentation/user_error_message.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,7 +25,7 @@ class KlmUrlLauncher {
           /// channel/chat
           final chat = await _chatsRepository.getChatWithId(path);
           if (chat == null) {
-            Fluttertoast.showToast(msg: 'Chat is not found');
+            unawaited(Fluttertoast.showToast(msg: 'Chat not found'));
             return;
           }
 
@@ -35,7 +38,7 @@ class KlmUrlLauncher {
       }
     } catch (e, st) {
       logger.e(e, stackTrace: st);
-      Fluttertoast.showToast(msg: 'Failed to open');
+      unawaited(Fluttertoast.showToast(msg: e.userErrorMessage));
     }
   }
 }

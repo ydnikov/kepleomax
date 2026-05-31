@@ -49,8 +49,8 @@ extension _OnDeleteMessageExtension on MessengerRepositoryImpl {
         }
         newChats.sort(
           (a, b) =>
-              (b.lastMessage?.createdAt.millisecondsSinceEpoch ?? 0) -
-              (a.lastMessage?.createdAt.millisecondsSinceEpoch ?? 0),
+              (b.lastMessage?.createdAt.millisecondsSinceEpoch ?? b.createdAt) -
+              (a.lastMessage?.createdAt.millisecondsSinceEpoch ?? a.createdAt),
         );
         _emitChatsCollection(ChatsCollection(chats: newChats));
       }

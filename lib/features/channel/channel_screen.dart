@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/models/chat.dart';
@@ -17,7 +18,6 @@ import 'package:kepleomax/core/presentation/user_image_widget.dart';
 import 'package:kepleomax/features/channel/bloc/channel_bloc.dart';
 import 'package:kepleomax/features/channel/bloc/channel_state.dart';
 import 'package:kepleomax/features/channel/data/channel_repository.dart';
-import 'package:kepleomax/features/channel/widgets/delete_channel_dialog.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:kepleomax/features/user/user_screen.dart';
 import 'package:num_remap/num_remap.dart';
@@ -26,8 +26,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 part 'widgets/channel_buttons_widget.dart';
-
 part 'widgets/channel_user_widget.dart';
+part 'widgets/delete_channel_dialog.dart';
+part 'widgets/delete_user_dialog.dart';
 
 const int _appBarNameFullShownOffset = 130;
 
@@ -55,12 +56,21 @@ class _ChannelScreenState extends State<ChannelScreen> {
       create: (context) => ChannelBloc(
         channelData: widget.channelData,
 
-        /// should be opened from chat_screen, for having this in dp
+        /// must be opened from chat_screen, for having this in dp
         channelRepository: Dependencies.of(context).read<ChannelRepository>(),
       )..add(const ChannelEventLoad()),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: _AppBar(scrollController: _scrollController),
+        // floatingActionButton: FloatingActionButton(
+        //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+        //   onPressed: () {
+        //     SharePlus.instance.share(
+        //       ShareParams(text: 'text'),
+        //     );
+        //   },
+        //   child: const Icon(Icons.ios_share),
+        // ),
         body: SafeArea(
           top: false,
           child: AutoScrollControllerListeners(
@@ -99,6 +109,9 @@ class _BodyState extends State<_Body> {
             text: state.message,
             color: state.isError ? Colors.red : Colors.black,
           );
+        } else if (state is ChannelStateDeleted) {
+          Fluttertoast.showToast(msg: 'Channel deleted');
+          AppNavigator.popAll(context);
         }
       },
       buildWhen: (oldState, newState) {
@@ -179,7 +192,7 @@ class _BodyState extends State<_Body> {
                       SelectableText(channelData.description)
                     else
                       const Text(
-                        'Empty description',
+                        'No description',
                         style: TextStyle(
                           color: Colors.black38,
                           fontWeight: FontWeight.w500,

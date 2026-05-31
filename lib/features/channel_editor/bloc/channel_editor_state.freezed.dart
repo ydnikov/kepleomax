@@ -549,7 +549,7 @@ as bool,
 /// @nodoc
 mixin _$ChannelEditorStateExit {
 
- ChannelData get newChannelData; String? get message;
+ String? get message;
 /// Create a copy of ChannelEditorStateExit
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -560,16 +560,16 @@ $ChannelEditorStateExitCopyWith<ChannelEditorStateExit> get copyWith => _$Channe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelEditorStateExit&&(identical(other.newChannelData, newChannelData) || other.newChannelData == newChannelData)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelEditorStateExit&&(identical(other.message, message) || other.message == message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,newChannelData,message);
+int get hashCode => Object.hash(runtimeType,message);
 
 @override
 String toString() {
-  return 'ChannelEditorStateExit(newChannelData: $newChannelData, message: $message)';
+  return 'ChannelEditorStateExit(message: $message)';
 }
 
 
@@ -580,11 +580,11 @@ abstract mixin class $ChannelEditorStateExitCopyWith<$Res>  {
   factory $ChannelEditorStateExitCopyWith(ChannelEditorStateExit value, $Res Function(ChannelEditorStateExit) _then) = _$ChannelEditorStateExitCopyWithImpl;
 @useResult
 $Res call({
- ChannelData newChannelData, String? message
+ String? message
 });
 
 
-$ChannelDataCopyWith<$Res> get newChannelData;
+
 
 }
 /// @nodoc
@@ -597,23 +597,13 @@ class _$ChannelEditorStateExitCopyWithImpl<$Res>
 
 /// Create a copy of ChannelEditorStateExit
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? newChannelData = null,Object? message = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? message = freezed,}) {
   return _then(_self.copyWith(
-newChannelData: null == newChannelData ? _self.newChannelData : newChannelData // ignore: cast_nullable_to_non_nullable
-as ChannelData,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
-/// Create a copy of ChannelEditorStateExit
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$ChannelDataCopyWith<$Res> get newChannelData {
-  
-  return $ChannelDataCopyWith<$Res>(_self.newChannelData, (value) {
-    return _then(_self.copyWith(newChannelData: value));
-  });
-}
+
 }
 
 
@@ -695,10 +685,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ChannelData newChannelData,  String? message)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? message)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChannelEditorStateExit() when $default != null:
-return $default(_that.newChannelData,_that.message);case _:
+return $default(_that.message);case _:
   return orElse();
 
 }
@@ -716,10 +706,10 @@ return $default(_that.newChannelData,_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ChannelData newChannelData,  String? message)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? message)  $default,) {final _that = this;
 switch (_that) {
 case _ChannelEditorStateExit():
-return $default(_that.newChannelData,_that.message);case _:
+return $default(_that.message);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -736,10 +726,10 @@ return $default(_that.newChannelData,_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ChannelData newChannelData,  String? message)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? message)?  $default,) {final _that = this;
 switch (_that) {
 case _ChannelEditorStateExit() when $default != null:
-return $default(_that.newChannelData,_that.message);case _:
+return $default(_that.message);case _:
   return null;
 
 }
@@ -751,10 +741,9 @@ return $default(_that.newChannelData,_that.message);case _:
 
 
 class _ChannelEditorStateExit implements ChannelEditorStateExit {
-  const _ChannelEditorStateExit({required this.newChannelData, this.message});
+  const _ChannelEditorStateExit({this.message});
   
 
-@override final  ChannelData newChannelData;
 @override final  String? message;
 
 /// Create a copy of ChannelEditorStateExit
@@ -767,16 +756,16 @@ _$ChannelEditorStateExitCopyWith<_ChannelEditorStateExit> get copyWith => __$Cha
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelEditorStateExit&&(identical(other.newChannelData, newChannelData) || other.newChannelData == newChannelData)&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelEditorStateExit&&(identical(other.message, message) || other.message == message));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,newChannelData,message);
+int get hashCode => Object.hash(runtimeType,message);
 
 @override
 String toString() {
-  return 'ChannelEditorStateExit(newChannelData: $newChannelData, message: $message)';
+  return 'ChannelEditorStateExit(message: $message)';
 }
 
 
@@ -787,11 +776,11 @@ abstract mixin class _$ChannelEditorStateExitCopyWith<$Res> implements $ChannelE
   factory _$ChannelEditorStateExitCopyWith(_ChannelEditorStateExit value, $Res Function(_ChannelEditorStateExit) _then) = __$ChannelEditorStateExitCopyWithImpl;
 @override @useResult
 $Res call({
- ChannelData newChannelData, String? message
+ String? message
 });
 
 
-@override $ChannelDataCopyWith<$Res> get newChannelData;
+
 
 }
 /// @nodoc
@@ -804,24 +793,14 @@ class __$ChannelEditorStateExitCopyWithImpl<$Res>
 
 /// Create a copy of ChannelEditorStateExit
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? newChannelData = null,Object? message = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? message = freezed,}) {
   return _then(_ChannelEditorStateExit(
-newChannelData: null == newChannelData ? _self.newChannelData : newChannelData // ignore: cast_nullable_to_non_nullable
-as ChannelData,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
 
-/// Create a copy of ChannelEditorStateExit
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$ChannelDataCopyWith<$Res> get newChannelData {
-  
-  return $ChannelDataCopyWith<$Res>(_self.newChannelData, (value) {
-    return _then(_self.copyWith(newChannelData: value));
-  });
-}
+
 }
 
 /// @nodoc

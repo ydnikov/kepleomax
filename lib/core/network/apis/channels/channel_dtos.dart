@@ -46,11 +46,21 @@ class GetSubscribersCountResponseDto {
 
 @JsonSerializable(createToJson: false)
 class GetSubscribersResponseDto {
-  GetSubscribersResponseDto({required this.data, required this.message});
+  GetSubscribersResponseDto({
+    required this.data,
+    required this.totalCount,
+    required this.offset,
+    required this.cursor,
+    required this.message,
+  });
 
   factory GetSubscribersResponseDto.fromJson(Map<String, dynamic> json) =>
       _$GetSubscribersResponseDtoFromJson(json);
 
   final List<UserDto>? data;
+  @JsonKey(name: 'total_count')
+  final int? totalCount;
+  final int? offset;
+  final int? cursor;
   final String? message;
 }

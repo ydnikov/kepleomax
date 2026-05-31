@@ -20,6 +20,11 @@ abstract class ChannelApi {
     @Body() required ChannelRequestDto body,
   });
 
+  @DELETE('/')
+  Future<HttpResponse<void>> deleteChannel({
+    @Query('channel_id') required int channelId,
+  });
+
   @GET('/subsCount')
   Future<HttpResponse<GetSubscribersCountResponseDto>> getSubscribersCount({
     @Query('channel_id') required int channelId,

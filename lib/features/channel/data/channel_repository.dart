@@ -7,7 +7,9 @@ import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_dtos.dart';
+import 'package:kepleomax/core/network/apis/chats/chats_api.dart';
 import 'package:kepleomax/core/network/apis/files/files_api.dart';
+import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/utils/stateful_stream.dart';
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_state.dart';
@@ -40,6 +42,8 @@ abstract class ChannelEditorRepository {
     required int channelId,
     required ChannelEditingUiData channelUiData,
   });
+
+  Future<void> deleteChannel({required int channelId});
 }
 
 class ChannelRepositoryImpl implements ChannelRepository {
@@ -52,7 +56,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
        _api = channelApi {
     _usersStreamController = StatefulStreamController<List<User>>(initialValue: []);
     _channelUpdatesController =
-        StatefulStreamController<ChannelOnChatScreenUpdate>();
+        StreamController<ChannelOnChatScreenUpdate>.broadcast();
 
     _subs.addAll([
       _webSocket.channelSubscriptionUpdatesStream.listen((update) {
@@ -75,16 +79,36 @@ class ChannelRepositoryImpl implements ChannelRepository {
       _webSocket.channelUpdatesStream.listen((update) {
         _channelUpdatesController.add(update);
       }),
+      // _baseWebSocket.connectionStateStream.listen((isConnected) {
+      //   if (isConnected) {
+      //
+      //   }
+      // })
     ]);
   }
 
   final ChannelApi _api;
+  // final ChatsApi _chatsApi;
   final FilesApi _filesApi;
   final MessengerWebSocket _webSocket;
+  // final KlmWebSocket _baseWebSocket;
   late final StatefulStreamController<List<User>> _usersStreamController;
-  late final StatefulStreamController<ChannelOnChatScreenUpdate>
-  _channelUpdatesController;
+  late final StreamController<ChannelOnChatScreenUpdate> _channelUpdatesController;
   final List<StreamSubscription<void>> _subs = [];
+
+  int _cachedSubsCount = 0;
+
+  // Future<void> _updateChannelData() async {
+  //   final res = await _chatsApi.getChatWithId(chatId: chatId);
+  //
+  //   if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+  //     throw Exception(
+  //       res.data.message ?? 'Failed to update channel: ${res.response.statusCode}',
+  //     );
+  //   }
+  //
+  //   _channelUpdatesController
+  // }
 
   @override
   Future<int> getSubscribersCount({required int channelId}) async {
@@ -96,7 +120,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
       );
     }
 
-    return res.data.count!;
+    return _cachedSubsCount = res.data.count!;
   }
 
   @override
@@ -114,6 +138,14 @@ class ChannelRepositoryImpl implements ChannelRepository {
     }
 
     _usersStreamController.add(res.data.data!.map(User.fromDto).toList());
+
+    _cachedSubsCount = res.data.totalCount!;
+    _channelUpdatesController.add(
+      ChannelOnChatScreenUpdate(
+        channelId: channelId,
+        newSubsCount: _cachedSubsCount,
+      ),
+    );
   }
 
   @override
@@ -140,6 +172,20 @@ class ChannelRepositoryImpl implements ChannelRepository {
             : 'Failed to unsubscribe: ${res.response.statusCode}',
       );
     }
+
+    if (userId != null) {
+      _usersStreamController.add(
+        _usersStreamController.currentValue!.where((u) => u.id != userId).toList(),
+      );
+
+      _cachedSubsCount--;
+      _channelUpdatesController.add(
+        ChannelOnChatScreenUpdate(
+          channelId: channelId,
+          newSubsCount: _cachedSubsCount,
+        ),
+      );
+    }
   }
 
   @override
@@ -152,10 +198,23 @@ class ChannelRepositoryImpl implements ChannelRepository {
   Future<ChannelData> createNewChannel({
     required ChannelEditingUiData channelUiData,
   }) async {
+    String? imageUrl;
+    if (channelUiData.imagePath != null) {
+      final imageRes = await _filesApi.uploadFile(File(channelUiData.imagePath!));
+      if (imageRes.response.statusCode! < 200 ||
+          imageRes.response.statusCode! > 299) {
+        throw Exception(
+          imageRes.data.message ??
+              'Failed to upload image: ${imageRes.response.statusCode}',
+        );
+      }
+      imageUrl = imageRes.data.data!.path;
+    }
+
     final res = await _api.createNewChannel(
       body: ChannelRequestDto(
         name: channelUiData.name,
-        image: null,
+        image: imageUrl,
         description: channelUiData.description,
         tag: channelUiData.tag,
       ),
@@ -186,7 +245,6 @@ class ChannelRepositoryImpl implements ChannelRepository {
               'Failed to upload image: ${imageRes.response.statusCode}',
         );
       }
-
       imageUrl = imageRes.data.data!.path;
     }
 
@@ -202,19 +260,21 @@ class ChannelRepositoryImpl implements ChannelRepository {
 
     if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
       throw Exception(
-        res.data.message ??
-            'Failed to create new channel, code: ${res.response.statusCode}',
+        res.data.message ?? 'Failed to edit, code: ${res.response.statusCode}',
       );
     }
 
-    final channelData = ChannelData.fromDto(res.data.data!);
-    // _channelUpdatesController.add(
-    //   ChannelOnChatScreenUpdate(
-    //     channelId: channelData.id,
-    //     newChannelData: channelData,
-    //   ),
-    // ); // TODO need?
-    return channelData;
+    return ChannelData.fromDto(res.data.data!);
+  }
+
+  @override
+  Future<void> deleteChannel({required int channelId}) async {
+    final res = await _api.deleteChannel(channelId: channelId);
+
+    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+      // TODO make better texts
+      throw Exception('Failed to delete, code: ${res.response.statusCode}');
+    }
   }
 
   @override

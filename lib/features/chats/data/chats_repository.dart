@@ -4,7 +4,6 @@ import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
 import 'package:kepleomax/core/data/local_data_sources/chats_local_data_source.dart';
 import 'package:kepleomax/core/models/chat.dart';
 
-
 abstract class ChatsRepository {
   /// api
   Future<Chat?> getChatWithUser(int otherUserId);
@@ -19,7 +18,6 @@ abstract class ChatsRepository {
 }
 
 class ChatsRepositoryImpl implements ChatsRepository {
-
   ChatsRepositoryImpl({
     required ChatsApiDataSource chatsApiDataSource,
     required ChatsLocalDataSource chatsLocalDataSource,
@@ -31,16 +29,14 @@ class ChatsRepositoryImpl implements ChatsRepository {
   /// api
   @override
   Future<Chat?> getChatWithUser(int otherUserId) async {
-    final dto = await _chatsApi
-        .getChatWithUser(otherUserId);
+    final dto = await _chatsApi.getChatWithUser(otherUserId);
 
     return dto == null ? null : Chat.fromDto(dto, fromCache: false);
   }
 
   @override
   Future<Chat?> getChatWithId(String chatId) async {
-    final dto = await _chatsApi
-        .getChatWithId(chatId);
+    final dto = await _chatsApi.getChatWithId(chatId);
 
     if (dto == null) return null;
 

@@ -318,6 +318,12 @@ class _BodyState extends State<_Body> {
                   onSubscribeTap: () {
                     _chatBloc.add(const ChatEventSubscribeOnChannel());
                   },
+                  onGoToChannelTap: () {
+                    AppNavigator.withKeyOf(
+                      context,
+                      mainNavigatorKey,
+                    )!.push(ChannelPage(channelData: data.chat.channelData!));
+                  },
                 ),
             ],
           ),

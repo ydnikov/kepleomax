@@ -30,7 +30,13 @@ class _ChannelButtonsWidget extends StatelessWidget {
               onPressed: () {
                 AppNavigator.showGeneralDialog(
                   context,
-                  const DeleteChannelDialog(),
+                  _DeleteChannelDialog(
+                    onDelete: () {
+                      context.read<ChannelBloc>().add(
+                        const ChannelEventDelete(),
+                      );
+                    },
+                  ),
                   barrierDismissible: true,
                 );
               },

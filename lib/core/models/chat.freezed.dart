@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Chat {
 
- int get id; User get otherUser; ChannelData? get channelData; Message? get lastMessage; bool get fromCache; int get unreadCount; MessageDraft? get draft; DateTime? get lastTypingActivityTime;
+ int get id; User get otherUser; ChannelData? get channelData; Message? get lastMessage; bool get fromCache; int get unreadCount; int get createdAt; MessageDraft? get draft; DateTime? get lastTypingActivityTime;
 /// Create a copy of Chat
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ChatCopyWith<Chat> get copyWith => _$ChatCopyWithImpl<Chat>(this as Chat, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Chat&&(identical(other.id, id) || other.id == id)&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.channelData, channelData) || other.channelData == channelData)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.draft, draft) || other.draft == draft)&&(identical(other.lastTypingActivityTime, lastTypingActivityTime) || other.lastTypingActivityTime == lastTypingActivityTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Chat&&(identical(other.id, id) || other.id == id)&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.channelData, channelData) || other.channelData == channelData)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.draft, draft) || other.draft == draft)&&(identical(other.lastTypingActivityTime, lastTypingActivityTime) || other.lastTypingActivityTime == lastTypingActivityTime));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,otherUser,channelData,lastMessage,fromCache,unreadCount,draft,lastTypingActivityTime);
+int get hashCode => Object.hash(runtimeType,id,otherUser,channelData,lastMessage,fromCache,unreadCount,createdAt,draft,lastTypingActivityTime);
 
 @override
 String toString() {
-  return 'Chat(id: $id, otherUser: $otherUser, channelData: $channelData, lastMessage: $lastMessage, fromCache: $fromCache, unreadCount: $unreadCount, draft: $draft, lastTypingActivityTime: $lastTypingActivityTime)';
+  return 'Chat(id: $id, otherUser: $otherUser, channelData: $channelData, lastMessage: $lastMessage, fromCache: $fromCache, unreadCount: $unreadCount, createdAt: $createdAt, draft: $draft, lastTypingActivityTime: $lastTypingActivityTime)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ChatCopyWith<$Res>  {
   factory $ChatCopyWith(Chat value, $Res Function(Chat) _then) = _$ChatCopyWithImpl;
 @useResult
 $Res call({
- int id, User otherUser, ChannelData? channelData, Message? lastMessage, bool fromCache, int unreadCount, MessageDraft? draft, DateTime? lastTypingActivityTime
+ int id, User otherUser, ChannelData? channelData, Message? lastMessage, bool fromCache, int unreadCount, int createdAt, MessageDraft? draft, DateTime? lastTypingActivityTime
 });
 
 
@@ -62,7 +62,7 @@ class _$ChatCopyWithImpl<$Res>
 
 /// Create a copy of Chat
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? otherUser = null,Object? channelData = freezed,Object? lastMessage = freezed,Object? fromCache = null,Object? unreadCount = null,Object? draft = freezed,Object? lastTypingActivityTime = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? otherUser = null,Object? channelData = freezed,Object? lastMessage = freezed,Object? fromCache = null,Object? unreadCount = null,Object? createdAt = null,Object? draft = freezed,Object? lastTypingActivityTime = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,otherUser: null == otherUser ? _self.otherUser : otherUser // ignore: cast_nullable_to_non_nullable
@@ -70,6 +70,7 @@ as User,channelData: freezed == channelData ? _self.channelData : channelData //
 as ChannelData?,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
 as Message?,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
 as bool,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
+as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as int,draft: freezed == draft ? _self.draft : draft // ignore: cast_nullable_to_non_nullable
 as MessageDraft?,lastTypingActivityTime: freezed == lastTypingActivityTime ? _self.lastTypingActivityTime : lastTypingActivityTime // ignore: cast_nullable_to_non_nullable
 as DateTime?,
@@ -202,10 +203,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  MessageDraft? draft,  DateTime? lastTypingActivityTime)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  int createdAt,  MessageDraft? draft,  DateTime? lastTypingActivityTime)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Chat() when $default != null:
-return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_that.fromCache,_that.unreadCount,_that.draft,_that.lastTypingActivityTime);case _:
+return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_that.fromCache,_that.unreadCount,_that.createdAt,_that.draft,_that.lastTypingActivityTime);case _:
   return orElse();
 
 }
@@ -223,10 +224,10 @@ return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  MessageDraft? draft,  DateTime? lastTypingActivityTime)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  int createdAt,  MessageDraft? draft,  DateTime? lastTypingActivityTime)  $default,) {final _that = this;
 switch (_that) {
 case _Chat():
-return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_that.fromCache,_that.unreadCount,_that.draft,_that.lastTypingActivityTime);case _:
+return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_that.fromCache,_that.unreadCount,_that.createdAt,_that.draft,_that.lastTypingActivityTime);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -243,10 +244,10 @@ return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  MessageDraft? draft,  DateTime? lastTypingActivityTime)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  int createdAt,  MessageDraft? draft,  DateTime? lastTypingActivityTime)?  $default,) {final _that = this;
 switch (_that) {
 case _Chat() when $default != null:
-return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_that.fromCache,_that.unreadCount,_that.draft,_that.lastTypingActivityTime);case _:
+return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_that.fromCache,_that.unreadCount,_that.createdAt,_that.draft,_that.lastTypingActivityTime);case _:
   return null;
 
 }
@@ -258,7 +259,7 @@ return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_th
 
 
 class _Chat extends Chat {
-  const _Chat({required this.id, required this.otherUser, required this.channelData, required this.lastMessage, required this.fromCache, required this.unreadCount, this.draft, this.lastTypingActivityTime}): super._();
+  const _Chat({required this.id, required this.otherUser, required this.channelData, required this.lastMessage, required this.fromCache, required this.unreadCount, required this.createdAt, this.draft, this.lastTypingActivityTime}): super._();
   
 
 @override final  int id;
@@ -267,6 +268,7 @@ class _Chat extends Chat {
 @override final  Message? lastMessage;
 @override final  bool fromCache;
 @override final  int unreadCount;
+@override final  int createdAt;
 @override final  MessageDraft? draft;
 @override final  DateTime? lastTypingActivityTime;
 
@@ -280,16 +282,16 @@ _$ChatCopyWith<_Chat> get copyWith => __$ChatCopyWithImpl<_Chat>(this, _$identit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Chat&&(identical(other.id, id) || other.id == id)&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.channelData, channelData) || other.channelData == channelData)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.draft, draft) || other.draft == draft)&&(identical(other.lastTypingActivityTime, lastTypingActivityTime) || other.lastTypingActivityTime == lastTypingActivityTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Chat&&(identical(other.id, id) || other.id == id)&&(identical(other.otherUser, otherUser) || other.otherUser == otherUser)&&(identical(other.channelData, channelData) || other.channelData == channelData)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.draft, draft) || other.draft == draft)&&(identical(other.lastTypingActivityTime, lastTypingActivityTime) || other.lastTypingActivityTime == lastTypingActivityTime));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,otherUser,channelData,lastMessage,fromCache,unreadCount,draft,lastTypingActivityTime);
+int get hashCode => Object.hash(runtimeType,id,otherUser,channelData,lastMessage,fromCache,unreadCount,createdAt,draft,lastTypingActivityTime);
 
 @override
 String toString() {
-  return 'Chat(id: $id, otherUser: $otherUser, channelData: $channelData, lastMessage: $lastMessage, fromCache: $fromCache, unreadCount: $unreadCount, draft: $draft, lastTypingActivityTime: $lastTypingActivityTime)';
+  return 'Chat(id: $id, otherUser: $otherUser, channelData: $channelData, lastMessage: $lastMessage, fromCache: $fromCache, unreadCount: $unreadCount, createdAt: $createdAt, draft: $draft, lastTypingActivityTime: $lastTypingActivityTime)';
 }
 
 
@@ -300,7 +302,7 @@ abstract mixin class _$ChatCopyWith<$Res> implements $ChatCopyWith<$Res> {
   factory _$ChatCopyWith(_Chat value, $Res Function(_Chat) _then) = __$ChatCopyWithImpl;
 @override @useResult
 $Res call({
- int id, User otherUser, ChannelData? channelData, Message? lastMessage, bool fromCache, int unreadCount, MessageDraft? draft, DateTime? lastTypingActivityTime
+ int id, User otherUser, ChannelData? channelData, Message? lastMessage, bool fromCache, int unreadCount, int createdAt, MessageDraft? draft, DateTime? lastTypingActivityTime
 });
 
 
@@ -317,7 +319,7 @@ class __$ChatCopyWithImpl<$Res>
 
 /// Create a copy of Chat
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? otherUser = null,Object? channelData = freezed,Object? lastMessage = freezed,Object? fromCache = null,Object? unreadCount = null,Object? draft = freezed,Object? lastTypingActivityTime = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? otherUser = null,Object? channelData = freezed,Object? lastMessage = freezed,Object? fromCache = null,Object? unreadCount = null,Object? createdAt = null,Object? draft = freezed,Object? lastTypingActivityTime = freezed,}) {
   return _then(_Chat(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,otherUser: null == otherUser ? _self.otherUser : otherUser // ignore: cast_nullable_to_non_nullable
@@ -325,6 +327,7 @@ as User,channelData: freezed == channelData ? _self.channelData : channelData //
 as ChannelData?,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
 as Message?,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
 as bool,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
+as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as int,draft: freezed == draft ? _self.draft : draft // ignore: cast_nullable_to_non_nullable
 as MessageDraft?,lastTypingActivityTime: freezed == lastTypingActivityTime ? _self.lastTypingActivityTime : lastTypingActivityTime // ignore: cast_nullable_to_non_nullable
 as DateTime?,

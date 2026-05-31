@@ -36,5 +36,8 @@ GetSubscribersResponseDto _$GetSubscribersResponseDtoFromJson(
   data: (json['data'] as List<dynamic>?)
       ?.map((e) => UserDto.fromJson(e as Map<String, dynamic>))
       .toList(),
+  totalCount: (json['total_count'] as num?)?.toInt(),
+  offset: (json['offset'] as num?)?.toInt(),
+  cursor: (json['cursor'] as num?)?.toInt(),
   message: json['message'] as String?,
 );
