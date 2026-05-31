@@ -24,7 +24,7 @@ abstract class Chat with _$Chat {
 
   const Chat._();
 
-  factory Chat.fromDto(ChatDto dto, {required bool fromCache}) => Chat(
+  factory Chat.fromDto(ChatDto dto, {bool fromCache = false}) => Chat(
     id: dto.id,
     otherUser: User.fromDto(dto.otherUser),
     lastMessage: dto.lastMessage == null ? null : Message.fromDto(dto.lastMessage!),

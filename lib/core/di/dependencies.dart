@@ -159,7 +159,9 @@ class Dependencies {
     }
   }
 
-  bool has<T>() => _map[T] != null;
+  bool hasByType(Type type) => _map[type] != null;
+
+  bool has<T>() => hasByType(T);
 
   Widget inject({required Widget child}) =>
       InheritedDependencies(dependencies: this, child: child);

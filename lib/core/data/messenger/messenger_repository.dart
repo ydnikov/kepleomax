@@ -364,7 +364,6 @@ class MessengerRepositoryImpl implements MessengerRepository {
 
   @override
   Future<void> dispose() async {
-    await _webSocket.dispose();
     await _messagesUpdatesController.close();
     await _chatsUpdatesController.close();
     for (final sub in _subs) {

@@ -227,9 +227,12 @@ List<_InitializationStep> _steps = [
         rtcWebSocket: dp.read<RtcWebSocket>(),
         peerConnectionController: PeerConnectionControllerImpl(),
       ))
+      // TODO maybe builder should accept dependencies?
       ..channelRepositoryBuilder = (() => ChannelRepositoryImpl(
         channelApi: dp.channelApi,
         filesApi: dp.filesApi,
+        chatsApiDataSource: dp.chatsApiDataSource,
+        klmWebSocket: dp.read<KlmWebSocket>(),
         messengerWebSocket: dp.read<MessengerWebSocket>(),
       ));
   }),

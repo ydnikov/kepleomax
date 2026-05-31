@@ -4,7 +4,7 @@ import 'package:focus_detector/focus_detector.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
-import 'package:kepleomax/core/di/dependencies_multi_provider.dart';
+import 'package:kepleomax/core/di/singleton_dependencies_provider.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/services/notifications_service.dart';
@@ -67,12 +67,12 @@ class _MessengerScopeState extends State<MessengerScope> {
   /// build
   @override
   Widget build(BuildContext context) {
-    return DependenciesMultiProvider(
+    return SingletonDependenciesProvider(
       providers: {
-        KlmWebSocket: _klmWebSocket,
-        MessengerWebSocket: _messengerWebSocket,
-        ConnectionRepository: _connectionRepository,
-        MessengerRepository: _messengerRepository,
+        KlmWebSocket: () => _klmWebSocket,
+        MessengerWebSocket: () => _messengerWebSocket,
+        ConnectionRepository: () => _connectionRepository,
+        MessengerRepository: () => _messengerRepository,
       },
       child: BlocProvider(
         create: (context) => ChatsBloc(

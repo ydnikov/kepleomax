@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
 import 'package:kepleomax/core/extensions/fake_delay_extension.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/chat.dart';
@@ -23,9 +22,9 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
       _channelRepository.usersStream.listen((list) {
         add(_ChannelEventOnSubsUpdate(users: list));
       }),
-      _channelRepository.channelOnChatScreenUpdatesStream.listen((update) {
-        if (update.channelId != _data.channelData.id) return;
-        add(_ChannelEventOnUpdate(update: update));
+      _channelRepository.channelOnChatScreenUpdatesStream.listen((channelData) {
+        if (channelData.id != _data.channelData.id) return;
+        add(_ChannelEventOnUpdate(channelData: channelData));
       }),
     ]);
 
@@ -52,19 +51,12 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     emit(ChannelStateBase(_data));
 
     try {
-      /// TODO start loading subsCount and subs at the same time
-      if (_data.channelData.subscribersCount == null) {
-        final subsCount = await _channelRepository.getSubscribersCount(
-          channelId: _data.channelData.id,
-        );
-        _data = _data.copyWith(
-          channelData: _data.channelData.copyWith(subscribersCount: subsCount),
-        );
-        emit(ChannelStateBase(_data));
-      }
+      await _channelRepository.init(channelData: _data.channelData);
 
       if (_data.channelData.userRole.isOwner) {
-        await _channelRepository.loadSubscribers(channelId: _data.channelData.id);
+        await _channelRepository.loadSubscribers();
+      } else if (_data.channelData.subscribersCount == null) {
+        await _channelRepository.loadSubscribersCount();
       }
     } catch (e, st) {
       logger.e(e, stackTrace: st);
@@ -85,9 +77,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     emit(ChannelStateBase(_data));
 
     try {
-      await _channelRepository
-          .subscribe(channelId: _data.channelData.id)
-          .withFakeDelay();
+      await _channelRepository.subscribe().withFakeDelay();
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       emit(ChannelStateMessage(message: e.userErrorMessage, isError: true));
@@ -107,9 +97,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     emit(ChannelStateBase(_data));
 
     try {
-      await _channelRepository
-          .unsubscribe(channelId: _data.channelData.id, userId: event.userId)
-          .withFakeDelay();
+      await _channelRepository.unsubscribe(userId: event.userId).withFakeDelay();
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       emit(ChannelStateMessage(message: e.userErrorMessage, isError: true));
@@ -142,33 +130,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
   }
 
   void _onUpdate(_ChannelEventOnUpdate event, Emitter<ChannelState> emit) {
-    final update = event.update;
-    if (update.newChannelData != null) {
-      _data = _data.copyWith(
-        channelData: update.newChannelData!.copyWith(
-          userRole: update.newChannelData!.userRole.isKeepCurrent
-              ? _data.channelData.userRole
-              : update.newChannelData!.userRole,
-        ),
-      );
-    }
-    if (update.newSubsCount != null) {
-      _data = _data.copyWith(
-        channelData: _data.channelData.copyWith(
-          subscribersCount: update.newSubsCount,
-        ),
-      );
-    }
-    if (update.newUserRole != null) {
-      _data = _data.copyWith(
-        channelData: _data.channelData.copyWith(
-          userRole: update.newUserRole!.isKeepCurrent
-              ? _data.channelData.userRole
-              : update.newUserRole!,
-        ),
-      );
-    }
-
+    _data = _data.copyWith(channelData: event.channelData);
     emit(ChannelStateBase(_data));
   }
 
@@ -210,9 +172,9 @@ class ChannelEventDelete implements ChannelEvent {
 }
 
 class _ChannelEventOnUpdate implements ChannelEvent {
-  const _ChannelEventOnUpdate({required this.update});
+  const _ChannelEventOnUpdate({required this.channelData});
 
-  final ChannelOnChatScreenUpdate update;
+  final ChannelData channelData;
 }
 
 class _ChannelEventOnSubsUpdate implements ChannelEvent {

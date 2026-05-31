@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
-import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
 import 'package:kepleomax/core/data/models/messages_collection.dart';
 import 'package:kepleomax/core/extensions/fake_delay_extension.dart';
 import 'package:kepleomax/core/flavor.dart';
@@ -65,12 +64,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         add(_ChatEventOnlineStatusUpdate(update));
       }),
       _messagesWebSocket.typingUpdatesStream.listen((update) {
-        if (_data.chat.id != update.chatId) return;
+        if (update.chatId != _data.chat.id) return;
         add(_ChatEventTypingUpdate(update));
       }),
-      _channelRepository.channelOnChatScreenUpdatesStream.listen((update) {
-        if (_data.chat.id != update.channelId) return;
-        add(_ChatEventEmitChannelUpdate(update: update));
+      _channelRepository.channelOnChatScreenUpdatesStream.listen((channelData) {
+        if (channelData.id != _data.chat.id) return;
+        add(_ChatEventEmitChannelUpdate(channelData: channelData));
       }),
     ]);
 
@@ -204,16 +203,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       /// get user and check updates, because online status can be changed
       if (chat.isChannel) {
-        final subsCount = await _channelRepository.getSubscribersCount(
-          channelId: chat.channelData!.id,
-        );
-        _data = _data.copyWith(
-          chat: _data.chat.copyWith(
-            channelData: _data.chat.channelData!.copyWith(
-              subscribersCount: subsCount,
-            ),
-          ),
-        );
+        await _channelRepository.init(channelData: chat.channelData);
+
+        await _channelRepository.loadSubscribersCount();
       } else {
         unawaited(
           Future(() async {
@@ -337,9 +329,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         throw Exception('Failed to subscribe: chat is not a channel');
       }
 
-      await _channelRepository
-          .subscribe(channelId: _data.chat.channelData!.id)
-          .withFakeDelay();
+      await _channelRepository.subscribe().withFakeDelay();
 
       /// don't set subsCount, cause it will be set via ws update
       _data = _data.copyWith(
@@ -527,30 +517,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _ChatEventEmitChannelUpdate event,
     Emitter<ChatState> emit,
   ) {
-    final update = event.update;
-
-    if (update.newChannelData != null) {
-      _data = _data.copyWith(
-        chat: _data.chat.copyWith(
-          channelData: update.newChannelData!.copyWith(
-            userRole: update.newChannelData!.userRole.isKeepCurrent
-                ? _data.chat.channelData!.userRole
-                : update.newChannelData!.userRole,
-          ),
-        ),
-      );
-    } else {
-      final currentChannelData = _data.chat.channelData!;
-      _data = _data.copyWith(
-        chat: _data.chat.copyWith(
-          channelData: currentChannelData.copyWith(
-            userRole: update.newUserRole ?? currentChannelData.userRole,
-            subscribersCount:
-                update.newSubsCount ?? currentChannelData.subscribersCount,
-          ),
-        ),
-      );
-    }
+    _data = _data.copyWith(
+      chat: _data.chat.copyWith(channelData: event.channelData),
+    );
     emit(ChatStateBase(_data));
   }
 

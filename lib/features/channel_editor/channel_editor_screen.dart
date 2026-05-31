@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
-import 'package:kepleomax/core/di/dependencies_multi_provider.dart';
+import 'package:kepleomax/core/di/singleton_dependencies_provider.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/models/chat.dart';
@@ -33,14 +33,11 @@ class ChannelEditorScreen extends StatelessWidget {
 
         _showGoBackDialog(context);
       },
-      child: DependenciesMultiProvider(
-        providers: Dependencies.of(context).has<ChannelRepository>()
-            ? {}
-            : {
-                ChannelRepository: Dependencies.of(
-                  context,
-                ).channelRepositoryBuilder(),
-              },
+      child: SingletonDependenciesProvider(
+        providers: {
+          ChannelRepository: () =>
+              Dependencies.of(context).channelRepositoryBuilder(),
+        },
         child: BlocProvider<ChannelEditorBloc>(
           create: (context) => ChannelEditorBloc(
             repository: Dependencies.of(context).read<ChannelRepository>(),

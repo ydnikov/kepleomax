@@ -10,7 +10,7 @@ import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/messenger/messenger_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
-import 'package:kepleomax/core/di/dependencies_multi_provider.dart';
+import 'package:kepleomax/core/di/singleton_dependencies_provider.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
@@ -70,9 +70,9 @@ class _ChatScreenState extends State<ChatScreen> {
   /// build
   @override
   Widget build(BuildContext context) {
-    return DependenciesMultiProvider(
+    return SingletonDependenciesProvider(
       providers: {
-        ChannelRepository: Dependencies.of(context).channelRepositoryBuilder(),
+        ChannelRepository: () => Dependencies.of(context).channelRepositoryBuilder(),
       },
       child: BlocProvider(
         create: (context) {

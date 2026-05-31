@@ -110,7 +110,7 @@ class _ChatEventEmitError implements ChatEvent {
 }
 
 class _ChatEventEmitChannelUpdate implements ChatEvent {
-  _ChatEventEmitChannelUpdate({required this.update});
+  const _ChatEventEmitChannelUpdate({required this.channelData});
 
-  final ChannelOnChatScreenUpdate update;
+  final ChannelData channelData;
 }

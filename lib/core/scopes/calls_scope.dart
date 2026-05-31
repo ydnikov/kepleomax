@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus_detector/focus_detector.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
-import 'package:kepleomax/core/di/dependencies_multi_provider.dart';
+import 'package:kepleomax/core/di/singleton_dependencies_provider.dart';
 import 'package:kepleomax/core/network/websockets/rtc_web_socket.dart';
 import 'package:kepleomax/core/services/calls_service.dart';
 
@@ -45,8 +45,8 @@ class _CallsScopeState extends State<CallsScope> {
 
   @override
   Widget build(BuildContext context) {
-    return DependenciesMultiProvider(
-      providers: {RtcWebSocket: _rtcWebSocket},
+    return SingletonDependenciesProvider(
+      providers: {RtcWebSocket: () => _rtcWebSocket},
       child: FocusDetector(
         onForegroundGained: _onResume,
         onVisibilityGained: _onResume,
