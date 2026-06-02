@@ -69,7 +69,7 @@ void main() {
       });
       when((dp.chatsApi as MockChatsApi).getChatWithId(chatId: anyNamed('chatId'))).thenAnswer((inv) async {
         return HttpResponse(
-          ChatResponse(data: [chatDto0, chatDto1, chatDto2, chatDto3, chatDto4].firstWhere((chat) => chat.id == inv.namedArguments[#chatId]), message: null),
+          ChatResponse(data: [chatDto0, chatDto1, chatDto2, chatDto3, chatDto4].firstWhere((chat) => chat.id == int.parse(inv.namedArguments[#chatId] as String)), message: null),
           Response(requestOptions: RequestOptions(), statusCode: 200),
         );
       });
@@ -231,7 +231,7 @@ void main() {
     });
 
     testWidgets('10000_unread_messages_test', (tester) async {
-      await setupAppWithChats(tester, [ChatDto(id: chatDto0.id, otherUser: chatDto0.otherUser, lastMessage: chatDto0.lastMessage, unreadCount: 10000)]);
+      await setupAppWithChats(tester, [ChatDto(id: chatDto0.id, otherUser: chatDto0.otherUser, lastMessage: chatDto0.lastMessage, unreadCount: 10000, channelData: null, createdAt: 0)]);
 
       /// check
       tester.getChat(0).check(unreadCount: 999);
@@ -521,7 +521,7 @@ void main() {
       await setupAppWithChats(tester, [chatDto0]);
 
       /// lastMessage will be earlier that the current one, cause the current one is deleted
-      getChatsMustReturn([ChatDto(id: chatDto0.id, otherUser: chatDto0.otherUser, lastMessage: messageDto1, unreadCount: chatDto0.unreadCount)], asyncControl: true);
+      getChatsMustReturn([ChatDto(id: chatDto0.id, otherUser: chatDto0.otherUser, lastMessage: messageDto1, unreadCount: chatDto0.unreadCount, channelData: null, createdAt: 0)], asyncControl: true);
       await restartApp(tester);
       tester.getChat(0).check(message: messageDto0.message);
       await sendGetChatsResponse(tester);

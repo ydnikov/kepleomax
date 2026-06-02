@@ -25,6 +25,7 @@ import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
 import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
+import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
 import 'package:kepleomax/core/network/apis/files/files_api.dart';
 import 'package:kepleomax/core/network/apis/posts/post_api.dart';
 import 'package:kepleomax/core/network/apis/profile/profile_api.dart';
@@ -32,6 +33,7 @@ import 'package:kepleomax/core/network/middlewares/auth_interceptor.dart';
 import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/settings/app_settings.dart';
+import 'package:kepleomax/features/channel/data/channel_repository.dart';
 import 'package:kepleomax/features/chats/data/chats_repository.dart';
 import 'package:kepleomax/features/post/data/post_repository.dart';
 import 'package:kepleomax/firebase_options.dart';
@@ -126,7 +128,8 @@ List<_InitializationStep> _steps = [
       ..messagesApi = MockMessagesApi()
       ..chatsApi = MockChatsApi()
       ..postApi = PostApi(dp.dio, flavor.baseUrl)
-      ..callsApi = CallsApi(dp.dio, flavor.baseUrl);
+      ..callsApi = CallsApi(dp.dio, flavor.baseUrl)
+      ..channelApi = ChannelApi(dp.dio, flavor.baseUrl);
   }),
 
   _InitializationStep('api_data_sources', (dp) async {
@@ -181,6 +184,13 @@ List<_InitializationStep> _steps = [
         filesApiDataSource: dp.filesApiDataSource,
       )
       ..postRepository = PostRepositoryImpl(postApi: dp.postApi)
+      ..channelRepositoryBuilder = (() => ChannelRepositoryImpl(
+        channelApi: dp.channelApi,
+        filesApi: dp.filesApi,
+        chatsApiDataSource: chatsApiDataSource,
+        klmWebSocket: dp.read<KlmWebSocket>(),
+        messengerWebSocket: dp.read<MessengerWebSocket>(),
+      ))
       ..connectionRepositoryBuilder = (() =>
           ConnectionRepositoryImpl(klmWebSocket: dp.read<KlmWebSocket>()))
       ..messengerRepositoryBuilder = (() => MessengerRepositoryImpl(

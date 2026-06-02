@@ -346,6 +346,8 @@ class _BodyState extends State<_Body> {
         !message.isCurrentUser &&
         !message.fromCache &&
         isVisible) {
+      print('KlmLog listeners, id: ${message.id} messageFromCache: ${message.fromCache}');
+      /// TODO make createdAt + 1 (also fix backend for it)
       _chatBloc.add(ChatEventReadMessagesBeforeTime(time: message.createdAt));
     }
     if (message.fromCache && !_chatBloc.isClosed) {

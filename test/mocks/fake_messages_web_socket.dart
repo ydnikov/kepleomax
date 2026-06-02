@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
+import 'package:kepleomax/core/network/websockets/models/channel_subscription_update.dart';
+import 'package:kepleomax/core/network/websockets/models/channel_unsubscription_update.dart';
 import 'package:kepleomax/core/network/websockets/models/deleted_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/new_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart';
@@ -8,7 +11,7 @@ import 'package:kepleomax/core/network/websockets/models/read_messages_update.da
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
 
 class FakeMessagesWebSocket implements MessengerWebSocket {
-
+  /// send events
   @override
   void deleteMessage({required int messageId}) {}
 
@@ -28,6 +31,10 @@ class FakeMessagesWebSocket implements MessengerWebSocket {
   void typingActivityDetected({required int chatId}) {}
 
   @override
+  void subscribeOnChatsUpdatesIfNot({required List<int> ids}) {}
+
+  /// receive events
+  @override
   Stream<DeletedMessageUpdate> get deletedMessageStream =>
       StreamController<DeletedMessageUpdate>.broadcast().stream;
 
@@ -46,6 +53,21 @@ class FakeMessagesWebSocket implements MessengerWebSocket {
   @override
   Stream<TypingActivityUpdate> get typingUpdatesStream =>
       StreamController<TypingActivityUpdate>.broadcast().stream;
+
+  @override
+  Stream<int> get channelDeletedStream => StreamController<int>.broadcast().stream;
+
+  @override
+  Stream<ChannelSubscriptionUpdate> get channelSubscriptionUpdatesStream =>
+      StreamController<ChannelSubscriptionUpdate>.broadcast().stream;
+
+  @override
+  Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream =>
+      StreamController<ChannelUnsubscriptionUpdate>.broadcast().stream;
+
+  @override
+  Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream =>
+      StreamController<ChannelOnChatScreenUpdate>.broadcast().stream;
 
   @override
   void dispose() {}
