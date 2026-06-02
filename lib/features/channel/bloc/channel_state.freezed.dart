@@ -549,30 +549,61 @@ as bool,
 /// @nodoc
 mixin _$ChannelStateDeleted {
 
-
+ bool get showToast;
+/// Create a copy of ChannelStateDeleted
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ChannelStateDeletedCopyWith<ChannelStateDeleted> get copyWith => _$ChannelStateDeletedCopyWithImpl<ChannelStateDeleted>(this as ChannelStateDeleted, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelStateDeleted);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelStateDeleted&&(identical(other.showToast, showToast) || other.showToast == showToast));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,showToast);
 
 @override
 String toString() {
-  return 'ChannelStateDeleted()';
+  return 'ChannelStateDeleted(showToast: $showToast)';
 }
 
 
 }
 
 /// @nodoc
-class $ChannelStateDeletedCopyWith<$Res>  {
-$ChannelStateDeletedCopyWith(ChannelStateDeleted _, $Res Function(ChannelStateDeleted) __);
+abstract mixin class $ChannelStateDeletedCopyWith<$Res>  {
+  factory $ChannelStateDeletedCopyWith(ChannelStateDeleted value, $Res Function(ChannelStateDeleted) _then) = _$ChannelStateDeletedCopyWithImpl;
+@useResult
+$Res call({
+ bool showToast
+});
+
+
+
+
+}
+/// @nodoc
+class _$ChannelStateDeletedCopyWithImpl<$Res>
+    implements $ChannelStateDeletedCopyWith<$Res> {
+  _$ChannelStateDeletedCopyWithImpl(this._self, this._then);
+
+  final ChannelStateDeleted _self;
+  final $Res Function(ChannelStateDeleted) _then;
+
+/// Create a copy of ChannelStateDeleted
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? showToast = null,}) {
+  return _then(_self.copyWith(
+showToast: null == showToast ? _self.showToast : showToast // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
 }
 
 
@@ -654,10 +685,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function()?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool showToast)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChannelStateDeleted() when $default != null:
-return $default();case _:
+return $default(_that.showToast);case _:
   return orElse();
 
 }
@@ -675,10 +706,10 @@ return $default();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function()  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool showToast)  $default,) {final _that = this;
 switch (_that) {
 case _ChannelStateDeleted():
-return $default();case _:
+return $default(_that.showToast);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -695,10 +726,10 @@ return $default();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function()?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool showToast)?  $default,) {final _that = this;
 switch (_that) {
 case _ChannelStateDeleted() when $default != null:
-return $default();case _:
+return $default(_that.showToast);case _:
   return null;
 
 }
@@ -710,33 +741,67 @@ return $default();case _:
 
 
 class _ChannelStateDeleted implements ChannelStateDeleted {
-  const _ChannelStateDeleted();
+  const _ChannelStateDeleted({this.showToast = true});
   
 
+@override@JsonKey() final  bool showToast;
 
-
+/// Create a copy of ChannelStateDeleted
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ChannelStateDeletedCopyWith<_ChannelStateDeleted> get copyWith => __$ChannelStateDeletedCopyWithImpl<_ChannelStateDeleted>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelStateDeleted);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelStateDeleted&&(identical(other.showToast, showToast) || other.showToast == showToast));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,showToast);
 
 @override
 String toString() {
-  return 'ChannelStateDeleted()';
+  return 'ChannelStateDeleted(showToast: $showToast)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$ChannelStateDeletedCopyWith<$Res> implements $ChannelStateDeletedCopyWith<$Res> {
+  factory _$ChannelStateDeletedCopyWith(_ChannelStateDeleted value, $Res Function(_ChannelStateDeleted) _then) = __$ChannelStateDeletedCopyWithImpl;
+@override @useResult
+$Res call({
+ bool showToast
+});
 
 
+
+
+}
+/// @nodoc
+class __$ChannelStateDeletedCopyWithImpl<$Res>
+    implements _$ChannelStateDeletedCopyWith<$Res> {
+  __$ChannelStateDeletedCopyWithImpl(this._self, this._then);
+
+  final _ChannelStateDeleted _self;
+  final $Res Function(_ChannelStateDeleted) _then;
+
+/// Create a copy of ChannelStateDeleted
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? showToast = null,}) {
+  return _then(_ChannelStateDeleted(
+showToast: null == showToast ? _self.showToast : showToast // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
 
 /// @nodoc
 mixin _$ChannelScreenData {

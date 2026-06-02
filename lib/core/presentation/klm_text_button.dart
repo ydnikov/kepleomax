@@ -6,6 +6,7 @@ class KlmTextButton extends StatelessWidget {
   const KlmTextButton({
     required this.onPressed,
     required this.text,
+    this.icon,
     this.width,
     this.backgroundColor = KlmColors.primaryColor,
     this.isLoading = false,
@@ -17,6 +18,7 @@ class KlmTextButton extends StatelessWidget {
   final double fontSize;
   final double? width;
   final String text;
+  final Widget? icon;
   final VoidCallback? onPressed;
   final bool isLoading;
   final bool enabled;
@@ -52,14 +54,23 @@ class KlmTextButton extends StatelessWidget {
                     strokeWidth: 2,
                   ),
                 )
-              : Text(
-                  text,
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                    fontSize: fontSize,
-                  ),
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (icon != null) ...[
+                      icon!,
+                      const SizedBox(width: 2)
+                    ],
+                    Text(
+                      text,
+                      textAlign: TextAlign.center,
+                      style: context.textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontSize: fontSize,
+                      ),
+                    ),
+                  ],
                 ),
         ),
       ),

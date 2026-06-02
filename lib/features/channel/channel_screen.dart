@@ -26,8 +26,11 @@ import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 part 'widgets/channel_buttons_widget.dart';
+
 part 'widgets/channel_user_widget.dart';
+
 part 'widgets/delete_channel_dialog.dart';
+
 part 'widgets/delete_user_dialog.dart';
 
 const int _appBarNameFullShownOffset = 130;
@@ -110,7 +113,9 @@ class _BodyState extends State<_Body> {
             color: state.isError ? Colors.red : Colors.black,
           );
         } else if (state is ChannelStateDeleted) {
-          Fluttertoast.showToast(msg: 'Channel deleted');
+          if (state.showToast) {
+            Fluttertoast.showToast(msg: 'Channel deleted');
+          }
           AppNavigator.popAll(context);
         }
       },

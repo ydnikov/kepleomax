@@ -22,9 +22,13 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
       _channelRepository.usersStream.listen((list) {
         add(_ChannelEventOnSubsUpdate(users: list));
       }),
-      _channelRepository.channelOnChatScreenUpdatesStream.listen((channelData) {
+      _channelRepository.channelUpdatesStream.listen((channelData) {
         if (channelData.id != _data.channelData.id) return;
         add(_ChannelEventOnUpdate(channelData: channelData));
+      }),
+      _channelRepository.channelDeletedStream.listen((channelId) {
+        if (channelId != _data.channelData.id) return;
+        add(const ChannelEventDeleted());
       }),
     ]);
 
@@ -40,6 +44,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
       },
       transformer: sequential(),
     );
+    on<ChannelEventDeleted>(_onDeleted);
   }
 
   final List<StreamSubscription<void>> _subs = [];
@@ -119,7 +124,8 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
           .deleteChannel(channelId: _data.channelData.id)
           .withFakeDelay();
 
-      emit(const ChannelStateDeleted());
+
+      /// don't add ChannelEventDeleted, cause it will be added via ws
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       emit(ChannelStateMessage(message: e.userErrorMessage, isError: true));
@@ -127,6 +133,10 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
       _data = _data.copyWith(isLoading: false);
       emit(ChannelStateBase(_data));
     }
+  }
+
+  void _onDeleted(ChannelEventDeleted event, Emitter<ChannelState> emit) {
+    emit(const ChannelStateDeleted());
   }
 
   void _onUpdate(_ChannelEventOnUpdate event, Emitter<ChannelState> emit) {
@@ -169,6 +179,10 @@ class ChannelEventUnsubscribe implements ChannelEvent {
 
 class ChannelEventDelete implements ChannelEvent {
   const ChannelEventDelete();
+}
+
+class ChannelEventDeleted implements ChannelEvent {
+  const ChannelEventDeleted();
 }
 
 class _ChannelEventOnUpdate implements ChannelEvent {

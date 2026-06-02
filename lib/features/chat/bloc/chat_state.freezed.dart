@@ -1064,6 +1064,263 @@ as String,
 }
 
 /// @nodoc
+mixin _$ChatStateExit {
+
+ String? get toastMessage;
+/// Create a copy of ChatStateExit
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ChatStateExitCopyWith<ChatStateExit> get copyWith => _$ChatStateExitCopyWithImpl<ChatStateExit>(this as ChatStateExit, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatStateExit&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,toastMessage);
+
+@override
+String toString() {
+  return 'ChatStateExit(toastMessage: $toastMessage)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ChatStateExitCopyWith<$Res>  {
+  factory $ChatStateExitCopyWith(ChatStateExit value, $Res Function(ChatStateExit) _then) = _$ChatStateExitCopyWithImpl;
+@useResult
+$Res call({
+ String? toastMessage
+});
+
+
+
+
+}
+/// @nodoc
+class _$ChatStateExitCopyWithImpl<$Res>
+    implements $ChatStateExitCopyWith<$Res> {
+  _$ChatStateExitCopyWithImpl(this._self, this._then);
+
+  final ChatStateExit _self;
+  final $Res Function(ChatStateExit) _then;
+
+/// Create a copy of ChatStateExit
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? toastMessage = freezed,}) {
+  return _then(_self.copyWith(
+toastMessage: freezed == toastMessage ? _self.toastMessage : toastMessage // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ChatStateExit].
+extension ChatStateExitPatterns on ChatStateExit {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ChatStateExit value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ChatStateExit() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ChatStateExit value)  $default,){
+final _that = this;
+switch (_that) {
+case _ChatStateExit():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ChatStateExit value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ChatStateExit() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? toastMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ChatStateExit() when $default != null:
+return $default(_that.toastMessage);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? toastMessage)  $default,) {final _that = this;
+switch (_that) {
+case _ChatStateExit():
+return $default(_that.toastMessage);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? toastMessage)?  $default,) {final _that = this;
+switch (_that) {
+case _ChatStateExit() when $default != null:
+return $default(_that.toastMessage);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _ChatStateExit implements ChatStateExit {
+  const _ChatStateExit({this.toastMessage});
+  
+
+@override final  String? toastMessage;
+
+/// Create a copy of ChatStateExit
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ChatStateExitCopyWith<_ChatStateExit> get copyWith => __$ChatStateExitCopyWithImpl<_ChatStateExit>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatStateExit&&(identical(other.toastMessage, toastMessage) || other.toastMessage == toastMessage));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,toastMessage);
+
+@override
+String toString() {
+  return 'ChatStateExit(toastMessage: $toastMessage)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ChatStateExitCopyWith<$Res> implements $ChatStateExitCopyWith<$Res> {
+  factory _$ChatStateExitCopyWith(_ChatStateExit value, $Res Function(_ChatStateExit) _then) = __$ChatStateExitCopyWithImpl;
+@override @useResult
+$Res call({
+ String? toastMessage
+});
+
+
+
+
+}
+/// @nodoc
+class __$ChatStateExitCopyWithImpl<$Res>
+    implements _$ChatStateExitCopyWith<$Res> {
+  __$ChatStateExitCopyWithImpl(this._self, this._then);
+
+  final _ChatStateExit _self;
+  final $Res Function(_ChatStateExit) _then;
+
+/// Create a copy of ChatStateExit
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? toastMessage = freezed,}) {
+  return _then(_ChatStateExit(
+toastMessage: freezed == toastMessage ? _self.toastMessage : toastMessage // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$ChatData {
 
  Chat get chat; User get otherUser;// if user in chat was null, this user will be used

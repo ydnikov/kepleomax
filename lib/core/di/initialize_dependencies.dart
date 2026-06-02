@@ -204,6 +204,7 @@ List<_InitializationStep> _steps = [
           ConnectionRepositoryImpl(klmWebSocket: dp.read<KlmWebSocket>()))
       ..messengerRepositoryBuilder = (() => MessengerRepositoryImpl(
         messengerWebSocket: dp.read<MessengerWebSocket>(),
+        connectionWebSocket: dp.read<KlmWebSocket>(),
         messagesApiDataSource: MessagesApiDataSourceImpl(
           messagesApi: dp.messagesApi,
         ),
@@ -238,12 +239,7 @@ List<_InitializationStep> _steps = [
   }),
 
   _InitializationStep(DiStep.navigation, (dp) async {
-    dp.klmUrlLauncher = KlmUrlLauncher(
-      chatsRepository: ChatsRepositoryImpl(
-        chatsApiDataSource: dp.chatsApiDataSource,
-        chatsLocalDataSource: dp.chatsLocalDataSource,
-      ),
-    );
+    dp.klmUrlLauncher = KlmUrlLauncher(chatsApi: dp.chatsApi);
   }),
 
   _InitializationStep(DiStep.firebase, (_) async {

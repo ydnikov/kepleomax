@@ -8,7 +8,7 @@ abstract class ChatsRepository {
   /// api
   Future<Chat?> getChatWithUser(int otherUserId);
 
-  /// string cause can be user for the channels via url
+  /// chatId is string cause can be user for the channels via url
   Future<Chat?> getChatWithId(String chatId);
 
   /// cache
@@ -23,6 +23,7 @@ class ChatsRepositoryImpl implements ChatsRepository {
     required ChatsLocalDataSource chatsLocalDataSource,
   }) : _chatsLocal = chatsLocalDataSource,
        _chatsApi = chatsApiDataSource;
+
   final ChatsApiDataSource _chatsApi;
   final ChatsLocalDataSource _chatsLocal;
 

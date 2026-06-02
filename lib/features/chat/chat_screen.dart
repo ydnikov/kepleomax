@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:focus_detector/focus_detector.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/data/connection_repository.dart';
@@ -202,9 +203,13 @@ class _BodyState extends State<_Body> {
             text: state.message,
             color: state.isError ? KlmColors.errorRed : Colors.green,
           );
-        }
-        if (state is ChatStateUpdateTextField) {
+        } else if (state is ChatStateUpdateTextField) {
           _textController.text = state.message;
+        } else if (state is ChatStateExit) {
+          if (state.toastMessage != null) {
+            Fluttertoast.showToast(msg: state.toastMessage!);
+          }
+          AppNavigator.pop(context);
         }
       },
       builder: (context, state) {

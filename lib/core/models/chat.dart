@@ -73,6 +73,8 @@ abstract class ChannelData with _$ChannelData {
     int? subscribersCount,
   }) = _ChannelData;
 
+  const ChannelData._();
+
   factory ChannelData.fromDto(ChatChannelDataDto dto) => ChannelData(
     id: dto.id,
     name: dto.channelName,
@@ -84,7 +86,12 @@ abstract class ChannelData with _$ChannelData {
     subscribersCount: dto.subscribersCount,
   );
 
-  const ChannelData._();
+  ChannelData keepRoleIfNeeded(UserChannelRole originalRole) {
+    if (userRole == UserChannelRole.keepCurrent) {
+      return copyWith(userRole: originalRole);
+    }
+    return this;
+  }
 
   String get fullTag => '${flavor.baseUrl}/$tag';
 }
@@ -113,6 +120,4 @@ enum UserChannelRole {
   bool get isSubscriber => this == subscriber;
 
   bool get isNone => this == none;
-
-  bool get isKeepCurrent => this == keepCurrent;
 }

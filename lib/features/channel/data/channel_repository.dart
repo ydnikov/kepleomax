@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
 import 'package:kepleomax/core/di/disposable.dart';
+import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
@@ -31,7 +32,9 @@ abstract class ChannelRepository implements ChannelEditorRepository, Disposable 
 
   Stream<List<User>> get usersStream;
 
-  Stream<ChannelData> get channelOnChatScreenUpdatesStream;
+  Stream<ChannelData> get channelUpdatesStream;
+
+  Stream<int> get channelDeletedStream;
 }
 
 abstract class ChannelEditorRepository {
@@ -59,9 +62,6 @@ class ChannelRepositoryImpl implements ChannelRepository {
        _baseWebSocket = klmWebSocket,
        _webSocket = messengerWebSocket,
        _api = channelApi {
-    _usersStreamController = StatefulStreamController<List<User>>(initialValue: []);
-    _channelUpdatesController = StatefulStreamController<ChannelData>();
-
     _subs.addAll([
       _webSocket.channelSubscriptionUpdatesStream.listen((update) {
         _channelUpdatesController.add(update.chat.channelData!);
@@ -74,18 +74,23 @@ class ChannelRepositoryImpl implements ChannelRepository {
 
         _channelUpdatesController.add(newChannelData);
       }),
+      _webSocket.channelDeletedStream.listen(_deletedController.add),
       _webSocket.channelUpdatesStream.listen((update) {
+        ChannelData channelData;
+
         if (update.newChannelData != null) {
-          _channelUpdatesController.add(update.newChannelData!);
+          channelData = update.newChannelData!;
         } else {
-          _channelUpdatesController.add(
-            _currentChannelData.copyWith(
-              userRole: update.newUserRole ?? _currentChannelData.userRole,
-              subscribersCount:
-                  update.newSubsCount ?? _currentChannelData.subscribersCount,
-            ),
+          channelData = _currentChannelData.copyWith(
+            userRole: update.newUserRole ?? _currentChannelData.userRole,
+            subscribersCount:
+                update.newSubsCount ?? _currentChannelData.subscribersCount,
           );
         }
+
+        _channelUpdatesController.add(
+          channelData.keepRoleIfNeeded(_currentChannelData.userRole),
+        );
       }),
       _baseWebSocket.connectionStateStream.listen((isConnected) {
         if (isConnected) {
@@ -100,23 +105,36 @@ class ChannelRepositoryImpl implements ChannelRepository {
   final FilesApi _filesApi;
   final MessengerWebSocket _webSocket;
   final KlmWebSocket _baseWebSocket;
-  late final StatefulStreamController<List<User>> _usersStreamController;
-  late final StatefulStreamController<ChannelData> _channelUpdatesController;
+
+  final StatefulStreamController<List<User>> _usersStreamController =
+      StatefulStreamController(initialValue: []);
+  final StatefulStreamController<ChannelData> _channelUpdatesController =
+      StatefulStreamController();
+  final StreamController<int> _deletedController = StreamController.broadcast();
+
   final List<StreamSubscription<void>> _subs = [];
 
   ChannelData get _currentChannelData {
     if (_channelUpdatesController.currentValue == null) {
-      throw Exception('call init() before any other methods');
+      throw Exception('Repository has not initial data');
     }
     return _channelUpdatesController.currentValue!;
   }
 
   Future<void> _updateChannelData() async {
-    final chatDto = await _chatsApiDataSource.getChatWithId(
-      _currentChannelData.id.toString(),
-    );
-    print('KlmLog newRole: ${chatDto.channelData!.userChannelRole}');
-    _channelUpdatesController.add(ChannelData.fromDto(chatDto.channelData!));
+    try {
+      final chatDto = await _chatsApiDataSource.getChatWithId(
+        _currentChannelData.id.toString(),
+      );
+
+      if (chatDto == null) {
+        _deletedController.add(_currentChannelData.id);
+      }
+
+      _channelUpdatesController.add(ChannelData.fromDto(chatDto!.channelData!));
+    } catch (e) {
+      logger.e(e);
+    }
   }
 
   @override
@@ -132,6 +150,12 @@ class ChannelRepositoryImpl implements ChannelRepository {
       data = channelData;
     } else {
       final chatDto = await _chatsApiDataSource.getChatWithId(channelId!.toString());
+
+      if (chatDto == null) {
+        _deletedController.add(channelId);
+        throw Exception('Channel is deleted');
+      }
+
       data = ChannelData.fromDto(chatDto.channelData!);
     }
 
@@ -303,19 +327,25 @@ class ChannelRepositoryImpl implements ChannelRepository {
     }
   }
 
+  // TODO maybe change Future<void> to void in the interface ?
   @override
-  Future<void> dispose() async {
+  Future<void> dispose() {
     for (final sub in _subs) {
-      unawaited(sub.cancel());
+      sub.cancel();
     }
-    await _usersStreamController.close();
-    await _channelUpdatesController.close();
+    _usersStreamController.close();
+    _channelUpdatesController.close();
+    _deletedController.close();
+
+    return Future.value();
   }
 
   @override
   Stream<List<User>> get usersStream => _usersStreamController.stream;
 
   @override
-  Stream<ChannelData> get channelOnChatScreenUpdatesStream =>
-      _channelUpdatesController.stream;
+  Stream<ChannelData> get channelUpdatesStream => _channelUpdatesController.stream;
+
+  @override
+  Stream<int> get channelDeletedStream => _deletedController.stream;
 }

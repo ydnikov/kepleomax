@@ -28,7 +28,8 @@ abstract class ChannelStateMessage
 abstract class ChannelStateDeleted
     with _$ChannelStateDeleted
     implements ChannelState {
-  const factory ChannelStateDeleted() = _ChannelStateDeleted;
+  const factory ChannelStateDeleted({@Default(true) bool showToast}) =
+      _ChannelStateDeleted;
 }
 
 @freezed

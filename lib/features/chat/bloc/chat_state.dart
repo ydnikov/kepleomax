@@ -9,7 +9,8 @@ abstract class ChatState {}
 
 @freezed
 abstract class ChatStateBase with _$ChatStateBase implements ChatState {
-  const factory ChatStateBase(ChatData data, {int? forceRebuildKey}) = _ChatStateBase;
+  const factory ChatStateBase(ChatData data, {int? forceRebuildKey}) =
+      _ChatStateBase;
 
   factory ChatStateBase.initial() => ChatStateBase(ChatData.initial());
 }
@@ -29,8 +30,12 @@ abstract class ChatStateMessage with _$ChatStateMessage implements ChatState {
 abstract class ChatStateUpdateTextField
     with _$ChatStateUpdateTextField
     implements ChatState {
-  const factory ChatStateUpdateTextField(String message) =
-      _ChatStateUpdateTextField;
+  const factory ChatStateUpdateTextField(String message) = _ChatStateUpdateTextField;
+}
+
+@freezed
+abstract class ChatStateExit with _$ChatStateExit implements ChatState {
+  const factory ChatStateExit({String? toastMessage}) = _ChatStateExit;
 }
 
 @freezed

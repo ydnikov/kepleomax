@@ -67,10 +67,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         if (update.chatId != _data.chat.id) return;
         add(_ChatEventTypingUpdate(update));
       }),
-      _channelRepository.channelOnChatScreenUpdatesStream.listen((channelData) {
+      _channelRepository.channelUpdatesStream.listen((channelData) {
         if (channelData.id != _data.chat.id) return;
         add(_ChatEventEmitChannelUpdate(channelData: channelData));
       }),
+      _channelRepository.channelDeletedStream.listen((channelId) {
+        if (channelId != _data.chat.id) return;
+        add(const _ChatEventChannelDeleted());
+      })
     ]);
 
     /// events
@@ -110,10 +114,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<_ChatEventEmitOtherUser>(_onEmitOtherUser);
     on<_ChatEventOnlineStatusUpdate>(_onOnlineStatusUpdate);
     on<_ChatEventEmitError>(_onEmitError);
-    on<_ChatEventEmitMessages>(_onEmitMessages);
+    on<_ChatEventEmitMessages>(_onEmitMessages, transformer: sequential());
     on<_ChatEventConnectingChanged>(_onConnectionChanged);
     on<_ChatEventEmitUnreadCount>(_onEmitUnreadCount);
     on<_ChatEventEmitChannelUpdate>(_onEmitChannelUpdate);
+    on<_ChatEventChannelDeleted>(_onChannelDeleted);
   }
 
   final MessengerRepository _messengerRepository;
@@ -157,6 +162,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       isLoading: true,
       isAllMessagesLoaded: false,
     );
+    if (event.chat != null) {
+      _data = _data.copyWith(chat: event.chat!);
+    }
     emit(ChatStateBase(_data));
 
     try {
@@ -428,7 +436,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         _data = _data.copyWith(chat: Chat.loading());
       } else if (event.data.chatId != _data.chat.id) {
         print(
-          'event.data.chatId: ${event.data.chatId}, _data.chat.id: ${_data.chat.id}',
+          'KlmLog event.data.chatId: ${event.data.chatId}, _data.chat.id: ${_data.chat.id}',
         );
         final chat = await _chatsRepository.getChatWithId(
           event.data.chatId.toString(),
@@ -521,6 +529,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       chat: _data.chat.copyWith(channelData: event.channelData),
     );
     emit(ChatStateBase(_data));
+  }
+
+  void _onChannelDeleted(_ChatEventChannelDeleted event, Emitter<ChatState> emit) {
+    emit(const ChatStateExit(toastMessage: 'Channel deleted'));
   }
 
   @override

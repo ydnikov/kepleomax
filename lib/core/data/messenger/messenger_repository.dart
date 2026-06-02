@@ -18,6 +18,7 @@ import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/message_draft.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
+import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/channel_subscription_update.dart';
 import 'package:kepleomax/core/network/websockets/models/channel_unsubscription_update.dart';
@@ -32,6 +33,8 @@ import 'package:kepleomax/core/utils/stateful_stream.dart';
 part 'on_channel_sub.dart';
 
 part 'on_channel_unsub.dart';
+
+part 'on_channel_deleted.dart';
 
 part 'on_channel_update.dart';
 
@@ -78,6 +81,7 @@ abstract class MessengerRepository implements Disposable {
 class MessengerRepositoryImpl implements MessengerRepository {
   MessengerRepositoryImpl({
     required MessengerWebSocket messengerWebSocket,
+    required ConnectionWebSocket connectionWebSocket,
     required ChatsApiDataSource chatsApiDataSource,
     required MessagesApiDataSource messagesApiDataSource,
     required MessagesLocalDataSource messagesLocalDataSource,
@@ -86,6 +90,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
     required UsersLocalDataSource usersLocalDataSource,
     required CombineCacheAndApi combiner,
   }) : _webSocket = messengerWebSocket,
+       _connectionWebSocket = connectionWebSocket,
        _chatsApi = chatsApiDataSource,
        _messagesApi = messagesApiDataSource,
        _chatsLocal = chatsLocalDataSource,
@@ -102,10 +107,18 @@ class MessengerRepositoryImpl implements MessengerRepository {
       _webSocket.channelSubscriptionUpdatesStream.listen(_onChannelSub),
       _webSocket.channelUnsubscriptionUpdatesStream.listen(_onChannelUnsub),
       _webSocket.channelUpdatesStream.listen(_onChannelUpdate),
+      _webSocket.channelDeletedStream.listen(_onChannelDeleted),
+      _connectionWebSocket.connectionStateStream.listen((isConnected) {
+        if (!isConnected) {
+          _subscribedOnChatsIds.clear();
+          _subscribedOnUsersIds.clear();
+        }
+      }),
     ]);
   }
 
   final MessengerWebSocket _webSocket;
+  final ConnectionWebSocket _connectionWebSocket;
 
   final ChatsApiDataSource _chatsApi;
   final MessagesApiDataSource _messagesApi;
@@ -137,6 +150,12 @@ class MessengerRepositoryImpl implements MessengerRepository {
   /// emitters
   void _emitMessagesCollection(MessagesCollection collection) {
     _messagesUpdatesController.add(collection);
+
+    final chatId = collection.chatId;
+    if (!_subscribedOnChatsIds.contains(chatId)) {
+      _webSocket.subscribeOnChatsUpdates(ids: [chatId]);
+      _subscribedOnChatsIds.add(chatId);
+    }
   }
 
   void _emitMessages(Iterable<Message> messages) {
@@ -144,7 +163,38 @@ class MessengerRepositoryImpl implements MessengerRepository {
     _messagesUpdatesController.add(collection);
   }
 
+  final Set<int> _subscribedOnChatsIds = {};
+  final Set<int> _subscribedOnUsersIds = {};
+
   void _emitChatsCollection(ChatsCollection collection) {
+    final subscribeOnChats = <int>[];
+    final subscribeOnUsers = <int>[];
+    for (final chat in collection.chats) {
+      final chatId = chat.id;
+      if (!_subscribedOnChatsIds.contains(chatId)) {
+        subscribeOnChats.add(chatId);
+        _subscribedOnChatsIds.add(chatId);
+      }
+
+      final otherUserId = chat.otherUser.id;
+      if (!chat.isChannel &&
+          otherUserId >= 0 &&
+          !_subscribedOnUsersIds.contains(otherUserId)) {
+        subscribeOnUsers.add(otherUserId);
+        _subscribedOnUsersIds.add(otherUserId);
+      }
+    }
+
+    if (subscribeOnChats.isNotEmpty) {
+      _webSocket.subscribeOnChatsUpdates(ids: subscribeOnChats);
+      print('KlmLog subscribeOnChat: $subscribeOnChats');
+    }
+
+    if (subscribeOnUsers.isNotEmpty) {
+      _webSocket.subscribeOnOnlineStatusUpdates(usersIds: subscribeOnUsers);
+      print('KlmLog subscribeOnUsers: $subscribeOnUsers');
+    }
+
     _chatsUpdatesController.add(collection);
   }
 
@@ -186,16 +236,6 @@ class MessengerRepositoryImpl implements MessengerRepository {
 
     /// emit
     _emitChatsCollection(ChatsCollection(chats: newList, fromCache: false));
-
-    /// subscribe on updates
-    _webSocket
-      ..subscribeOnOnlineStatusUpdates(
-        usersIds: chats.map((c) => c.otherUser.id).where((id) => id >= 0).toList(),
-      )
-      /// now only on channels
-      ..subscribeOnChatsUpdates(
-        ids: chats.where((c) => c.channelData != null).map((c) => c.id).toList(),
-      );
 
     /// cache
     unawaited(_chatsLocal.clearAndInsertChatsAndLastMessages(chats));

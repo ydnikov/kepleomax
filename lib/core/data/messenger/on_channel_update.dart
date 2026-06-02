@@ -7,10 +7,8 @@ extension _OnChannelUpdateExtension on MessengerRepositoryImpl {
           .map(
             (c) => c.id == update.channelId
                 ? c.copyWith(
-                    channelData: update.newChannelData!.copyWith(
-                      userRole: update.newChannelData!.userRole.isKeepCurrent
-                          ? c.channelData!.userRole
-                          : update.newChannelData!.userRole,
+                    channelData: update.newChannelData!.keepRoleIfNeeded(
+                      c.channelData!.userRole,
                     ),
                   )
                 : c,

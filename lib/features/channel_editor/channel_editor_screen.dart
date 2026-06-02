@@ -71,6 +71,7 @@ class ChannelEditorScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
+              AppNavigator.pop(context);
             },
             style: TextButton.styleFrom(overlayColor: Colors.red),
             child: const Text('Discard', style: TextStyle(color: Colors.red)),

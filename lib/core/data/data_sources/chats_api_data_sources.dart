@@ -4,9 +4,8 @@ import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
 abstract class ChatsApiDataSource {
   Future<Iterable<ChatDto>> getChats();
 
-  Future<ChatDto> getChatWithId(String chatId);
+  Future<ChatDto?> getChatWithId(String chatId);
 
-  // TODO get rid of nullability
   Future<ChatDto?> getChatWithUser(int otherUserId);
 }
 
@@ -28,8 +27,10 @@ class ChatsApiDataSourceImpl implements ChatsApiDataSource {
   }
 
   @override
-  Future<ChatDto> getChatWithId(String chatId) async {
+  Future<ChatDto?> getChatWithId(String chatId) async {
     final res = await _chatsApi.getChatWithId(chatId: chatId);
+
+    if (res.response.statusCode == 404) return null;
 
     if (res.response.statusCode != 200) {
       throw Exception(

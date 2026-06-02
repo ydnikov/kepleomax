@@ -5,7 +5,7 @@ import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/token_provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
-abstract class KlmWebSocket {
+abstract class KlmWebSocket implements ConnectionWebSocket {
   Future<void> init();
 
   void connectIfNot();
@@ -14,11 +14,13 @@ abstract class KlmWebSocket {
 
   Future<void> dispose();
 
+  Stream<(String, dynamic)> get eventsStream;
+}
+
+abstract class ConnectionWebSocket {
   bool get isConnected;
 
   Stream<bool> get connectionStateStream;
-
-  Stream<(String, dynamic)> get eventsStream;
 }
 
 class KlmWebSocketImpl implements KlmWebSocket {

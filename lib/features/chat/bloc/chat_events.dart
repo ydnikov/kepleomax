@@ -114,3 +114,7 @@ class _ChatEventEmitChannelUpdate implements ChatEvent {
 
   final ChannelData channelData;
 }
+
+class _ChatEventChannelDeleted implements ChatEvent {
+  const _ChatEventChannelDeleted();
+}

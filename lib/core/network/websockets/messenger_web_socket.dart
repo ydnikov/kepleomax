@@ -45,6 +45,8 @@ abstract class MessengerWebSocket implements Disposable {
   Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream;
 
   Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream;
+
+  Stream<int> get channelDeletedStream;
 }
 
 class MessengerWebSocketImpl implements MessengerWebSocket {
@@ -75,6 +77,8 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
               ),
             ),
           );
+        case 'channel_deleted':
+          _onChannelDeleted(data['channel_id'] as int);
       }
     });
   }
@@ -98,6 +102,8 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
   final StreamController<ChannelUnsubscriptionUpdate>
   _channelUnsubUpdatesController = StreamController.broadcast();
   final StreamController<ChannelOnChatScreenUpdate> _channelUpdatesController =
+      StreamController.broadcast();
+  final StreamController<int> _channelDeletedController =
       StreamController.broadcast();
 
   /// streams
@@ -131,6 +137,9 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
   @override
   Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream =>
       _channelUpdatesController.stream;
+
+  @override
+  Stream<int> get channelDeletedStream => _channelDeletedController.stream;
 
   /// events handlers
   void _onNewMessage(NewMessageUpdate messageUpdate) {
@@ -175,6 +184,10 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
         newChannelData: channelData,
       ),
     );
+  }
+
+  void _onChannelDeleted(int channelId) {
+    _channelDeletedController.add(channelId);
   }
 
   /// events
@@ -228,6 +241,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
     _channelSubUpdatesController.close();
     _channelUnsubUpdatesController.close();
     _channelUpdatesController.close();
+    _channelDeletedController.close();
     _eventsSub.cancel();
   }
 }
