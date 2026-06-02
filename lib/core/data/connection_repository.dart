@@ -9,10 +9,6 @@ abstract class ConnectionRepository implements Disposable {
 
   void reconnect({bool onlyIfDisconnected = false});
 
-  void listenOnlineStatusUpdate({required int userId});
-
-  void listenOnlineStatusUpdates({required List<int> usersIds});
-
   void activityDetected();
 
   Stream<bool> get connectionStateStream;
@@ -31,27 +27,13 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
   Future<void> connect() => _webSocket.init();
 
   @override
-  Future<void> dispose() => _webSocket.dispose();
+  void dispose() => _webSocket.dispose();
 
   @override
   Future<void> reconnect({bool onlyIfDisconnected = false}) async =>
       onlyIfDisconnected ? _webSocket.connectIfNot() : await _webSocket.init();
 
   /// emits
-  @override
-  void listenOnlineStatusUpdates({required List<int> usersIds}) => _webSocket.emit(
-    'subscribe_on_online_status_updates',
-    {'users_ids': usersIds.where((id) => id > 0).toList()},
-  );
-
-  @override
-  void listenOnlineStatusUpdate({required int userId}) {
-    if (userId <= 0) return;
-    _webSocket.emit('subscribe_on_online_status_updates', {
-      'users_ids': [userId].toList(),
-    });
-  }
-
   @override
   void activityDetected() {
     _webSocket.emit('activity_detected');

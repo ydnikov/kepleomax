@@ -38,11 +38,9 @@ abstract class ChannelRepository implements ChannelEditorRepository, Disposable 
 }
 
 abstract class ChannelEditorRepository {
-  Future<ChannelData> createNewChannel({
-    required ChannelEditingUiData channelUiData,
-  });
+  Future<Chat> createNewChannel({required ChannelEditingUiData channelUiData});
 
-  Future<ChannelData> editChannel({
+  Future<Chat> editChannel({
     required int channelId,
     required ChannelEditingUiData channelUiData,
   });
@@ -61,44 +59,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
        _chatsApiDataSource = chatsApiDataSource,
        _baseWebSocket = klmWebSocket,
        _webSocket = messengerWebSocket,
-       _api = channelApi {
-    _subs.addAll([
-      _webSocket.channelSubscriptionUpdatesStream.listen((update) {
-        _channelUpdatesController.add(update.chat.channelData!);
-      }),
-      _webSocket.channelUnsubscriptionUpdatesStream.listen((update) {
-        final newChannelData = _currentChannelData.copyWith(
-          userRole: UserChannelRole.none,
-          subscribersCount: update.subsCount,
-        );
-
-        _channelUpdatesController.add(newChannelData);
-      }),
-      _webSocket.channelDeletedStream.listen(_deletedController.add),
-      _webSocket.channelUpdatesStream.listen((update) {
-        ChannelData channelData;
-
-        if (update.newChannelData != null) {
-          channelData = update.newChannelData!;
-        } else {
-          channelData = _currentChannelData.copyWith(
-            userRole: update.newUserRole ?? _currentChannelData.userRole,
-            subscribersCount:
-                update.newSubsCount ?? _currentChannelData.subscribersCount,
-          );
-        }
-
-        _channelUpdatesController.add(
-          channelData.keepRoleIfNeeded(_currentChannelData.userRole),
-        );
-      }),
-      _baseWebSocket.connectionStateStream.listen((isConnected) {
-        if (isConnected) {
-          _updateChannelData();
-        }
-      }),
-    ]);
-  }
+       _api = channelApi;
 
   final ChannelApi _api;
   final ChatsApiDataSource _chatsApiDataSource;
@@ -116,7 +77,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
 
   ChannelData get _currentChannelData {
     if (_channelUpdatesController.currentValue == null) {
-      throw Exception('Repository has not initial data');
+      throw Exception('ChannelRepository has no initial data');
     }
     return _channelUpdatesController.currentValue!;
   }
@@ -160,6 +121,56 @@ class ChannelRepositoryImpl implements ChannelRepository {
     }
 
     _channelUpdatesController.add(data, notify: false);
+
+    if (_subs.isEmpty) {
+      _subs.addAll([
+        _webSocket.channelSubscriptionUpdatesStream.listen((update) {
+          if (update.chat.id != _currentChannelData.id) return;
+
+          _channelUpdatesController.add(update.chat.channelData!);
+        }),
+        _webSocket.channelUnsubscriptionUpdatesStream.listen((update) {
+          if (update.channelId != _currentChannelData.id) return;
+
+          final newChannelData = _currentChannelData.copyWith(
+            userRole: UserChannelRole.none,
+            subscribersCount: update.subsCount,
+          );
+
+          _channelUpdatesController.add(newChannelData);
+        }),
+        _webSocket.channelDeletedStream.listen((channelId) {
+          if (channelId != _currentChannelData.id) return;
+
+          _deletedController.add(channelId);
+        }),
+        _webSocket.channelUpdatesStream.listen((update) {
+          if (update.channelId != _currentChannelData.id) return;
+
+          ChannelData channelData;
+
+          if (update.newChannelData != null) {
+            channelData = update.newChannelData!;
+          } else {
+            channelData = _currentChannelData.copyWith(
+              userRole: update.newUserRole ?? _currentChannelData.userRole,
+              subscribersCount:
+                  update.newSubsCount ?? _currentChannelData.subscribersCount,
+            );
+          }
+
+          _channelUpdatesController.add(
+            channelData.keepRoleIfNeeded(_currentChannelData.userRole),
+          );
+        }),
+        _baseWebSocket.connectionStateStream.listen((isConnected) {
+          if (isConnected) {
+            _updateChannelData();
+          }
+        }),
+      ]);
+    }
+
     return data;
   }
 
@@ -245,7 +256,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
   }
 
   @override
-  Future<ChannelData> createNewChannel({
+  Future<Chat> createNewChannel({
     required ChannelEditingUiData channelUiData,
   }) async {
     String? imageUrl;
@@ -277,11 +288,11 @@ class ChannelRepositoryImpl implements ChannelRepository {
       );
     }
 
-    return ChannelData.fromDto(res.data.data!);
+    return Chat.fromDto(res.data.data!);
   }
 
   @override
-  Future<ChannelData> editChannel({
+  Future<Chat> editChannel({
     required int channelId,
     required ChannelEditingUiData channelUiData,
   }) async {
@@ -314,7 +325,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
       );
     }
 
-    return ChannelData.fromDto(res.data.data!);
+    return Chat.fromDto(res.data.data!);
   }
 
   @override
@@ -327,17 +338,15 @@ class ChannelRepositoryImpl implements ChannelRepository {
     }
   }
 
-  // TODO maybe change Future<void> to void in the interface ?
   @override
-  Future<void> dispose() {
+  void dispose() {
     for (final sub in _subs) {
       sub.cancel();
     }
+    _subs.clear();
     _usersStreamController.close();
     _channelUpdatesController.close();
     _deletedController.close();
-
-    return Future.value();
   }
 
   @override

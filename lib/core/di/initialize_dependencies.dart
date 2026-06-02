@@ -204,7 +204,6 @@ List<_InitializationStep> _steps = [
           ConnectionRepositoryImpl(klmWebSocket: dp.read<KlmWebSocket>()))
       ..messengerRepositoryBuilder = (() => MessengerRepositoryImpl(
         messengerWebSocket: dp.read<MessengerWebSocket>(),
-        connectionWebSocket: dp.read<KlmWebSocket>(),
         messagesApiDataSource: MessagesApiDataSourceImpl(
           messagesApi: dp.messagesApi,
         ),

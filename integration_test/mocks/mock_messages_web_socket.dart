@@ -128,11 +128,11 @@ class MockMessengerWebSocket implements MessengerWebSocket {
   }
 
   @override
-  void subscribeOnOnlineStatusUpdates({required Iterable<int> usersIds}) {}
+  void subscribeOnOnlineStatusUpdatesIfNot({required Iterable<int> usersIds}) {}
 
   @override
   void typingActivityDetected({required int chatId}) {}
 
   @override
-  Future<void> dispose() async {}
+  void dispose() {}
 }

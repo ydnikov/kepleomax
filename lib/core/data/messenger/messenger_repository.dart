@@ -18,7 +18,6 @@ import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/models/message.dart';
 import 'package:kepleomax/core/models/message_draft.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
-import 'package:kepleomax/core/network/websockets/klm_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/channel_subscription_update.dart';
 import 'package:kepleomax/core/network/websockets/models/channel_unsubscription_update.dart';
@@ -30,22 +29,14 @@ import 'package:kepleomax/core/network/websockets/models/typing_activity_update.
 import 'package:kepleomax/core/services/notifications_service.dart';
 import 'package:kepleomax/core/utils/stateful_stream.dart';
 
-part 'on_channel_sub.dart';
-
-part 'on_channel_unsub.dart';
-
 part 'on_channel_deleted.dart';
-
+part 'on_channel_sub.dart';
+part 'on_channel_unsub.dart';
 part 'on_channel_update.dart';
-
 part 'on_delete_message.dart';
-
 part 'on_new_message.dart';
-
 part 'on_online_update.dart';
-
 part 'on_read_messages.dart';
-
 part 'on_typing_update.dart';
 
 abstract class MessengerRepository implements Disposable {
@@ -70,6 +61,8 @@ abstract class MessengerRepository implements Disposable {
   /// subscribes on messages from that userId, is used when chatId == -1
   void listenToMessagesWithOtherUserId({required int? otherUserId});
 
+  void subscribeOnUserOnlineUpdates({required int userId});
+
   /// ws streams
   Stream<MessagesCollection> get messagesUpdatesStream;
 
@@ -81,7 +74,6 @@ abstract class MessengerRepository implements Disposable {
 class MessengerRepositoryImpl implements MessengerRepository {
   MessengerRepositoryImpl({
     required MessengerWebSocket messengerWebSocket,
-    required ConnectionWebSocket connectionWebSocket,
     required ChatsApiDataSource chatsApiDataSource,
     required MessagesApiDataSource messagesApiDataSource,
     required MessagesLocalDataSource messagesLocalDataSource,
@@ -90,7 +82,6 @@ class MessengerRepositoryImpl implements MessengerRepository {
     required UsersLocalDataSource usersLocalDataSource,
     required CombineCacheAndApi combiner,
   }) : _webSocket = messengerWebSocket,
-       _connectionWebSocket = connectionWebSocket,
        _chatsApi = chatsApiDataSource,
        _messagesApi = messagesApiDataSource,
        _chatsLocal = chatsLocalDataSource,
@@ -108,17 +99,10 @@ class MessengerRepositoryImpl implements MessengerRepository {
       _webSocket.channelUnsubscriptionUpdatesStream.listen(_onChannelUnsub),
       _webSocket.channelUpdatesStream.listen(_onChannelUpdate),
       _webSocket.channelDeletedStream.listen(_onChannelDeleted),
-      _connectionWebSocket.connectionStateStream.listen((isConnected) {
-        if (!isConnected) {
-          _subscribedOnChatsIds.clear();
-          _subscribedOnUsersIds.clear();
-        }
-      }),
     ]);
   }
 
   final MessengerWebSocket _webSocket;
-  final ConnectionWebSocket _connectionWebSocket;
 
   final ChatsApiDataSource _chatsApi;
   final MessagesApiDataSource _messagesApi;
@@ -151,10 +135,9 @@ class MessengerRepositoryImpl implements MessengerRepository {
   void _emitMessagesCollection(MessagesCollection collection) {
     _messagesUpdatesController.add(collection);
 
-    final chatId = collection.chatId;
-    if (!_subscribedOnChatsIds.contains(chatId)) {
-      _webSocket.subscribeOnChatsUpdates(ids: [chatId]);
-      _subscribedOnChatsIds.add(chatId);
+    // TODO also subscribe on user
+    if (!collection.fromCache && collection.chatId >= 0) {
+      _webSocket.subscribeOnChatsUpdatesIfNot(ids: [collection.chatId]);
     }
   }
 
@@ -163,39 +146,21 @@ class MessengerRepositoryImpl implements MessengerRepository {
     _messagesUpdatesController.add(collection);
   }
 
-  final Set<int> _subscribedOnChatsIds = {};
-  final Set<int> _subscribedOnUsersIds = {};
-
   void _emitChatsCollection(ChatsCollection collection) {
-    final subscribeOnChats = <int>[];
-    final subscribeOnUsers = <int>[];
-    for (final chat in collection.chats) {
-      final chatId = chat.id;
-      if (!_subscribedOnChatsIds.contains(chatId)) {
-        subscribeOnChats.add(chatId);
-        _subscribedOnChatsIds.add(chatId);
-      }
-
-      final otherUserId = chat.otherUser.id;
-      if (!chat.isChannel &&
-          otherUserId >= 0 &&
-          !_subscribedOnUsersIds.contains(otherUserId)) {
-        subscribeOnUsers.add(otherUserId);
-        _subscribedOnUsersIds.add(otherUserId);
-      }
-    }
-
-    if (subscribeOnChats.isNotEmpty) {
-      _webSocket.subscribeOnChatsUpdates(ids: subscribeOnChats);
-      print('KlmLog subscribeOnChat: $subscribeOnChats');
-    }
-
-    if (subscribeOnUsers.isNotEmpty) {
-      _webSocket.subscribeOnOnlineStatusUpdates(usersIds: subscribeOnUsers);
-      print('KlmLog subscribeOnUsers: $subscribeOnUsers');
-    }
-
     _chatsUpdatesController.add(collection);
+
+    if (!collection.fromCache && collection.chats.isNotEmpty) {
+      _webSocket
+        ..subscribeOnChatsUpdatesIfNot(
+          ids: collection.chats.map((c) => c.id).toList(),
+        )
+        ..subscribeOnOnlineStatusUpdatesIfNot(
+          usersIds: collection.chats
+              .where((c) => !c.isChannel && c.otherUser.id >= 0)
+              .map((c) => c.otherUser.id)
+              .toList(),
+        );
+    }
   }
 
   /// api calls
@@ -253,8 +218,14 @@ class MessengerRepositoryImpl implements MessengerRepository {
   }
 
   @override
+  void subscribeOnUserOnlineUpdates({required int userId}) {
+    _webSocket.subscribeOnOnlineStatusUpdatesIfNot(usersIds: [userId]);
+  }
+
+  @override
   Future<void> loadMessages({
     required int chatId,
+    int? otherUserId,
     bool withCache = true,
     bool loadCacheInTwoSteps = false,
   }) async {
@@ -264,6 +235,10 @@ class MessengerRepositoryImpl implements MessengerRepository {
     /// and also there are that check in other places in this method
     if (_currentChatOtherUserId != null) return;
     _currentChatId = chatId;
+
+    if (otherUserId != null) {
+      _webSocket.subscribeOnOnlineStatusUpdatesIfNot(usersIds: [otherUserId]);
+    }
 
     /// start loading api
     final apiMessagesDtosCompleter = Completer<List<MessageDto>>();
@@ -285,7 +260,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
         MessagesCollection(
           messages: cache.map(Message.fromDto),
           chatId: chatId,
-          maintainLoading: true,
+          fromCache: true,
         ),
       );
       if (loadCacheInTwoSteps) {
@@ -300,7 +275,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
           MessagesCollection(
             messages: cache.map(Message.fromDto),
             chatId: chatId,
-            maintainLoading: true,
+            fromCache: true,
           ),
         );
       }
@@ -316,7 +291,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
         messages: newList.map(Message.fromDto),
         chatId: chatId,
         allMessagesLoaded: newList.length < AppConstants.msgPagingLimit,
-        maintainLoading: false,
+        fromCache: false,
       ),
     );
   }
@@ -351,7 +326,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
         MessagesCollection(
           messages: messages,
           chatId: chatId,
-          maintainLoading: false,
+          fromCache: false,
           allMessagesLoaded: true,
         ),
       );
@@ -367,7 +342,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
       MessagesCollection(
         messages: newList,
         chatId: chatId,
-        maintainLoading: false,
+        fromCache: false,
         allMessagesLoaded: newLimit > api.length,
       ),
     );
@@ -403,11 +378,11 @@ class MessengerRepositoryImpl implements MessengerRepository {
       _draftsLocal.getByChatId(chatId);
 
   @override
-  Future<void> dispose() async {
-    await _messagesUpdatesController.close();
-    await _chatsUpdatesController.close();
+  void dispose() {
+    _messagesUpdatesController.close();
+    _chatsUpdatesController.close();
     for (final sub in _subs) {
-      await sub.cancel();
+      sub.cancel();
     }
   }
 

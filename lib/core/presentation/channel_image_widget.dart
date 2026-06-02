@@ -28,10 +28,7 @@ class ChannelImageWidget extends StatelessWidget {
           ? () {
               AppNavigator.showGeneralDialog(
                 context,
-                PhotosPreviewScreen(
-                  urls: [image!],
-                  isOnePictureMode: true,
-                ),
+                (_) => PhotosPreviewScreen(urls: [image!], isOnePictureMode: true),
               );
             }
           : null,

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/data/user_repository.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/user_profile.dart';
@@ -14,11 +13,9 @@ import 'package:kepleomax/features/user/bloc/user_states.dart';
 class UserBloc extends Bloc<UserEvent, UserState> {
   UserBloc({
     required UserRepository userRepository,
-    required ConnectionRepository connectionRepository,
     required MessengerWebSocket messengerWebSocket,
     required int userId,
   }) : _userRepository = userRepository,
-       _connectionRepository = connectionRepository,
        _messengerWebSocket = messengerWebSocket,
        _userId = userId,
        super(UserStateBase.initial()) {
@@ -34,7 +31,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       },
       transformer: sequential(),
     );
-    _connectionRepository.listenOnlineStatusUpdates(usersIds: [_userId]);
+    _messengerWebSocket.subscribeOnOnlineStatusUpdatesIfNot(usersIds: [_userId]);
     _onlineUpdatesSub = _messengerWebSocket.onlineUpdatesStream.listen((update) {
       if (update.userId == userId) {
         add(_UserEventUpdateOnlineStatus(update));
@@ -43,7 +40,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   final UserRepository _userRepository;
-  final ConnectionRepository _connectionRepository;
   final MessengerWebSocket _messengerWebSocket;
 
   final int _userId;

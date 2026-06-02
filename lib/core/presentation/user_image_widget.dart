@@ -51,7 +51,7 @@ class UserImageWidget extends StatelessWidget {
                         onTap: openImageViewerOnTap ? () {
                           AppNavigator.showGeneralDialog(
                             context,
-                            PhotosPreviewScreen(
+                            (_) => PhotosPreviewScreen(
                               urls: [user!.profileImage!],
                               isOnePictureMode: true,
                             ),

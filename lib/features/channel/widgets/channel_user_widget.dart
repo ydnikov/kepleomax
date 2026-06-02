@@ -69,7 +69,7 @@ class _ChannelUserWidget extends StatelessWidget {
                 onPressed: () {
                   AppNavigator.showGeneralDialog(
                     context,
-                    _DeleteUserDialog(
+                    (_) => _DeleteUserDialog(
                       user: user,
                       onDelete: () {
                         onDelete?.call();
@@ -84,4 +84,3 @@ class _ChannelUserWidget extends StatelessWidget {
     );
   }
 }
-

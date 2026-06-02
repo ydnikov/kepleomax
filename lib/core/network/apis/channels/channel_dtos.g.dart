@@ -19,7 +19,7 @@ CreateNewChannelResponseDto _$CreateNewChannelResponseDtoFromJson(
 ) => CreateNewChannelResponseDto(
   data: json['data'] == null
       ? null
-      : ChatChannelDataDto.fromJson(json['data'] as Map<String, dynamic>),
+      : ChatDto.fromJson(json['data'] as Map<String, dynamic>),
   message: json['message'] as String?,
 );
 

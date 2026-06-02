@@ -45,16 +45,16 @@ class AppNavigator extends StatefulWidget {
 
   static Future<void>? showGeneralDialog(
     BuildContext context,
-    Widget dialog, {
+    Widget Function(BuildContext) builder, {
     bool barrierDismissible = false,
   }) => of(
     context,
-  )?.showGeneralDialog(context, dialog, barrierDismissible: barrierDismissible);
+  )?.showGeneralDialog(context, builder, barrierDismissible: barrierDismissible);
 
   static Future<void>? showModalBottomSheet(
     BuildContext context,
-    Widget bottomSheet,
-  ) => of(context)?.showModalBottomSheet(context, bottomSheet);
+    Widget Function(BuildContext) builder,
+  ) => of(context)?.showModalBottomSheet(context, builder);
 
   @override
   State<AppNavigator> createState() => AppNavigatorState();
@@ -133,7 +133,7 @@ class AppNavigatorState extends State<AppNavigator> with WidgetsBindingObserver 
 
   Future<void> showGeneralDialog(
     BuildContext context,
-    Widget dialog, {
+    Widget Function(BuildContext) builder, {
     bool barrierDismissible = false,
   }) async {
     _isDialogOpened = true;
@@ -142,12 +142,15 @@ class AppNavigatorState extends State<AppNavigator> with WidgetsBindingObserver 
       useRootNavigator: true,
       barrierDismissible: barrierDismissible,
       barrierLabel: 'Dismiss',
-      pageBuilder: (context, _, _) => _PopScope(child: dialog),
+      pageBuilder: (context, _, _) => _PopScope(child: builder(context)),
     );
     _isDialogOpened = false;
   }
 
-  Future<void> showModalBottomSheet(BuildContext context, Widget bottomSheet) async {
+  Future<void> showModalBottomSheet(
+    BuildContext context,
+    Widget Function(BuildContext) builder,
+  ) async {
     _isDialogOpened = true;
     await material.showModalBottomSheet<void>(
       context: context,
@@ -157,7 +160,7 @@ class AppNavigatorState extends State<AppNavigator> with WidgetsBindingObserver 
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _PopScope(child: bottomSheet),
+      builder: (context) => _PopScope(child: builder(context)),
       isDismissible: false,
       //enableDrag: false,
     );

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/models/user.dart';
@@ -65,7 +64,6 @@ class _UserScreenState extends State<UserScreen> {
             final dp = Dependencies.of(context);
             return UserBloc(
               userRepository: dp.userRepository,
-              connectionRepository: dp.read<ConnectionRepository>(),
               messengerWebSocket: dp.read<MessengerWebSocket>(),
               userId: widget.userId,
             )..add(const UserEventLoad());
@@ -80,27 +78,29 @@ class _UserScreenState extends State<UserScreen> {
       ],
       child: Builder(
         builder: (builderContext) => Scaffold(
-            extendBodyBehindAppBar: true,
-            appBar: _AppBar(
-              scrollController: _scrollController,
-              userId: widget.userId,
-              key: const Key('user_app_bar'),
-            ),
-            body: SafeArea(
-              top: false,
-              child: AutoScrollControllerListeners(
-                controller: _scrollController,
-                onLoadMore: () {
-                  builderContext.read<PostListBloc>().add(const PostListEventLoadMore());
-                },
-                child: _Body(
-                  scrollController: _scrollController,
-                  scrollPadding: MediaQuery.of(context).viewPadding.top,
-                  key: const Key('user_screen_body'),
-                ),
+          extendBodyBehindAppBar: true,
+          appBar: _AppBar(
+            scrollController: _scrollController,
+            userId: widget.userId,
+            key: const Key('user_app_bar'),
+          ),
+          body: SafeArea(
+            top: false,
+            child: AutoScrollControllerListeners(
+              controller: _scrollController,
+              onLoadMore: () {
+                builderContext.read<PostListBloc>().add(
+                  const PostListEventLoadMore(),
+                );
+              },
+              child: _Body(
+                scrollController: _scrollController,
+                scrollPadding: MediaQuery.of(context).viewPadding.top,
+                key: const Key('user_screen_body'),
               ),
             ),
           ),
+        ),
       ),
     );
   }
@@ -407,7 +407,7 @@ class _AppBarState extends State<_AppBar> {
                     if (data.profile == null || data.isLoading) return;
                     AppNavigator.of(context)!.showModalBottomSheet(
                       context,
-                      EditProfileBottomSheet(
+                      (_) => EditProfileBottomSheet(
                         profile: data.profile!,
                         onSave: (newProfile) {
                           context.read<UserBloc>().add(

@@ -22,7 +22,7 @@ class FakeMessagesWebSocket implements MessengerWebSocket {
   void readMessagesBeforeTime({required int chatId, required DateTime time}) {}
 
   @override
-  void subscribeOnOnlineStatusUpdates({required Iterable<int> usersIds}) {}
+  void subscribeOnOnlineStatusUpdatesIfNot({required Iterable<int> usersIds}) {}
 
   @override
   void typingActivityDetected({required int chatId}) {}
@@ -48,5 +48,5 @@ class FakeMessagesWebSocket implements MessengerWebSocket {
       StreamController<TypingActivityUpdate>.broadcast().stream;
 
   @override
-  Future<void> dispose() async {}
+  void dispose() {}
 }

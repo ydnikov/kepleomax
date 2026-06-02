@@ -10,7 +10,7 @@ abstract class KlmWebSocket implements ConnectionWebSocket {
 
   void connectIfNot();
 
-  void emit(String event, [dynamic data]);
+  void emit(String event, [dynamic data, bool volatile = false]);
 
   Future<void> dispose();
 
@@ -119,8 +119,12 @@ class KlmWebSocketImpl implements KlmWebSocket {
   }
 
   @override
-  void emit(String event, [dynamic data]) {
-    _socket?.emit(event, data);
+  void emit(String event, [dynamic data, bool volatile = false]) {
+    if (volatile) {
+      _socket?.volatile.emit(event, data);
+    } else {
+      _socket?.emit(event, data);
+    }
   }
 
   @override

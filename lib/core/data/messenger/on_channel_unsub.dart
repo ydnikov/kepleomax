@@ -4,7 +4,7 @@ extension _OnChannelUnsubUpdateExtension on MessengerRepositoryImpl {
   void _onChannelUnsub(ChannelUnsubscriptionUpdate update) {
     if (_currentChatsCollection != null) {
       final currentChats = _currentChatsCollection!.chats;
-      final newChats = currentChats.where((c) => c.id != update.chatId).toList();
+      final newChats = currentChats.where((c) => c.id != update.channelId).toList();
       _emitChatsCollection(
         ChatsCollection(
           chats: newChats,

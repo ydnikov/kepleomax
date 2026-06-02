@@ -19,7 +19,7 @@ class _PhotoWidget extends StatelessWidget {
       onTap: () {
         AppNavigator.showGeneralDialog(
           context,
-          PhotosPreviewScreen(urls: imagesToOpen, initialIndex: index),
+          (_) => PhotosPreviewScreen(urls: imagesToOpen, initialIndex: index),
         );
       },
       child: SizedBox(

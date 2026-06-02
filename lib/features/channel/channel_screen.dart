@@ -114,7 +114,7 @@ class _BodyState extends State<_Body> {
           );
         } else if (state is ChannelStateDeleted) {
           if (state.showToast) {
-            Fluttertoast.showToast(msg: 'Channel deleted');
+            Fluttertoast.showToast(msg: 'Channel Deleted');
           }
           AppNavigator.popAll(context);
         }

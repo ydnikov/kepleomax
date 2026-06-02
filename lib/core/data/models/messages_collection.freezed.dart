@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$MessagesCollection {
 
  int get chatId; Iterable<Message> get messages;/// if get messages from cache, loading still have to be visible
- bool get maintainLoading; bool? get allMessagesLoaded;
+ bool get fromCache; bool? get allMessagesLoaded;
 /// Create a copy of MessagesCollection
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,16 +26,16 @@ $MessagesCollectionCopyWith<MessagesCollection> get copyWith => _$MessagesCollec
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessagesCollection&&(identical(other.chatId, chatId) || other.chatId == chatId)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.maintainLoading, maintainLoading) || other.maintainLoading == maintainLoading)&&(identical(other.allMessagesLoaded, allMessagesLoaded) || other.allMessagesLoaded == allMessagesLoaded));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessagesCollection&&(identical(other.chatId, chatId) || other.chatId == chatId)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.allMessagesLoaded, allMessagesLoaded) || other.allMessagesLoaded == allMessagesLoaded));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,chatId,const DeepCollectionEquality().hash(messages),maintainLoading,allMessagesLoaded);
+int get hashCode => Object.hash(runtimeType,chatId,const DeepCollectionEquality().hash(messages),fromCache,allMessagesLoaded);
 
 @override
 String toString() {
-  return 'MessagesCollection(chatId: $chatId, messages: $messages, maintainLoading: $maintainLoading, allMessagesLoaded: $allMessagesLoaded)';
+  return 'MessagesCollection(chatId: $chatId, messages: $messages, fromCache: $fromCache, allMessagesLoaded: $allMessagesLoaded)';
 }
 
 
@@ -46,7 +46,7 @@ abstract mixin class $MessagesCollectionCopyWith<$Res>  {
   factory $MessagesCollectionCopyWith(MessagesCollection value, $Res Function(MessagesCollection) _then) = _$MessagesCollectionCopyWithImpl;
 @useResult
 $Res call({
- int chatId, Iterable<Message> messages, bool maintainLoading, bool? allMessagesLoaded
+ int chatId, Iterable<Message> messages, bool fromCache, bool? allMessagesLoaded
 });
 
 
@@ -63,11 +63,11 @@ class _$MessagesCollectionCopyWithImpl<$Res>
 
 /// Create a copy of MessagesCollection
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? chatId = null,Object? messages = null,Object? maintainLoading = null,Object? allMessagesLoaded = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? chatId = null,Object? messages = null,Object? fromCache = null,Object? allMessagesLoaded = freezed,}) {
   return _then(_self.copyWith(
 chatId: null == chatId ? _self.chatId : chatId // ignore: cast_nullable_to_non_nullable
 as int,messages: null == messages ? _self.messages : messages // ignore: cast_nullable_to_non_nullable
-as Iterable<Message>,maintainLoading: null == maintainLoading ? _self.maintainLoading : maintainLoading // ignore: cast_nullable_to_non_nullable
+as Iterable<Message>,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
 as bool,allMessagesLoaded: freezed == allMessagesLoaded ? _self.allMessagesLoaded : allMessagesLoaded // ignore: cast_nullable_to_non_nullable
 as bool?,
   ));
@@ -154,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int chatId,  Iterable<Message> messages,  bool maintainLoading,  bool? allMessagesLoaded)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int chatId,  Iterable<Message> messages,  bool fromCache,  bool? allMessagesLoaded)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MessagesCollection() when $default != null:
-return $default(_that.chatId,_that.messages,_that.maintainLoading,_that.allMessagesLoaded);case _:
+return $default(_that.chatId,_that.messages,_that.fromCache,_that.allMessagesLoaded);case _:
   return orElse();
 
 }
@@ -175,10 +175,10 @@ return $default(_that.chatId,_that.messages,_that.maintainLoading,_that.allMessa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int chatId,  Iterable<Message> messages,  bool maintainLoading,  bool? allMessagesLoaded)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int chatId,  Iterable<Message> messages,  bool fromCache,  bool? allMessagesLoaded)  $default,) {final _that = this;
 switch (_that) {
 case _MessagesCollection():
-return $default(_that.chatId,_that.messages,_that.maintainLoading,_that.allMessagesLoaded);case _:
+return $default(_that.chatId,_that.messages,_that.fromCache,_that.allMessagesLoaded);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +195,10 @@ return $default(_that.chatId,_that.messages,_that.maintainLoading,_that.allMessa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int chatId,  Iterable<Message> messages,  bool maintainLoading,  bool? allMessagesLoaded)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int chatId,  Iterable<Message> messages,  bool fromCache,  bool? allMessagesLoaded)?  $default,) {final _that = this;
 switch (_that) {
 case _MessagesCollection() when $default != null:
-return $default(_that.chatId,_that.messages,_that.maintainLoading,_that.allMessagesLoaded);case _:
+return $default(_that.chatId,_that.messages,_that.fromCache,_that.allMessagesLoaded);case _:
   return null;
 
 }
@@ -210,13 +210,13 @@ return $default(_that.chatId,_that.messages,_that.maintainLoading,_that.allMessa
 
 
 class _MessagesCollection implements MessagesCollection {
-  const _MessagesCollection({required this.chatId, required this.messages, this.maintainLoading = false, this.allMessagesLoaded});
+  const _MessagesCollection({required this.chatId, required this.messages, this.fromCache = false, this.allMessagesLoaded});
   
 
 @override final  int chatId;
 @override final  Iterable<Message> messages;
 /// if get messages from cache, loading still have to be visible
-@override@JsonKey() final  bool maintainLoading;
+@override@JsonKey() final  bool fromCache;
 @override final  bool? allMessagesLoaded;
 
 /// Create a copy of MessagesCollection
@@ -229,16 +229,16 @@ _$MessagesCollectionCopyWith<_MessagesCollection> get copyWith => __$MessagesCol
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessagesCollection&&(identical(other.chatId, chatId) || other.chatId == chatId)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.maintainLoading, maintainLoading) || other.maintainLoading == maintainLoading)&&(identical(other.allMessagesLoaded, allMessagesLoaded) || other.allMessagesLoaded == allMessagesLoaded));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessagesCollection&&(identical(other.chatId, chatId) || other.chatId == chatId)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.allMessagesLoaded, allMessagesLoaded) || other.allMessagesLoaded == allMessagesLoaded));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,chatId,const DeepCollectionEquality().hash(messages),maintainLoading,allMessagesLoaded);
+int get hashCode => Object.hash(runtimeType,chatId,const DeepCollectionEquality().hash(messages),fromCache,allMessagesLoaded);
 
 @override
 String toString() {
-  return 'MessagesCollection(chatId: $chatId, messages: $messages, maintainLoading: $maintainLoading, allMessagesLoaded: $allMessagesLoaded)';
+  return 'MessagesCollection(chatId: $chatId, messages: $messages, fromCache: $fromCache, allMessagesLoaded: $allMessagesLoaded)';
 }
 
 
@@ -249,7 +249,7 @@ abstract mixin class _$MessagesCollectionCopyWith<$Res> implements $MessagesColl
   factory _$MessagesCollectionCopyWith(_MessagesCollection value, $Res Function(_MessagesCollection) _then) = __$MessagesCollectionCopyWithImpl;
 @override @useResult
 $Res call({
- int chatId, Iterable<Message> messages, bool maintainLoading, bool? allMessagesLoaded
+ int chatId, Iterable<Message> messages, bool fromCache, bool? allMessagesLoaded
 });
 
 
@@ -266,11 +266,11 @@ class __$MessagesCollectionCopyWithImpl<$Res>
 
 /// Create a copy of MessagesCollection
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? chatId = null,Object? messages = null,Object? maintainLoading = null,Object? allMessagesLoaded = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? chatId = null,Object? messages = null,Object? fromCache = null,Object? allMessagesLoaded = freezed,}) {
   return _then(_MessagesCollection(
 chatId: null == chatId ? _self.chatId : chatId // ignore: cast_nullable_to_non_nullable
 as int,messages: null == messages ? _self.messages : messages // ignore: cast_nullable_to_non_nullable
-as Iterable<Message>,maintainLoading: null == maintainLoading ? _self.maintainLoading : maintainLoading // ignore: cast_nullable_to_non_nullable
+as Iterable<Message>,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
 as bool,allMessagesLoaded: freezed == allMessagesLoaded ? _self.allMessagesLoaded : allMessagesLoaded // ignore: cast_nullable_to_non_nullable
 as bool?,
   ));

@@ -29,7 +29,7 @@ class CreateNewChannelResponseDto {
   factory CreateNewChannelResponseDto.fromJson(Map<String, dynamic> json) =>
       _$CreateNewChannelResponseDtoFromJson(json);
 
-  final ChatChannelDataDto? data;
+  final ChatDto? data;
   final String? message;
 }
 

@@ -17,6 +17,7 @@ import 'package:kepleomax/core/presentation/klm_textfield.dart';
 import 'package:kepleomax/features/channel/data/channel_repository.dart';
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_bloc.dart';
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_state.dart';
+import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 
 class ChannelEditorScreen extends StatelessWidget {
   const ChannelEditorScreen({required this.channelData, super.key});
@@ -60,18 +61,18 @@ class ChannelEditorScreen extends StatelessWidget {
     );
   }
 
-  void _showGoBackDialog(BuildContext context) {
+  void _showGoBackDialog(BuildContext context1) {
     AppNavigator.showGeneralDialog(
-      context,
+      context1,
       barrierDismissible: true,
-      AlertDialog(
+      (context) => AlertDialog(
         backgroundColor: Colors.white,
         title: const Text('Discard all changes?'),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              AppNavigator.pop(context);
+              AppNavigator.pop(context1);
             },
             style: TextButton.styleFrom(overlayColor: Colors.red),
             child: const Text('Discard', style: TextStyle(color: Colors.red)),
@@ -137,11 +138,22 @@ class _BodyState extends State<_Body> {
         }
 
         if (state is ChannelEditorStateExit) {
+          FocusManager.instance.primaryFocus?.unfocus();
+
           if (state.message != null) {
             Fluttertoast.showToast(msg: state.message!);
           }
 
           AppNavigator.pop(context);
+
+          if (state.navigateToChatScreen != null) {
+            AppNavigator.withKeyOf(context, mainNavigatorKey)!.push(
+              ChatPage(
+                chat: state.navigateToChatScreen,
+                otherUser: state.navigateToChatScreen!.otherUser,
+              ),
+            );
+          }
         }
       },
       buildWhen: (oldState, newState) {

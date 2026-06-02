@@ -3,10 +3,10 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i3;
 
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart'
-    as _i3;
+    as _i2;
 import 'package:kepleomax/core/data/data_sources/messages_api_data_sources.dart'
     as _i5;
 import 'package:kepleomax/core/data/local_data_sources/chats_local_data_source.dart'
@@ -14,7 +14,7 @@ import 'package:kepleomax/core/data/local_data_sources/chats_local_data_source.d
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart'
     as _i8;
 import 'package:kepleomax/core/models/user.dart' as _i11;
-import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart' as _i2;
+import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart' as _i4;
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart' as _i6;
 import 'package:kepleomax/core/network/common/user_dto.dart' as _i9;
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart'
@@ -36,47 +36,40 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeChatDto_0 extends _i1.SmartFake implements _i2.ChatDto {
-  _FakeChatDto_0(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
 /// A class which mocks [ChatsApiDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockChatsApiDataSource extends _i1.Mock
-    implements _i3.ChatsApiDataSource {
+    implements _i2.ChatsApiDataSource {
   MockChatsApiDataSource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<Iterable<_i2.ChatDto>> getChats() =>
+  _i3.Future<Iterable<_i4.ChatDto>> getChats() =>
       (super.noSuchMethod(
             Invocation.method(#getChats, []),
-            returnValue: _i4.Future<Iterable<_i2.ChatDto>>.value(
-              <_i2.ChatDto>[],
+            returnValue: _i3.Future<Iterable<_i4.ChatDto>>.value(
+              <_i4.ChatDto>[],
             ),
           )
-          as _i4.Future<Iterable<_i2.ChatDto>>);
+          as _i3.Future<Iterable<_i4.ChatDto>>);
 
   @override
-  _i4.Future<_i2.ChatDto> getChatWithId(String? chatId) =>
+  _i3.Future<_i4.ChatDto?> getChatWithId(String? chatId) =>
       (super.noSuchMethod(
             Invocation.method(#getChatWithId, [chatId]),
-            returnValue: _i4.Future<_i2.ChatDto>.value(
-              _FakeChatDto_0(this, Invocation.method(#getChatWithId, [chatId])),
-            ),
+            returnValue: _i3.Future<_i4.ChatDto?>.value(),
           )
-          as _i4.Future<_i2.ChatDto>);
+          as _i3.Future<_i4.ChatDto?>);
 
   @override
-  _i4.Future<_i2.ChatDto?> getChatWithUser(int? otherUserId) =>
+  _i3.Future<_i4.ChatDto?> getChatWithUser(int? otherUserId) =>
       (super.noSuchMethod(
             Invocation.method(#getChatWithUser, [otherUserId]),
-            returnValue: _i4.Future<_i2.ChatDto?>.value(),
+            returnValue: _i3.Future<_i4.ChatDto?>.value(),
           )
-          as _i4.Future<_i2.ChatDto?>);
+          as _i3.Future<_i4.ChatDto?>);
 }
 
 /// A class which mocks [MessagesApiDataSource].
@@ -89,7 +82,7 @@ class MockMessagesApiDataSource extends _i1.Mock
   }
 
   @override
-  _i4.Future<List<_i6.MessageDto>> getMessages({
+  _i3.Future<List<_i6.MessageDto>> getMessages({
     required int? chatId,
     required int? limit,
     int? cursor,
@@ -100,11 +93,11 @@ class MockMessagesApiDataSource extends _i1.Mock
               #limit: limit,
               #cursor: cursor,
             }),
-            returnValue: _i4.Future<List<_i6.MessageDto>>.value(
+            returnValue: _i3.Future<List<_i6.MessageDto>>.value(
               <_i6.MessageDto>[],
             ),
           )
-          as _i4.Future<List<_i6.MessageDto>>);
+          as _i3.Future<List<_i6.MessageDto>>);
 }
 
 /// A class which mocks [ChatsLocalDataSource].
@@ -117,84 +110,84 @@ class MockChatsLocalDataSource extends _i1.Mock
   }
 
   @override
-  _i4.Future<List<_i2.ChatDto>> getChats() =>
+  _i3.Future<List<_i4.ChatDto>> getChats() =>
       (super.noSuchMethod(
             Invocation.method(#getChats, []),
-            returnValue: _i4.Future<List<_i2.ChatDto>>.value(<_i2.ChatDto>[]),
+            returnValue: _i3.Future<List<_i4.ChatDto>>.value(<_i4.ChatDto>[]),
           )
-          as _i4.Future<List<_i2.ChatDto>>);
+          as _i3.Future<List<_i4.ChatDto>>);
 
   @override
-  _i4.Future<_i2.ChatDto?> getChat(int? chatId) =>
+  _i3.Future<_i4.ChatDto?> getChat(int? chatId) =>
       (super.noSuchMethod(
             Invocation.method(#getChat, [chatId]),
-            returnValue: _i4.Future<_i2.ChatDto?>.value(),
+            returnValue: _i3.Future<_i4.ChatDto?>.value(),
           )
-          as _i4.Future<_i2.ChatDto?>);
+          as _i3.Future<_i4.ChatDto?>);
 
   @override
-  _i4.Future<_i2.ChatDto?> getChatByOtherUserId(int? otherUserId) =>
+  _i3.Future<_i4.ChatDto?> getChatByOtherUserId(int? otherUserId) =>
       (super.noSuchMethod(
             Invocation.method(#getChatByOtherUserId, [otherUserId]),
-            returnValue: _i4.Future<_i2.ChatDto?>.value(),
+            returnValue: _i3.Future<_i4.ChatDto?>.value(),
           )
-          as _i4.Future<_i2.ChatDto?>);
+          as _i3.Future<_i4.ChatDto?>);
 
   @override
-  _i4.Future<void> clearAndInsertChatsAndLastMessages(
-    Iterable<_i2.ChatDto>? chats,
+  _i3.Future<void> clearAndInsertChatsAndLastMessages(
+    Iterable<_i4.ChatDto>? chats,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#clearAndInsertChatsAndLastMessages, [chats]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<void> insert(_i2.ChatDto? chat) =>
+  _i3.Future<void> insert(_i4.ChatDto? chat) =>
       (super.noSuchMethod(
             Invocation.method(#insert, [chat]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<void> update(_i2.ChatDto? chat) =>
+  _i3.Future<void> update(_i4.ChatDto? chat) =>
       (super.noSuchMethod(
             Invocation.method(#update, [chat]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<void> deleteById(int? chatId) =>
+  _i3.Future<void> deleteById(int? chatId) =>
       (super.noSuchMethod(
             Invocation.method(#deleteById, [chatId]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<void> increaseUnreadCountBy1(int? chatId) =>
+  _i3.Future<void> increaseUnreadCountBy1(int? chatId) =>
       (super.noSuchMethod(
             Invocation.method(#increaseUnreadCountBy1, [chatId]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<void> decreaseUnreadCount(int? chatId, int? amount) =>
+  _i3.Future<void> decreaseUnreadCount(int? chatId, int? amount) =>
       (super.noSuchMethod(
             Invocation.method(#decreaseUnreadCount, [chatId, amount]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 }
 
 /// A class which mocks [UsersLocalDataSource].
@@ -207,38 +200,38 @@ class MockUsersLocalDataSource extends _i1.Mock
   }
 
   @override
-  _i4.Future<void> insert(_i9.UserDto? user) =>
+  _i3.Future<void> insert(_i9.UserDto? user) =>
       (super.noSuchMethod(
             Invocation.method(#insert, [user]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<void> insertAll(Iterable<_i9.UserDto>? users) =>
+  _i3.Future<void> insertAll(Iterable<_i9.UserDto>? users) =>
       (super.noSuchMethod(
             Invocation.method(#insertAll, [users]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<void> updateOnlineStatus(_i10.OnlineStatusUpdate? update) =>
+  _i3.Future<void> updateOnlineStatus(_i10.OnlineStatusUpdate? update) =>
       (super.noSuchMethod(
             Invocation.method(#updateOnlineStatus, [update]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<void> setCurrentUser(_i11.User? user) =>
+  _i3.Future<void> setCurrentUser(_i11.User? user) =>
       (super.noSuchMethod(
             Invocation.method(#setCurrentUser, [user]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 }

@@ -74,7 +74,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _channelRepository.channelDeletedStream.listen((channelId) {
         if (channelId != _data.chat.id) return;
         add(const _ChatEventChannelDeleted());
-      })
+      }),
     ]);
 
     /// events
@@ -199,9 +199,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           _messengerRepository.listenToMessagesWithOtherUserId(
             otherUserId: event.otherUser.id,
           );
-          _connectionRepository.listenOnlineStatusUpdates(
-            usersIds: [_data.otherUser.id],
-          );
           return;
         }
 
@@ -209,12 +206,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         _data = _data.copyWith(chat: chat);
       }
 
-      /// get user and check updates, because online status can be changed
       if (chat.isChannel) {
         await _channelRepository.init(channelData: chat.channelData);
-
         await _channelRepository.loadSubscribersCount();
       } else {
+        /// get user and check updates, because online status can be changed
         unawaited(
           Future(() async {
             final newChat = await _chatsRepository.getChatWithId(chat.id.toString());
@@ -246,7 +242,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       /// TODO now it works because we always open the chat at the very bottom of scroll list
       NotificationService.instance.closeWithChatId(chat.id);
-      _connectionRepository.listenOnlineStatusUpdate(userId: _data.otherUser.id);
+      if (!chat.isChannel && chat.otherUser.id > 0) {
+        _messengerRepository.subscribeOnUserOnlineUpdates(userId: chat.otherUser.id);
+      }
 
       final draft = await _messengerRepository.getDraft(chatId: chat.id);
       if (draft != null) {
@@ -376,7 +374,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final handleUnreadMessages =
           messages.isNotEmpty &&
           !_data.unreadMessagesValue.isLocked &&
-          (event.data.maintainLoading == false || messages.length > 1);
+          (event.data.fromCache == false || messages.length > 1);
 
       /// event.data.maintainLoading == false || messages.length > 1 means:
       /// either messages are from api, not from cache, OR messages from cache, but
@@ -385,7 +383,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (unreadMessagesIsRequired && handleUnreadMessages) {
         _data = _data.copyWith(
           unreadMessagesValue: UnreadMessagesValue(
-            isLocked: !event.data.maintainLoading,
+            isLocked: !event.data.fromCache,
             firstReadMessageCreatedAt:
                 messages.firstWhereOrNull((m) => m.isRead)?.createdAt ??
                 DateTime.fromMillisecondsSinceEpoch(0),
@@ -394,7 +392,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       } else if (handleUnreadMessages) {
         _data = _data.copyWith(
           unreadMessagesValue: UnreadMessagesValue(
-            isLocked: !event.data.maintainLoading,
+            isLocked: !event.data.fromCache,
             firstReadMessageCreatedAt: null,
           ),
         );
@@ -444,10 +442,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         _data = _data.copyWith(chat: chat ?? Chat.loading());
       }
 
-      _data = _data.copyWith(
-        messages: newMessages,
-        isLoading: event.data.maintainLoading,
-      );
+      _data = _data.copyWith(messages: newMessages, isLoading: event.data.fromCache);
       if (event.data.allMessagesLoaded != null) {
         _data = _data.copyWith(isAllMessagesLoaded: event.data.allMessagesLoaded!);
       }
@@ -532,7 +527,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   void _onChannelDeleted(_ChatEventChannelDeleted event, Emitter<ChatState> emit) {
-    emit(const ChatStateExit(toastMessage: 'Channel deleted'));
+    /// TODO better to pass toastMessage: 'Channel deleted', but if user opens
+    /// channel_screen and screen will be deleted, toast also will be shown there,
+    /// so I need to somehow handle it, OR delete toast in one place. Now there
+    /// is toast on channel_screen, but here is not
+    emit(const ChatStateExit());
   }
 
   @override
@@ -540,6 +539,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     for (final sub in _subs) {
       sub.cancel();
     }
+
+    /// TODO why set it to null, if repository will be cleared, right?
     _messengerRepository.listenToMessagesWithOtherUserId(otherUserId: null);
     return super.close();
   }

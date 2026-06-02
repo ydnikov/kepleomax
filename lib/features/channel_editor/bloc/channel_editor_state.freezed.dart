@@ -549,7 +549,7 @@ as bool,
 /// @nodoc
 mixin _$ChannelEditorStateExit {
 
- String? get message;
+ String? get message; Chat? get navigateToChatScreen;
 /// Create a copy of ChannelEditorStateExit
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -560,16 +560,16 @@ $ChannelEditorStateExitCopyWith<ChannelEditorStateExit> get copyWith => _$Channe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelEditorStateExit&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelEditorStateExit&&(identical(other.message, message) || other.message == message)&&(identical(other.navigateToChatScreen, navigateToChatScreen) || other.navigateToChatScreen == navigateToChatScreen));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message);
+int get hashCode => Object.hash(runtimeType,message,navigateToChatScreen);
 
 @override
 String toString() {
-  return 'ChannelEditorStateExit(message: $message)';
+  return 'ChannelEditorStateExit(message: $message, navigateToChatScreen: $navigateToChatScreen)';
 }
 
 
@@ -580,11 +580,11 @@ abstract mixin class $ChannelEditorStateExitCopyWith<$Res>  {
   factory $ChannelEditorStateExitCopyWith(ChannelEditorStateExit value, $Res Function(ChannelEditorStateExit) _then) = _$ChannelEditorStateExitCopyWithImpl;
 @useResult
 $Res call({
- String? message
+ String? message, Chat? navigateToChatScreen
 });
 
 
-
+$ChatCopyWith<$Res>? get navigateToChatScreen;
 
 }
 /// @nodoc
@@ -597,13 +597,26 @@ class _$ChannelEditorStateExitCopyWithImpl<$Res>
 
 /// Create a copy of ChannelEditorStateExit
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? message = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? message = freezed,Object? navigateToChatScreen = freezed,}) {
   return _then(_self.copyWith(
 message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,navigateToChatScreen: freezed == navigateToChatScreen ? _self.navigateToChatScreen : navigateToChatScreen // ignore: cast_nullable_to_non_nullable
+as Chat?,
   ));
 }
+/// Create a copy of ChannelEditorStateExit
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ChatCopyWith<$Res>? get navigateToChatScreen {
+    if (_self.navigateToChatScreen == null) {
+    return null;
+  }
 
+  return $ChatCopyWith<$Res>(_self.navigateToChatScreen!, (value) {
+    return _then(_self.copyWith(navigateToChatScreen: value));
+  });
+}
 }
 
 
@@ -685,10 +698,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? message)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? message,  Chat? navigateToChatScreen)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChannelEditorStateExit() when $default != null:
-return $default(_that.message);case _:
+return $default(_that.message,_that.navigateToChatScreen);case _:
   return orElse();
 
 }
@@ -706,10 +719,10 @@ return $default(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? message)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? message,  Chat? navigateToChatScreen)  $default,) {final _that = this;
 switch (_that) {
 case _ChannelEditorStateExit():
-return $default(_that.message);case _:
+return $default(_that.message,_that.navigateToChatScreen);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -726,10 +739,10 @@ return $default(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? message)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? message,  Chat? navigateToChatScreen)?  $default,) {final _that = this;
 switch (_that) {
 case _ChannelEditorStateExit() when $default != null:
-return $default(_that.message);case _:
+return $default(_that.message,_that.navigateToChatScreen);case _:
   return null;
 
 }
@@ -741,10 +754,11 @@ return $default(_that.message);case _:
 
 
 class _ChannelEditorStateExit implements ChannelEditorStateExit {
-  const _ChannelEditorStateExit({this.message});
+  const _ChannelEditorStateExit({this.message, this.navigateToChatScreen});
   
 
 @override final  String? message;
+@override final  Chat? navigateToChatScreen;
 
 /// Create a copy of ChannelEditorStateExit
 /// with the given fields replaced by the non-null parameter values.
@@ -756,16 +770,16 @@ _$ChannelEditorStateExitCopyWith<_ChannelEditorStateExit> get copyWith => __$Cha
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelEditorStateExit&&(identical(other.message, message) || other.message == message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelEditorStateExit&&(identical(other.message, message) || other.message == message)&&(identical(other.navigateToChatScreen, navigateToChatScreen) || other.navigateToChatScreen == navigateToChatScreen));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message);
+int get hashCode => Object.hash(runtimeType,message,navigateToChatScreen);
 
 @override
 String toString() {
-  return 'ChannelEditorStateExit(message: $message)';
+  return 'ChannelEditorStateExit(message: $message, navigateToChatScreen: $navigateToChatScreen)';
 }
 
 
@@ -776,11 +790,11 @@ abstract mixin class _$ChannelEditorStateExitCopyWith<$Res> implements $ChannelE
   factory _$ChannelEditorStateExitCopyWith(_ChannelEditorStateExit value, $Res Function(_ChannelEditorStateExit) _then) = __$ChannelEditorStateExitCopyWithImpl;
 @override @useResult
 $Res call({
- String? message
+ String? message, Chat? navigateToChatScreen
 });
 
 
-
+@override $ChatCopyWith<$Res>? get navigateToChatScreen;
 
 }
 /// @nodoc
@@ -793,14 +807,27 @@ class __$ChannelEditorStateExitCopyWithImpl<$Res>
 
 /// Create a copy of ChannelEditorStateExit
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? message = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? message = freezed,Object? navigateToChatScreen = freezed,}) {
   return _then(_ChannelEditorStateExit(
 message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,navigateToChatScreen: freezed == navigateToChatScreen ? _self.navigateToChatScreen : navigateToChatScreen // ignore: cast_nullable_to_non_nullable
+as Chat?,
   ));
 }
 
+/// Create a copy of ChannelEditorStateExit
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ChatCopyWith<$Res>? get navigateToChatScreen {
+    if (_self.navigateToChatScreen == null) {
+    return null;
+  }
 
+  return $ChatCopyWith<$Res>(_self.navigateToChatScreen!, (value) {
+    return _then(_self.copyWith(navigateToChatScreen: value));
+  });
+}
 }
 
 /// @nodoc

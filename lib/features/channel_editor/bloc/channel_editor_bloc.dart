@@ -31,11 +31,16 @@ class ChannelEditorBloc extends Bloc<ChannelEditorEvent, ChannelEditorState> {
     emit(ChannelEditorStateBase(_data));
 
     try {
-      await _editorRepository.createNewChannel(
+      final chat = await _editorRepository.createNewChannel(
         channelUiData: event.channelEditingData,
       );
 
-      emit(const ChannelEditorStateExit(message: 'Channel successfully created'));
+      emit(
+        ChannelEditorStateExit(
+          message: 'Channel successfully created',
+          navigateToChatScreen: chat,
+        ),
+      );
     } catch (e, st) {
       logger.e(e, stackTrace: st);
       emit(ChannelEditorStateMessage(message: e.userErrorMessage, isError: true));

@@ -32,6 +32,7 @@ abstract class ChannelEditorStateExit
     implements ChannelEditorState {
   const factory ChannelEditorStateExit({
     String? message,
+    Chat? navigateToChatScreen
   }) = _ChannelEditorStateExit;
 }
 

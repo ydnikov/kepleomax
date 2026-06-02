@@ -1,3 +1,3 @@
 abstract class Disposable {
-  Future<void> dispose();
+  void dispose();
 }

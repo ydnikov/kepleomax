@@ -10,7 +10,7 @@ abstract class MessagesCollection with _$MessagesCollection {
     required Iterable<Message> messages,
 
     /// if get messages from cache, loading still have to be visible
-    @Default(false) bool maintainLoading,
+    @Default(false) bool fromCache,
     bool? allMessagesLoaded,
   }) = _MessagesCollection;
 }
