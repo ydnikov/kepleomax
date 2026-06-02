@@ -269,10 +269,8 @@ class _BodyState extends State<_Body> {
                                     onDelete: () {},
                                   )
                                 : VisibilityDetector(
-                                    /// DateTime to check visibility on every messagesList changes
-                                    /// (like the change of some fromCache statuses)
                                     key: Key(
-                                      'visibility_detector_$i-${DateTime.now().millisecondsSinceEpoch}',
+                                      'visibility_detector_$i-${data.messages[i].fromCache}',
                                     ),
                                     onVisibilityChanged: (info) =>
                                         _onVisibilityChanged(info, data.messages[i]),
@@ -346,6 +344,8 @@ class _BodyState extends State<_Body> {
         !message.isCurrentUser &&
         !message.fromCache &&
         isVisible) {
+      print('KlmLog listeners, id: ${message.id} messageFromCache: ${message.fromCache}');
+      /// TODO make createdAt + 1 (also fix backend for it)
       _chatBloc.add(ChatEventReadMessagesBeforeTime(time: message.createdAt));
     }
     if (message.fromCache && !_chatBloc.isClosed) {

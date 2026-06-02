@@ -10,6 +10,8 @@ final chatDto0 = ChatDto(
   otherUser: UserDto(id: 1, username: 'OTHER_USERNAME_1', profileImage: null, isCurrent: false, isOnline: true, lastActivityTime: DateTime.now().millisecondsSinceEpoch),
   lastMessage: messageDto0,
   unreadCount: 2,
+  channelData: null,
+  createdAt: 0,
 );
 
 const chatDto1 = ChatDto(
@@ -17,6 +19,8 @@ const chatDto1 = ChatDto(
   otherUser: UserDto(id: 2, username: 'OTHER_USERNAME_2', profileImage: null, isCurrent: false, isOnline: true, lastActivityTime: 0),
   lastMessage: MessageDto(id: 1, chatId: 1, senderId: 2, isCurrentUser: false, message: 'MSG_1', type: 'message', isRead: false, createdAt: 1080, editedAt: null, fromCache: false),
   unreadCount: 4,
+  channelData: null,
+  createdAt: 0,
 );
 
 const chatDto2 = ChatDto(
@@ -24,6 +28,8 @@ const chatDto2 = ChatDto(
   otherUser: UserDto(id: 3, username: 'OTHER_USERNAME_3', profileImage: null, isCurrent: false, isOnline: false, lastActivityTime: 0),
   lastMessage: MessageDto(id: 2, chatId: 2, senderId: 0, isCurrentUser: true, message: 'MSG_2', type: 'message', isRead: false, createdAt: 1070, editedAt: null, fromCache: false),
   unreadCount: 0,
+  channelData: null,
+  createdAt: 0,
 );
 
 const chatDto3 = ChatDto(
@@ -31,6 +37,8 @@ const chatDto3 = ChatDto(
   otherUser: UserDto(id: 4, username: 'OTHER_USERNAME_4', profileImage: null, isCurrent: false, isOnline: false, lastActivityTime: 0),
   lastMessage: MessageDto(id: 3, chatId: 3, senderId: 0, isCurrentUser: true, message: 'MSG_3', type: 'message', isRead: true, createdAt: 1060, editedAt: null, fromCache: false),
   unreadCount: 0,
+  channelData: null,
+  createdAt: 0,
 );
 
 const chatDto4 = ChatDto(
@@ -38,6 +46,8 @@ const chatDto4 = ChatDto(
   otherUser: UserDto(id: 5, username: 'OTHER_USERNAME_5', profileImage: null, isCurrent: false, isOnline: false, lastActivityTime: 0),
   lastMessage: MessageDto(id: 4, chatId: 4, senderId: 5, isCurrentUser: false, message: 'MSG_4', type: 'message', isRead: true, createdAt: 1050, editedAt: null, fromCache: false),
   unreadCount: 0,
+  channelData: null,
+  createdAt: 0,
 );
 
 const messageDto0 = MessageDto(id: 0, chatId: 0, senderId: 1, isCurrentUser: false, message: 'MSG_0', type: 'message', isRead: false, createdAt: 1090, editedAt: null, fromCache: false);

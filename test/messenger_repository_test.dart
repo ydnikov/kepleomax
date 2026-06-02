@@ -83,11 +83,11 @@ void main() {
       return list;
     }
 
-    Future<void> checkNextState(List<MessageDto> messages, {bool maintainLoading = false, bool? allMessagesLoaded = false, bool checkLocal = false}) async {
+    Future<void> checkNextState(List<MessageDto> messages, {bool fromCache = false, bool? allMessagesLoaded = false, bool checkLocal = false}) async {
       await iterator.moveNext();
       expect(
         iterator.current,
-        MessagesCollection(chatId: 0, messages: messages.map(Message.fromDto).toList(), maintainLoading: maintainLoading, allMessagesLoaded: allMessagesLoaded),
+        MessagesCollection(chatId: 0, messages: messages.map(Message.fromDto).toList(), fromCache: fromCache, allMessagesLoaded: allMessagesLoaded),
         reason:
             '\nExpected messages (id, fromCache): ${messages.map((m) => '(${m.id}, ${m.fromCache})').toList()} - ${messages.length} in total\nActual messages (id, fromCache): ${iterator.current.messages.map((m) => '(${m.id}, ${m.fromCache})').toList()} - ${iterator.current.messages.length} in total',
       );
@@ -101,7 +101,7 @@ void main() {
       getMessagesMustReturn(apiMessages);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState([...apiMessages, if (apiMessages.length <= cacheMessages.length) ...cacheMessages.sublist(apiMessages.length)]);
     }
 
@@ -113,7 +113,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, checkLocal: true);
     });
 
@@ -122,7 +122,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, checkLocal: true);
     });
 
@@ -131,7 +131,7 @@ void main() {
       final apiMessages = generateGetMessages(20, 5);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState([...apiMessages, ...generateMessages(5, 0, fromCache: true)], checkLocal: true);
     });
 
@@ -140,7 +140,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 5);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState([...apiMessages], allMessagesLoaded: true, checkLocal: true);
     });
 
@@ -149,7 +149,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, checkLocal: true);
     });
 
@@ -158,7 +158,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, checkLocal: true);
     });
 
@@ -167,7 +167,7 @@ void main() {
       final apiMessages = generateGetMessages(20, 5);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState([...apiMessages, ...generateMessages(5, 0, fromCache: true)], checkLocal: true);
     });
 
@@ -176,7 +176,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 5);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, allMessagesLoaded: true, checkLocal: true);
     });
 
@@ -185,7 +185,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, checkLocal: true);
     });
 
@@ -194,7 +194,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, checkLocal: true);
     });
 
@@ -203,7 +203,7 @@ void main() {
       final apiMessages = generateGetMessages(20, 5);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState([...apiMessages, ...generateMessages(5, 0, fromCache: true)], checkLocal: true);
     });
 
@@ -212,7 +212,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 5);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, allMessagesLoaded: true, checkLocal: true);
     });
 
@@ -221,7 +221,7 @@ void main() {
       final apiMessages = generateGetMessages(1, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, allMessagesLoaded: true, checkLocal: true);
     });
 
@@ -230,7 +230,7 @@ void main() {
       final apiMessages = generateGetMessages(0, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, allMessagesLoaded: true, checkLocal: true);
     });
 
@@ -239,7 +239,7 @@ void main() {
       final apiMessages = generateGetMessages(15, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, checkLocal: true);
     });
 
@@ -248,7 +248,7 @@ void main() {
       final apiMessages = generateGetMessages(0, 0);
 
       repository.loadMessages(chatId: 0);
-      await checkNextState(cacheMessages, maintainLoading: true, allMessagesLoaded: null);
+      await checkNextState(cacheMessages, fromCache: true, allMessagesLoaded: null);
       await checkNextState(apiMessages, allMessagesLoaded: true, checkLocal: true);
     });
 

@@ -83,7 +83,7 @@ void main() {
           _getChatWithIdCompleter = Completer();
           await _getChatWithIdCompleter.future;
         }
-        final chat = factory(inv.namedArguments[#chatId] as int);
+        final chat = factory(int.parse(inv.namedArguments[#chatId] as String));
         return HttpResponse(ChatResponse(data: chat, message: null), Response(requestOptions: RequestOptions(), statusCode: chat == null ? 404 : 200));
       });
     }
@@ -228,8 +228,10 @@ void main() {
     testWidgets('read_messages_test', (tester) async {
       await setupApp(tester, [chatDto0], [messageDto0, messageDto2, messageDto3, messageDto4], getMessagesAsyncControl: true);
 
-      /// check (with cache messages should not work), send apiMessages, check
+      /// check (with cache messages must not work)
       expect(ws.readBeforeTimeCalledTimes, 0);
+
+      /// send apiMessages, check
       await sendGetMessagesResponse(tester);
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
       expect(ws.readBeforeTimeCalledTimes, 1);
@@ -482,7 +484,9 @@ void main() {
       await tester.pumpAndSettle();
       tester.checkChatsOrder([]);
 
-      getChatWithIdMustReturn((id) => id == 0 ? ChatDto(id: id, otherUser: chatDto0.otherUser, lastMessage: messageDto1, unreadCount: 0) : throw Exception('not found'));
+      getChatWithIdMustReturn(
+        (id) => id == 0 ? ChatDto(id: id, otherUser: chatDto0.otherUser, lastMessage: messageDto1, unreadCount: 0, channelData: null, createdAt: 0) : throw Exception('not found'),
+      );
       ws.addMessage(messageDto1);
       await tester.pumpAndSettle();
       tester.getChat(0).check(message: messageDto1.message);
@@ -495,7 +499,7 @@ void main() {
     /// checks that if new api chat has new lastMessage, the actual lastMessage is not deleted from cache
     /// lastMessage should be deleted only if it's later that the new one
     testWidgets('clearing_cache_test_2_test', (tester) async {
-      await setupApp(tester, [ChatDto(id: 0, otherUser: chatDto0.otherUser, lastMessage: messageDto2, unreadCount: 0)], [messageDto2, messageDto3, messageDto4]);
+      await setupApp(tester, [ChatDto(id: 0, otherUser: chatDto0.otherUser, lastMessage: messageDto2, unreadCount: 0, channelData: null, createdAt: 0)], [messageDto2, messageDto3, messageDto4]);
       getChatsMustReturn([chatDto0]);
       getMessagesMustReturn([messageDto0, messageDto2, messageDto3, messageDto4], asyncControl: true);
 
@@ -519,7 +523,15 @@ void main() {
 
       await tester.pushPage(
         ChatPage(
-          chat: Chat(id: 6, otherUser: const User(id: 10, username: 'OTHER_USERNAME_10', profileImage: null, isCurrent: false), channelData: null, lastMessage: null, fromCache: true, unreadCount: 0),
+          chat: const Chat(
+            id: 6,
+            otherUser: User(id: 10, username: 'OTHER_USERNAME_10', profileImage: null, isCurrent: false),
+            lastMessage: null,
+            fromCache: true,
+            unreadCount: 0,
+            channelData: null,
+            createdAt: 0,
+          ),
           otherUser: const User(id: 10, username: 'OTHER_USERNAME_10', profileImage: null, isCurrent: false),
         ),
       );

@@ -79,7 +79,6 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
 
   @override
   Future<void> deleteById(int id) async {
-    print('KlmLog deleteMessage: $id');
     await _database.delete('messages', where: 'id = ?', whereArgs: [id]);
   }
 
@@ -95,7 +94,6 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
 
   @override
   Future<void> deleteAllByChatId(int chatId) async {
-    print('KlmLog deleteMessagesByChatId: $chatId');
     await _database.delete('messages', where: 'chat_id = ?', whereArgs: [chatId]);
   }
 }

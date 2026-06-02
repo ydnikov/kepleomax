@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
+import 'package:kepleomax/core/network/websockets/models/channel_subscription_update.dart';
+import 'package:kepleomax/core/network/websockets/models/channel_unsubscription_update.dart';
 import 'package:kepleomax/core/network/websockets/models/deleted_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/new_message_update.dart';
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart';
@@ -128,10 +131,28 @@ class MockMessengerWebSocket implements MessengerWebSocket {
   }
 
   @override
+  void subscribeOnChatsUpdatesIfNot({required List<int> ids}) {}
+
+  @override
   void subscribeOnOnlineStatusUpdatesIfNot({required Iterable<int> usersIds}) {}
 
   @override
   void typingActivityDetected({required int chatId}) {}
+
+  /// mock streams
+  @override
+  Stream<int> get channelDeletedStream => const Stream.empty();
+
+  @override
+  Stream<ChannelSubscriptionUpdate> get channelSubscriptionUpdatesStream =>
+      const Stream.empty();
+
+  @override
+  Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream =>
+      const Stream.empty();
+
+  @override
+  Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream => const Stream.empty();
 
   @override
   void dispose() {}

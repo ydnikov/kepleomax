@@ -24,7 +24,7 @@ class MockKlmWebSocket implements KlmWebSocket {
   Future<void> dispose() async {}
 
   @override
-  void emit(String event, [data]) {}
+  void emit(String event, [dynamic data, bool volatile = false]) {}
 
   @override
   Stream<(String, dynamic)> get eventsStream => _eventsController.stream;

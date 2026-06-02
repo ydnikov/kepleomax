@@ -114,7 +114,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<_ChatEventEmitOtherUser>(_onEmitOtherUser);
     on<_ChatEventOnlineStatusUpdate>(_onOnlineStatusUpdate);
     on<_ChatEventEmitError>(_onEmitError);
-    on<_ChatEventEmitMessages>(_onEmitMessages, transformer: sequential());
+    on<_ChatEventEmitMessages>(_onEmitMessages, transformer: restartable());
     on<_ChatEventConnectingChanged>(_onConnectionChanged);
     on<_ChatEventEmitUnreadCount>(_onEmitUnreadCount);
     on<_ChatEventEmitChannelUpdate>(_onEmitChannelUpdate);
@@ -158,14 +158,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     /// set isConnected cause it can be called at init bloc
     _data = _data.copyWith(
+      chat: event.chat ?? Chat.loading(),
       isConnected: _connectionRepository.isConnected,
       isLoading: true,
       isAllMessagesLoaded: false,
     );
-    if (event.chat != null) {
-      _data = _data.copyWith(chat: event.chat!);
-    }
-    emit(ChatStateBase(_data));
 
     try {
       Chat chat = event.chat ?? Chat.loading();
@@ -282,6 +279,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     Emitter<ChatState> emit,
   ) {
     if (_data.isLoading || !_data.isConnected) return;
+
+    print('KlmLog readMessages before time, time: ${event.time}');
     _messagesWebSocket.readMessagesBeforeTime(
       chatId: _data.chat.id,
       time: event.time,
@@ -364,6 +363,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _ChatEventEmitMessages event,
     Emitter<ChatState> emit,
   ) async {
+    print(
+      'KlmLog emitMessages, fromCache: ${event.data.fromCache}, chatId: ${event.data.chatId}, currentChatId: ${_data.chat.id}',
+    );
+
     try {
       final messages = event.data.messages.toList();
       final newMessages = <Message>[];
@@ -433,9 +436,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         /// and chatId will be set to -1
         _data = _data.copyWith(chat: Chat.loading());
       } else if (event.data.chatId != _data.chat.id) {
-        print(
-          'KlmLog event.data.chatId: ${event.data.chatId}, _data.chat.id: ${_data.chat.id}',
-        );
+        // print(
+        //   'KlmLog event.data.chatId: ${event.data.chatId}, _data.chat.id: ${_data.chat.id}',
+        // );
         final chat = await _chatsRepository.getChatWithId(
           event.data.chatId.toString(),
         );
