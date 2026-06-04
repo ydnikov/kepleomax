@@ -1,7 +1,7 @@
 part of '../chat_screen.dart';
 
-class _ChannelChatBottom extends StatelessWidget {
-  const _ChannelChatBottom({
+class _ChatChannelBottom extends StatelessWidget {
+  const _ChatChannelBottom({
     required this.role,
     required this.isLoading,
     required this.isSubscribeClickable,
@@ -24,9 +24,12 @@ class _ChannelChatBottom extends StatelessWidget {
       left: false,
       right: false,
       child: InkWell(
+        key: const Key('chat_channel_bottom_button'),
         onTap: isLoading || !isSubscribeClickable
             ? null
-            : isSubscriber ? onGoToChannelTap : onSubscribeTap,
+            : isSubscriber
+            ? onGoToChannelTap
+            : onSubscribeTap,
         child: Container(
           width: context.screenSize.width,
           height: 50,
@@ -39,7 +42,7 @@ class _ChannelChatBottom extends StatelessWidget {
                     child: CircularProgressIndicator(),
                   )
                 : Text(
-                    isSubscriber ? 'Go to channel' : 'Subscribe',
+                    isSubscriber ? 'Go to Channel' : 'Subscribe',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,

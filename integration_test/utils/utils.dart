@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/features/chat/widgets/message_widget.dart';
@@ -14,18 +17,27 @@ enum ChatAppBarStatus { connecting, updating, none }
 extension TesterExtension on WidgetTester {
   String? textByKey(Key key) => widget<Text>(find.byKey(key)).data;
 
-  Iterable<T> childrenOfListByKey<T extends Widget>(Key listKey,
-      Type childrenType,) =>
-      widgetList<T>(
-        find.descendant(
-            of: find.byKey(listKey), matching: find.byType(childrenType)),
-      ).toList();
+  Iterable<T> childrenOfListByKey<T extends Widget>(
+    Key listKey,
+    Type childrenType,
+  ) => widgetList<T>(
+    find.descendant(of: find.byKey(listKey), matching: find.byType(childrenType)),
+  ).toList();
 
   Iterable<Key?> keysOfListByKey(Key listKey, Type childrenType) =>
       childrenOfListByKey(
         listKey,
         childrenType,
       ).map((widget) => widget.key).toList();
+
+  Future<void> sendResponse(Completer<void> completer, {bool settle = true}) async {
+    completer.complete();
+    if (settle) {
+      await pumpAndSettle();
+    } else {
+      await pump(const Duration(milliseconds: 50));
+    }
+  }
 
   Future<void> scrollMessagesTo(int messageId) async {
     await dragUntilVisible(
@@ -95,7 +107,7 @@ extension TesterExtension on WidgetTester {
     expect(textByKey(const Key('chat_app_bar_status_text')), contains(text));
   }
 
-  void checkChatOtherUserName(String expected) {
+  void checkChatName(String expected) {
     expect(textByKey(const Key('chat_username')), equals(expected));
   }
 
@@ -136,13 +148,10 @@ extension TesterExtension on WidgetTester {
     expect(visibleMessagesCount, equals(expected));
   }
 
-  int get visibleMessagesCount =>
-      childrenOfListByKey<MessageWidget>(
-        const Key('messages_list_view'),
-        MessageWidget,
-      )
-          .where((w) => !w.message.isSystem)
-          .length;
+  int get visibleMessagesCount => childrenOfListByKey<MessageWidget>(
+    const Key('messages_list_view'),
+    MessageWidget,
+  ).where((w) => !w.message.isSystem).length;
 
   void checkMessagesOrder(List<int> ids, {bool countSystem = false}) {
     expect(
@@ -167,6 +176,25 @@ extension TesterExtension on WidgetTester {
     await tap(find.byKey(const Key('back_button')));
     await pumpAndSettle();
   }
+
+  /// channel
+  void checkChannelBottom(UserChannelRole expected) {
+    if (expected.isNone || expected.isSubscriber) {
+      expect(
+        find.childrenWithText(
+          const Key('chat_channel_bottom_button'),
+          expected.isNone ? 'Subscribe' : 'Go to Channel',
+        ),
+        findsOneWidget,
+      );
+    } else {
+      // TODO
+    }
+  }
+
+  void checkSubsCountOnChatScreen(String expected) {
+    expect(textByKey(const Key('subscribers_count_text')), expected);
+  }
 }
 
 extension CommonFindersExtension on CommonFinders {
@@ -178,9 +206,4 @@ extension CommonFindersExtension on CommonFinders {
 
   Finder childrenWithIcon(Key parentKey, IconData icon) =>
       find.descendant(of: find.byKey(parentKey), matching: find.byIcon(icon));
-
-// Finder textRich(String text) => find.byWidgetPredicate(
-//       (widget) => widget is RichText &&
-//       widget.text.toPlainText().contains("text"),
-// );
 }

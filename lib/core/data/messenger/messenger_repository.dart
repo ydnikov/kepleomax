@@ -10,7 +10,7 @@ import 'package:kepleomax/core/data/local_data_sources/drafts_local_data_source.
 import 'package:kepleomax/core/data/local_data_sources/messages_local_data_source.dart';
 import 'package:kepleomax/core/data/local_data_sources/users_local_data_source.dart';
 import 'package:kepleomax/core/data/messenger/combine_cache_and_api.dart';
-import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
+import 'package:kepleomax/core/data/models/channel_update.dart';
 import 'package:kepleomax/core/data/models/chats_collection.dart';
 import 'package:kepleomax/core/data/models/messages_collection.dart';
 import 'package:kepleomax/core/di/disposable.dart';

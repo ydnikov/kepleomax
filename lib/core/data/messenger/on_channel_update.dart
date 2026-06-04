@@ -1,13 +1,13 @@
 part of 'messenger_repository.dart';
 
 extension _OnChannelUpdateExtension on MessengerRepositoryImpl {
-  void _onChannelUpdate(ChannelOnChatScreenUpdate update) {
+  void _onChannelUpdate(ChannelUpdate update) {
     if (_currentChatsCollection != null) {
       final newChats = _currentChatsCollection!.chats
           .map(
             (c) => c.id == update.channelId
                 ? c.copyWith(
-                    channelData: update.newChannelData!.keepRoleIfNeeded(
+                    channelData: update.newChannelData.keepRoleIfNeeded(
                       c.channelData!.userRole,
                     ),
                   )

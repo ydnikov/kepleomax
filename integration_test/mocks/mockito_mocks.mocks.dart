@@ -5,6 +5,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 
+import 'package:kepleomax/core/network/apis/channels/channel_api.dart' as _i8;
+import 'package:kepleomax/core/network/apis/channels/channel_dtos.dart' as _i9;
 import 'package:kepleomax/core/network/apis/chats/chats_api.dart' as _i3;
 import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart' as _i5;
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart' as _i7;
@@ -122,4 +124,152 @@ class MockMessagesApi extends _i1.Mock implements _i6.MessagesApi {
                 ),
           )
           as _i4.Future<_i2.HttpResponse<_i7.MessagesResponse>>);
+}
+
+/// A class which mocks [ChannelApi].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockChannelApi extends _i1.Mock implements _i8.ChannelApi {
+  MockChannelApi() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<_i2.HttpResponse<_i9.CreateNewChannelResponseDto>>
+  createNewChannel({required _i9.ChannelRequestDto? body}) =>
+      (super.noSuchMethod(
+            Invocation.method(#createNewChannel, [], {#body: body}),
+            returnValue:
+                _i4.Future<
+                  _i2.HttpResponse<_i9.CreateNewChannelResponseDto>
+                >.value(
+                  _FakeHttpResponse_0<_i9.CreateNewChannelResponseDto>(
+                    this,
+                    Invocation.method(#createNewChannel, [], {#body: body}),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.HttpResponse<_i9.CreateNewChannelResponseDto>>);
+
+  @override
+  _i4.Future<_i2.HttpResponse<_i9.CreateNewChannelResponseDto>> editChannel({
+    required int? channelId,
+    required _i9.ChannelRequestDto? body,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#editChannel, [], {
+              #channelId: channelId,
+              #body: body,
+            }),
+            returnValue:
+                _i4.Future<
+                  _i2.HttpResponse<_i9.CreateNewChannelResponseDto>
+                >.value(
+                  _FakeHttpResponse_0<_i9.CreateNewChannelResponseDto>(
+                    this,
+                    Invocation.method(#editChannel, [], {
+                      #channelId: channelId,
+                      #body: body,
+                    }),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.HttpResponse<_i9.CreateNewChannelResponseDto>>);
+
+  @override
+  _i4.Future<_i2.HttpResponse<void>> deleteChannel({required int? channelId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteChannel, [], {#channelId: channelId}),
+            returnValue: _i4.Future<_i2.HttpResponse<void>>.value(
+              _FakeHttpResponse_0<void>(
+                this,
+                Invocation.method(#deleteChannel, [], {#channelId: channelId}),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.HttpResponse<void>>);
+
+  @override
+  _i4.Future<_i2.HttpResponse<_i9.GetSubscribersCountResponseDto>>
+  getSubscribersCount({required int? channelId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#getSubscribersCount, [], {
+              #channelId: channelId,
+            }),
+            returnValue:
+                _i4.Future<
+                  _i2.HttpResponse<_i9.GetSubscribersCountResponseDto>
+                >.value(
+                  _FakeHttpResponse_0<_i9.GetSubscribersCountResponseDto>(
+                    this,
+                    Invocation.method(#getSubscribersCount, [], {
+                      #channelId: channelId,
+                    }),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.HttpResponse<_i9.GetSubscribersCountResponseDto>>);
+
+  @override
+  _i4.Future<_i2.HttpResponse<_i9.GetSubscribersResponseDto>> getSubscribers({
+    required int? channelId,
+    required int? limit,
+    required int? cursor,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getSubscribers, [], {
+              #channelId: channelId,
+              #limit: limit,
+              #cursor: cursor,
+            }),
+            returnValue:
+                _i4.Future<
+                  _i2.HttpResponse<_i9.GetSubscribersResponseDto>
+                >.value(
+                  _FakeHttpResponse_0<_i9.GetSubscribersResponseDto>(
+                    this,
+                    Invocation.method(#getSubscribers, [], {
+                      #channelId: channelId,
+                      #limit: limit,
+                      #cursor: cursor,
+                    }),
+                  ),
+                ),
+          )
+          as _i4.Future<_i2.HttpResponse<_i9.GetSubscribersResponseDto>>);
+
+  @override
+  _i4.Future<_i2.HttpResponse<void>> subscribe({required int? channelId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#subscribe, [], {#channelId: channelId}),
+            returnValue: _i4.Future<_i2.HttpResponse<void>>.value(
+              _FakeHttpResponse_0<void>(
+                this,
+                Invocation.method(#subscribe, [], {#channelId: channelId}),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.HttpResponse<void>>);
+
+  @override
+  _i4.Future<_i2.HttpResponse<void>> unsubscribe({
+    required int? channelId,
+    int? userId,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#unsubscribe, [], {
+              #channelId: channelId,
+              #userId: userId,
+            }),
+            returnValue: _i4.Future<_i2.HttpResponse<void>>.value(
+              _FakeHttpResponse_0<void>(
+                this,
+                Invocation.method(#unsubscribe, [], {
+                  #channelId: channelId,
+                  #userId: userId,
+                }),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.HttpResponse<void>>);
 }

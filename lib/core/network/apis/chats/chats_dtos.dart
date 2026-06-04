@@ -48,7 +48,7 @@ class ChatDto extends Equatable {
         ? null
         : MessageDto.fromJson(json['last_message'] as Map<String, dynamic>),
     channelData: json['is_channel'] == true
-        ? ChatChannelDataDto.fromJson(json)
+        ? ChannelDataDto.fromJson(json)
         : null,
     unreadCount: (json['unread_count'] as num? ?? 0).toInt(),
     createdAt: json['created_at'] as int,
@@ -89,7 +89,7 @@ class ChatDto extends Equatable {
   final int unreadCount;
   final int createdAt;
   final MessageDraft? draft;
-  final ChatChannelDataDto? channelData;
+  final ChannelDataDto? channelData;
 
   Map<String, dynamic> toLocalJson() => {
     'id': id,
@@ -102,8 +102,8 @@ class ChatDto extends Equatable {
 }
 
 @JsonSerializable(createToJson: false)
-class ChatChannelDataDto {
-  const ChatChannelDataDto({
+class ChannelDataDto {
+  const ChannelDataDto({
     required this.id,
     required this.channelName,
     required this.description,
@@ -114,8 +114,8 @@ class ChatChannelDataDto {
     this.subscribersCount,
   });
 
-  factory ChatChannelDataDto.fromJson(Map<String, dynamic> json) =>
-      _$ChatChannelDataDtoFromJson(json);
+  factory ChannelDataDto.fromJson(Map<String, dynamic> json) =>
+      _$ChannelDataDtoFromJson(json);
 
   final int id;
   @JsonKey(name: 'channel_name')

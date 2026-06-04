@@ -69,4 +69,7 @@ class _AppConstantsTesting extends AppConstantsType {
 
   @override
   Duration get showTypingAfterActivity => const Duration(seconds: 1);
+
+  @override
+  Duration get fakeDelayDuration => Duration.zero;
 }

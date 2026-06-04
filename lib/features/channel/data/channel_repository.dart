@@ -149,15 +149,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
 
           ChannelData channelData;
 
-          if (update.newChannelData != null) {
-            channelData = update.newChannelData!;
-          } else {
-            channelData = _currentChannelData.copyWith(
-              userRole: update.newUserRole ?? _currentChannelData.userRole,
-              subscribersCount:
-                  update.newSubsCount ?? _currentChannelData.subscribersCount,
-            );
-          }
+          channelData = update.newChannelData;
 
           _channelUpdatesController.add(
             channelData.keepRoleIfNeeded(_currentChannelData.userRole),

@@ -40,7 +40,7 @@ import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-part 'widgets/channel_chat_bottom.dart';
+part 'widgets/chat_channel_bottom.dart';
 
 part 'widgets/chat_bottom.dart';
 
@@ -314,7 +314,7 @@ class _BodyState extends State<_Body> {
                   key: const Key('chat_bottom'),
                 )
               else
-                _ChannelChatBottom(
+                _ChatChannelBottom(
                   role: data.chat.channelData!.userRole,
                   isLoading: data.isBottomBarLoading,
                   isSubscribeClickable: !data.isLoading && data.isConnected,
@@ -344,7 +344,6 @@ class _BodyState extends State<_Body> {
         !message.isCurrentUser &&
         !message.fromCache &&
         isVisible) {
-      print('KlmLog listeners, id: ${message.id} messageFromCache: ${message.fromCache}');
       /// TODO make createdAt + 1 (also fix backend for it)
       _chatBloc.add(ChatEventReadMessagesBeforeTime(time: message.createdAt));
     }
@@ -442,6 +441,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                         if (data.chat.isChannel)
                           Text(
                             '${data.chat.channelData!.subscribersCount ?? 0} subscriber${ParseTime.isSingular(data.chat.channelData!.subscribersCount ?? 0) ? '' : 's'}',
+                            key: const Key('subscribers_count_text'),
                             style: context.textTheme.bodyMedium?.copyWith(
                               fontSize: 13,
                               fontWeight: FontWeight.w400,

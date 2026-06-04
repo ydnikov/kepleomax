@@ -280,7 +280,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ) {
     if (_data.isLoading || !_data.isConnected) return;
 
-    print('KlmLog readMessages before time, time: ${event.time}');
     _messagesWebSocket.readMessagesBeforeTime(
       chatId: _data.chat.id,
       time: event.time,
@@ -363,10 +362,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _ChatEventEmitMessages event,
     Emitter<ChatState> emit,
   ) async {
-    print(
-      'KlmLog emitMessages, fromCache: ${event.data.fromCache}, chatId: ${event.data.chatId}, currentChatId: ${_data.chat.id}',
-    );
-
     try {
       final messages = event.data.messages.toList();
       final newMessages = <Message>[];

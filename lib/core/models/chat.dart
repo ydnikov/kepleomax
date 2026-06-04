@@ -75,7 +75,7 @@ abstract class ChannelData with _$ChannelData {
 
   const ChannelData._();
 
-  factory ChannelData.fromDto(ChatChannelDataDto dto) => ChannelData(
+  factory ChannelData.fromDto(ChannelDataDto dto) => ChannelData(
     id: dto.id,
     name: dto.channelName,
     description: dto.description,

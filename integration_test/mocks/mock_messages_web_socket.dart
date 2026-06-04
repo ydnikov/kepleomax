@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
+import 'package:kepleomax/core/data/models/channel_update.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/channel_subscription_update.dart';
@@ -39,6 +39,16 @@ class MockMessengerWebSocket implements MessengerWebSocket {
     _nextSendMessageId = value;
   }
 
+  void addSubChannel(ChannelSubscriptionUpdate update) =>
+      _channelSubUpdatesController.add(update);
+
+  void addUnsubChannel(ChannelUnsubscriptionUpdate update) =>
+      _channelUnsubUpdatesController.add(update);
+
+  void addChannelUpdateEvent(ChannelUpdate update) {
+    _channelUpdatesController.add(update);
+  }
+
   bool isRaadBeforeTimeWasCalledWith(int chatId, DateTime time) {
     final last = _readMessagesBeforeTimeWasCalls.lastOrNull;
     return last?.$1 == chatId && last?.$2 == time;
@@ -69,6 +79,12 @@ class MockMessengerWebSocket implements MessengerWebSocket {
       StreamController.broadcast();
   final StreamController<TypingActivityUpdate> _typingUpdatesController =
       StreamController.broadcast();
+  final StreamController<ChannelSubscriptionUpdate> _channelSubUpdatesController =
+      StreamController.broadcast();
+  final StreamController<ChannelUnsubscriptionUpdate>
+  _channelUnsubUpdatesController = StreamController.broadcast();
+  final StreamController<ChannelUpdate> _channelUpdatesController =
+      StreamController.broadcast();
 
   @override
   Stream<NewMessageUpdate> get newMessageUpdatesStream => _messageController.stream;
@@ -88,6 +104,18 @@ class MockMessengerWebSocket implements MessengerWebSocket {
   @override
   Stream<TypingActivityUpdate> get typingUpdatesStream =>
       _typingUpdatesController.stream;
+
+  @override
+  Stream<ChannelSubscriptionUpdate> get channelSubscriptionUpdatesStream =>
+      _channelSubUpdatesController.stream;
+
+  @override
+  Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream =>
+      _channelUnsubUpdatesController.stream;
+
+  @override
+  Stream<ChannelUpdate> get channelUpdatesStream =>
+      _channelUpdatesController.stream;
 
   /// events
   @override
@@ -142,17 +170,6 @@ class MockMessengerWebSocket implements MessengerWebSocket {
   /// mock streams
   @override
   Stream<int> get channelDeletedStream => const Stream.empty();
-
-  @override
-  Stream<ChannelSubscriptionUpdate> get channelSubscriptionUpdatesStream =>
-      const Stream.empty();
-
-  @override
-  Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream =>
-      const Stream.empty();
-
-  @override
-  Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream => const Stream.empty();
 
   @override
   void dispose() {}

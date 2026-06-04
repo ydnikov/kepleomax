@@ -21,8 +21,8 @@ ChatsResponse _$ChatsResponseFromJson(Map<String, dynamic> json) =>
       message: json['message'] as String?,
     );
 
-ChatChannelDataDto _$ChatChannelDataDtoFromJson(Map<String, dynamic> json) =>
-    ChatChannelDataDto(
+ChannelDataDto _$ChannelDataDtoFromJson(Map<String, dynamic> json) =>
+    ChannelDataDto(
       id: (json['id'] as num).toInt(),
       channelName: json['channel_name'] as String,
       description: json['description'] as String,

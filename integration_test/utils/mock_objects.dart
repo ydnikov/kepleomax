@@ -50,6 +50,40 @@ const chatDto4 = ChatDto(
   createdAt: 0,
 );
 
+final chatChannelDto0 = ChatDto(
+  id: 0,
+  otherUser: UserDto.empty(),
+  lastMessage: null,
+  unreadCount: 0,
+  createdAt: 1000,
+  channelData: const ChannelDataDto(
+    id: 0,
+    channelName: 'CHANNEL_NAME_0',
+    description: 'CHANNEL_0_DESCRIPTION',
+    image: null,
+    isOfficial: false,
+    userChannelRole: UserChannelRoleDto.subscriber,
+    tag: 'CHANNEL_0',
+  ),
+);
+
+final chatChannelDto1 = ChatDto(
+  id: 1,
+  otherUser: UserDto.empty(),
+  lastMessage: null,
+  unreadCount: 0,
+  createdAt: 2000,
+  channelData: const ChannelDataDto(
+    id: 1,
+    channelName: 'CHANNEL_NAME_1',
+    description: 'CHANNEL_1_DESCRIPTION',
+    image: null,
+    isOfficial: false,
+    userChannelRole: UserChannelRoleDto.subscriber,
+    tag: 'CHANNEL_1',
+  ),
+);
+
 const messageDto0 = MessageDto(id: 0, chatId: 0, senderId: 1, isCurrentUser: false, message: 'MSG_0', type: 'message', isRead: false, createdAt: 1090, editedAt: null, fromCache: false);
 const messageDto1 = MessageDto(id: 1, chatId: 0, senderId: 1, isCurrentUser: false, message: 'MSG_1', type: 'message', isRead: false, createdAt: 1080, editedAt: null, fromCache: false);
 const messageDto2 = MessageDto(id: 2, chatId: 0, senderId: 1, isCurrentUser: false, message: 'MSG_2', type: 'message', isRead: true, createdAt: 1070, editedAt: null, fromCache: false);

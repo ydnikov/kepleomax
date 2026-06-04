@@ -68,7 +68,7 @@ class ChatChecker {
     bool? readIcon,
     String? message,
     bool? msgFromCurrentUser,
-    String? otherUserName,
+    String? name,
     bool? isOnline,
     bool? isTyping,
   }) {
@@ -112,9 +112,9 @@ class ChatChecker {
         msgFromCurrentUser ? findsOneWidget : findsNothing,
       );
     }
-    if (otherUserName != null) {
+    if (name != null) {
       expect(
-        find.descendant(of: finder, matching: find.text(otherUserName)),
+        find.descendant(of: finder, matching: find.text(name)),
         findsOneWidget,
       );
     }

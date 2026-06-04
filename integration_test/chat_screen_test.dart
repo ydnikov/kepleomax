@@ -1,9 +1,6 @@
 // dart format width=200
 
-import 'dart:async';
-
 import 'package:collection/collection.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -24,14 +21,12 @@ import 'package:kepleomax/core/network/websockets/models/new_message_update.dart
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart';
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
 import 'package:kepleomax/features/chats/chats_screen_navigator.dart';
-import 'package:mockito/mockito.dart';
-import 'package:retrofit/dio.dart';
 
 import 'di/initialize_tests_dependencies.dart';
 import 'mocks/mock_klm_web_socket.dart';
 import 'mocks/mock_messages_web_socket.dart';
-import 'mocks/mockito_mocks.mocks.dart';
 import 'utils/mock_objects.dart';
+import 'utils/mock_utils.dart';
 import 'utils/utils.dart';
 
 void main() {
@@ -41,9 +36,8 @@ void main() {
     late Dependencies dp;
     late MockMessengerWebSocket ws;
     late MockKlmWebSocket baseWs;
-    late Completer<void> _getMessagesCompleter;
-    late Completer<void> _getChatWithIdCompleter;
 
+    /// test lifecycle
     setUpAll(() {
       Flavor.setFlavor(Flavor.testing());
     });
@@ -57,7 +51,8 @@ void main() {
       await LocalDatabaseManager.reset();
     });
 
-    Future<void> _pumpAppWidgetAndSetupDi(WidgetTester tester) async {
+    /// setup methods
+    Future<void> pumpAppWidgetAndSetupDi(WidgetTester tester) async {
       await tester.pumpWidget(dp.inject(child: const App()));
       ws = dp.read<MessengerWebSocket>() as MockMessengerWebSocket;
       baseWs = dp.read<KlmWebSocket>() as MockKlmWebSocket;
@@ -66,42 +61,9 @@ void main() {
     Future<void> restartApp(WidgetTester tester) async {
       baseWs.setIsConnected(false);
       await tester.pumpWidget(const SizedBox());
-      await _pumpAppWidgetAndSetupDi(tester);
+      await pumpAppWidgetAndSetupDi(tester);
       baseWs.setIsConnected(true);
       await tester.pumpAndSettle();
-    }
-
-    void getChatsMustReturn(List<ChatDto> chats) {
-      when(dp.chatsApi.getChats()).thenAnswer((_) async {
-        return HttpResponse(ChatsResponse(data: chats, message: null), Response(requestOptions: RequestOptions(), statusCode: 200));
-      });
-    }
-
-    void getChatWithIdMustReturn(ChatDto? Function(int) factory, {bool asyncControl = false}) {
-      when((dp.chatsApi as MockChatsApi).getChatWithId(chatId: anyNamed('chatId'))).thenAnswer((inv) async {
-        if (asyncControl) {
-          _getChatWithIdCompleter = Completer();
-          await _getChatWithIdCompleter.future;
-        }
-        final chat = factory(int.parse(inv.namedArguments[#chatId] as String));
-        return HttpResponse(ChatResponse(data: chat, message: null), Response(requestOptions: RequestOptions(), statusCode: chat == null ? 404 : 200));
-      });
-    }
-
-    void getMessagesMustReturn(List<MessageDto> messages, {int chatId = 0, bool asyncControl = false}) {
-      when(dp.messagesApi.getMessages(chatId: chatId, limit: AppConstants.msgPagingLimit, cursor: null)).thenAnswer((_) async {
-        if (asyncControl) {
-          _getMessagesCompleter = Completer();
-          await _getMessagesCompleter.future;
-        }
-        return HttpResponse(MessagesResponse(data: messages, message: null), Response(requestOptions: RequestOptions(), statusCode: 200));
-      });
-    }
-
-    void getChatWithUserMustReturn(ChatDto? chat, {int userId = 1}) {
-      when(
-        dp.chatsApi.getChatWithUser(otherUserId: userId),
-      ).thenAnswer((_) async => HttpResponse(ChatResponse(data: chat, message: null), Response(requestOptions: RequestOptions(), statusCode: chat == null ? 404 : 200)));
     }
 
     Future<void> setupApp(WidgetTester tester, List<ChatDto> chats, List<MessageDto> messages, {bool getMessagesAsyncControl = false, int openChatAtIndex = 0}) async {
@@ -109,14 +71,15 @@ void main() {
         throw Exception('chats are empty, but messages is not');
       }
 
-      getChatsMustReturn(chats);
-      // every ChatEventLoad calls it to get actual otherUser data
-      getChatWithIdMustReturn((id) => [chatDto0, chatDto1, chatDto2, chatDto3, chatDto4].firstWhereOrNull((chat) => chat.id == id));
+      getChatsMustReturn(dp, chats);
+
+      /// each ChatEventLoad calls it to get actual otherUser data
+      getChatWithIdMustReturn(dp, (id) => [chatDto0, chatDto1, chatDto2, chatDto3, chatDto4].firstWhereOrNull((chat) => chat.id == id));
       if (chats.isNotEmpty) {
-        getMessagesMustReturn(messages, chatId: chats[openChatAtIndex].id, asyncControl: getMessagesAsyncControl);
+        getMessagesMustReturn(dp, messages, chatId: chats[openChatAtIndex].id, asyncControl: getMessagesAsyncControl);
       }
 
-      await _pumpAppWidgetAndSetupDi(tester);
+      await pumpAppWidgetAndSetupDi(tester);
       baseWs.setIsConnected(true);
       await tester.pumpAndSettle();
 
@@ -131,15 +94,7 @@ void main() {
       }
     }
 
-    Future<void> sendGetMessagesResponse(WidgetTester tester, {bool settle = true}) async {
-      _getMessagesCompleter.complete();
-      if (settle) {
-        await tester.pumpAndSettle();
-      } else {
-        await tester.pump(const Duration(milliseconds: 50));
-      }
-    }
-
+    /// tests
     testWidgets('connection_test', timeout: const Timeout(Duration(seconds: 3)), (tester) async {
       /// after setup app will be connected to the ws, because the app must be connected to open the chat
       await setupApp(tester, [chatDto0], [messageDto0, messageDto1, messageDto2, messageDto3, messageDto4], getMessagesAsyncControl: true);
@@ -380,14 +335,14 @@ void main() {
     testWidgets('new_chat_other_user_message_first_test', (tester) async {
       await setupApp(tester, [], [], getMessagesAsyncControl: true);
       await dp.usersLocalDataSource.insert(chatDto0.otherUser);
-      getChatWithUserMustReturn(null);
+      getChatWithUserMustReturn(dp, null);
 
       /// open new chat, check
       await tester.pushPage(ChatPage(chat: null, otherUser: User.fromDto(chatDto0.otherUser)));
       tester.checkMessagesOrder([]);
 
       /// add message, check
-      getChatWithUserMustReturn(chatDto0);
+      getChatWithUserMustReturn(dp, chatDto0);
       ws.addMessage(messageDto0, createdChatInfo: CreatedChatInfo(chatId: 0, usersIds: [0, messageDto0.senderId]));
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([0]);
@@ -411,14 +366,14 @@ void main() {
     testWidgets('new_chat_current_user_message_first_test', (tester) async {
       await setupApp(tester, [], []);
       await dp.usersLocalDataSource.insert(chatDto0.otherUser);
-      getChatWithUserMustReturn(null);
+      getChatWithUserMustReturn(dp, null);
 
       /// open new chat, check
       await tester.pushPage(ChatPage(chat: null, otherUser: User.fromDto(chatDto0.otherUser)));
       tester.checkMessagesOrder([]);
 
       /// add message, check
-      getChatWithUserMustReturn(chatDto0);
+      getChatWithUserMustReturn(dp, chatDto0);
       ws.addMessage(messageDto3, createdChatInfo: CreatedChatInfo(chatId: 0, usersIds: [0, messageDto0.senderId]));
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([3]);
@@ -448,7 +403,7 @@ void main() {
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([]);
 
-      getChatWithUserMustReturn(chatDto0);
+      getChatWithUserMustReturn(dp, chatDto0);
       ws.addMessage(messageDto1, createdChatInfo: CreatedChatInfo(chatId: 0, usersIds: [0, chatDto0.otherUser.id]));
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([1]);
@@ -463,7 +418,7 @@ void main() {
       await sendGetMessagesResponse(tester);
       tester.checkMessagesOrder([0, 1, 2, 3]);
 
-      getMessagesMustReturn([messageDto0, messageDto1, messageDto3], asyncControl: true);
+      getMessagesMustReturn(dp, [messageDto0, messageDto1, messageDto3], asyncControl: true);
       await restartApp(tester);
       await tester.openChat(0);
       tester.checkMessagesOrder([0, 1, 2, 3]);
@@ -472,9 +427,9 @@ void main() {
     });
 
     /// checks that after deleting the chat there is no its messages in the cache
-    testWidgets('clearing_cache_test_1_test', (tester) async {
+    testWidgets('clearing_cache_test_1', (tester) async {
       await setupApp(tester, [], []);
-      getMessagesMustReturn([], asyncControl: true);
+      getMessagesMustReturn(dp, [], asyncControl: true);
 
       ws.addMessage(messageDto0);
       await tester.pumpAndSettle();
@@ -485,6 +440,7 @@ void main() {
       tester.checkChatsOrder([]);
 
       getChatWithIdMustReturn(
+        dp,
         (id) => id == 0 ? ChatDto(id: id, otherUser: chatDto0.otherUser, lastMessage: messageDto1, unreadCount: 0, channelData: null, createdAt: 0) : throw Exception('not found'),
       );
       ws.addMessage(messageDto1);
@@ -498,10 +454,10 @@ void main() {
 
     /// checks that if new api chat has new lastMessage, the actual lastMessage is not deleted from cache
     /// lastMessage should be deleted only if it's later that the new one
-    testWidgets('clearing_cache_test_2_test', (tester) async {
+    testWidgets('clearing_cache_test_2', (tester) async {
       await setupApp(tester, [ChatDto(id: 0, otherUser: chatDto0.otherUser, lastMessage: messageDto2, unreadCount: 0, channelData: null, createdAt: 0)], [messageDto2, messageDto3, messageDto4]);
-      getChatsMustReturn([chatDto0]);
-      getMessagesMustReturn([messageDto0, messageDto2, messageDto3, messageDto4], asyncControl: true);
+      getChatsMustReturn(dp, [chatDto0]);
+      getMessagesMustReturn(dp, [messageDto0, messageDto2, messageDto3, messageDto4], asyncControl: true);
 
       /// check message, restart the app
       tester.checkMessagesOrder([2, 3, 4]);
@@ -519,7 +475,7 @@ void main() {
 
     testWidgets('open_deleted_chat_from_notification_test', (tester) async {
       await setupApp(tester, [], []);
-      getMessagesMustReturn([], chatId: 6);
+      getMessagesMustReturn(dp, [], chatId: 6);
 
       await tester.pushPage(
         ChatPage(

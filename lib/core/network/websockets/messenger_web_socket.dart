@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
+import 'package:kepleomax/core/data/models/channel_update.dart';
 import 'package:kepleomax/core/di/disposable.dart';
 import 'package:kepleomax/core/models/chat.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
@@ -44,7 +44,7 @@ abstract class MessengerWebSocket implements Disposable {
 
   Stream<ChannelUnsubscriptionUpdate> get channelUnsubscriptionUpdatesStream;
 
-  Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream;
+  Stream<ChannelUpdate> get channelUpdatesStream;
 
   Stream<int> get channelDeletedStream;
 }
@@ -73,7 +73,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
           case 'channel_edited':
             _onChannelEdited(
               ChannelData.fromDto(
-                ChatChannelDataDto.fromJson(
+                ChannelDataDto.fromJson(
                   data['new_channel'] as Map<String, dynamic>,
                 ),
               ),
@@ -109,7 +109,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
       StreamController.broadcast();
   final StreamController<ChannelUnsubscriptionUpdate>
   _channelUnsubUpdatesController = StreamController.broadcast();
-  final StreamController<ChannelOnChatScreenUpdate> _channelUpdatesController =
+  final StreamController<ChannelUpdate> _channelUpdatesController =
       StreamController.broadcast();
   final StreamController<int> _channelDeletedController =
       StreamController.broadcast();
@@ -143,7 +143,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
       _channelUnsubUpdatesController.stream;
 
   @override
-  Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream =>
+  Stream<ChannelUpdate> get channelUpdatesStream =>
       _channelUpdatesController.stream;
 
   @override
@@ -187,7 +187,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
 
   void _onChannelEdited(ChannelData channelData) {
     _channelUpdatesController.add(
-      ChannelOnChatScreenUpdate(
+      ChannelUpdate(
         channelId: channelData.id,
         newChannelData: channelData,
       ),

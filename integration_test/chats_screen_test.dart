@@ -2,7 +2,6 @@
 
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -21,14 +20,12 @@ import 'package:kepleomax/core/network/websockets/models/deleted_message_update.
 import 'package:kepleomax/core/network/websockets/models/online_status_update.dart';
 import 'package:kepleomax/core/network/websockets/models/read_messages_update.dart';
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
-import 'package:mockito/mockito.dart';
-import 'package:retrofit/dio.dart';
 
 import 'di/initialize_tests_dependencies.dart';
 import 'mocks/mock_klm_web_socket.dart';
 import 'mocks/mock_messages_web_socket.dart';
-import 'mocks/mockito_mocks.mocks.dart';
 import 'utils/mock_objects.dart';
+import 'utils/mock_utils.dart';
 import 'utils/utils.dart';
 
 void main() {
@@ -38,8 +35,8 @@ void main() {
     late Dependencies dp;
     late MockMessengerWebSocket ws;
     late MockKlmWebSocket baseWs;
-    late Completer<void> _getChatsCompleter;
 
+    /// test lifecycle
     setUpAll(() {
       Flavor.setFlavor(Flavor.testing());
     });
@@ -53,27 +50,26 @@ void main() {
       await LocalDatabaseManager.reset();
     });
 
-    Future<void> _pumpAppWidgetAndSetupDi(WidgetTester tester) async {
+    /// setup
+    Future<void> pumpAppWidgetAndSetupDi(WidgetTester tester) async {
       await tester.pumpWidget(dp.inject(child: const App()));
       ws = dp.read<MessengerWebSocket>() as MockMessengerWebSocket;
       baseWs = dp.read<KlmWebSocket>() as MockKlmWebSocket;
     }
 
+    Future<void> restartApp(WidgetTester tester) async {
+      baseWs.setIsConnected(false);
+      await tester.pumpWidget(const SizedBox());
+      await pumpAppWidgetAndSetupDi(tester);
+      baseWs.setIsConnected(true);
+      await tester.pumpAndSettle();
+    }
+
     Future<void> setupAppWithChats(WidgetTester tester, List<ChatDto> chats, {bool getChatsAsyncControl = false, bool connect = true}) async {
-      when(dp.chatsApi.getChats()).thenAnswer((_) async {
-        if (getChatsAsyncControl) {
-          _getChatsCompleter = Completer();
-          await _getChatsCompleter.future;
-        }
-        return HttpResponse(ChatsResponse(data: chats, message: null), Response(requestOptions: RequestOptions(), statusCode: 200));
-      });
-      when((dp.chatsApi as MockChatsApi).getChatWithId(chatId: anyNamed('chatId'))).thenAnswer((inv) async {
-        return HttpResponse(
-          ChatResponse(data: [chatDto0, chatDto1, chatDto2, chatDto3, chatDto4].firstWhere((chat) => chat.id == int.parse(inv.namedArguments[#chatId] as String)), message: null),
-          Response(requestOptions: RequestOptions(), statusCode: 200),
-        );
-      });
-      await _pumpAppWidgetAndSetupDi(tester);
+      getChatsMustReturn(dp, chats, asyncControl: getChatsAsyncControl);
+      getChatWithIdMustReturn(dp, (chatId) => [chatDto0, chatDto1, chatDto2, chatDto3, chatDto4].firstWhere((chat) => chat.id == chatId));
+
+      await pumpAppWidgetAndSetupDi(tester);
 
       if (!connect) {
         return;
@@ -86,29 +82,7 @@ void main() {
       }
     }
 
-    Future<void> sendGetChatsResponse(WidgetTester tester) async {
-      _getChatsCompleter.complete();
-      await tester.pumpAndSettle();
-    }
-
-    void getChatsMustReturn(List<ChatDto> chats, {bool asyncControl = false}) {
-      when(dp.chatsApi.getChats()).thenAnswer((_) async {
-        if (asyncControl) {
-          _getChatsCompleter = Completer();
-          await _getChatsCompleter.future;
-        }
-        return HttpResponse(ChatsResponse(data: chats, message: null), Response(requestOptions: RequestOptions(), statusCode: 200));
-      });
-    }
-
-    Future<void> restartApp(WidgetTester tester) async {
-      baseWs.setIsConnected(false);
-      await tester.pumpWidget(const SizedBox());
-      await _pumpAppWidgetAndSetupDi(tester);
-      baseWs.setIsConnected(true);
-      await tester.pumpAndSettle();
-    }
-
+    /// tests
     testWidgets('connection_test', timeout: const Timeout(Duration(seconds: 3)), (tester) async {
       await setupAppWithChats(tester, [], getChatsAsyncControl: true, connect: false);
       tester
@@ -154,11 +128,11 @@ void main() {
 
       /// check
       tester.checkChatsOrder([0, 1, 2, 3, 4]);
-      tester.getChat(0).check(unreadCount: 2, unreadIcon: false, readIcon: false, message: 'MSG_0', msgFromCurrentUser: false, otherUserName: 'OTHER_USERNAME_1', isOnline: true);
-      tester.getChat(1).check(unreadCount: 4, unreadIcon: false, readIcon: false, message: 'MSG_1', msgFromCurrentUser: false, otherUserName: 'OTHER_USERNAME_2', isOnline: false);
-      tester.getChat(2).check(unreadCount: 0, unreadIcon: true, readIcon: false, message: 'MSG_2', msgFromCurrentUser: true, otherUserName: 'OTHER_USERNAME_3', isOnline: false);
-      tester.getChat(3).check(unreadCount: 0, unreadIcon: false, readIcon: true, message: 'MSG_3', msgFromCurrentUser: true, otherUserName: 'OTHER_USERNAME_4', isOnline: false);
-      tester.getChat(4).check(unreadCount: 0, unreadIcon: false, readIcon: false, message: 'MSG_4', msgFromCurrentUser: false, otherUserName: 'OTHER_USERNAME_5', isOnline: false);
+      tester.getChat(0).check(unreadCount: 2, unreadIcon: false, readIcon: false, message: 'MSG_0', msgFromCurrentUser: false, name: 'OTHER_USERNAME_1', isOnline: true);
+      tester.getChat(1).check(unreadCount: 4, unreadIcon: false, readIcon: false, message: 'MSG_1', msgFromCurrentUser: false, name: 'OTHER_USERNAME_2', isOnline: false);
+      tester.getChat(2).check(unreadCount: 0, unreadIcon: true, readIcon: false, message: 'MSG_2', msgFromCurrentUser: true, name: 'OTHER_USERNAME_3', isOnline: false);
+      tester.getChat(3).check(unreadCount: 0, unreadIcon: false, readIcon: true, message: 'MSG_3', msgFromCurrentUser: true, name: 'OTHER_USERNAME_4', isOnline: false);
+      tester.getChat(4).check(unreadCount: 0, unreadIcon: false, readIcon: false, message: 'MSG_4', msgFromCurrentUser: false, name: 'OTHER_USERNAME_5', isOnline: false);
     });
 
     testWidgets('unread_count_test', (tester) async {
@@ -359,7 +333,7 @@ void main() {
         ..checkChatsOrder([0, 1, 2, 3, 4]);
 
       /// check cachedChats, then new chats from api
-      getChatsMustReturn([chatDto4, chatDto3, chatDto2, chatDto1], asyncControl: true);
+      getChatsMustReturn(dp, [chatDto4, chatDto3, chatDto2, chatDto1], asyncControl: true);
       await restartApp(tester);
       tester
         ..checkChatsAppBarStatus(ChatsAppBarStatus.updating)
@@ -418,7 +392,7 @@ void main() {
       ws.addMessage(chatDto3.lastMessage!);
       await tester.pumpAndSettle();
       tester.checkChatsOrder([3, 0, 1]);
-      tester.getChat(3).check(message: chatDto3.lastMessage!.message, msgFromCurrentUser: chatDto3.lastMessage!.isCurrentUser, otherUserName: chatDto3.otherUser.username);
+      tester.getChat(3).check(message: chatDto3.lastMessage!.message, msgFromCurrentUser: chatDto3.lastMessage!.isCurrentUser, name: chatDto3.otherUser.username);
     });
 
     testWidgets('online_status_test', (tester) async {
@@ -521,7 +495,9 @@ void main() {
       await setupAppWithChats(tester, [chatDto0]);
 
       /// lastMessage will be earlier that the current one, cause the current one is deleted
-      getChatsMustReturn([ChatDto(id: chatDto0.id, otherUser: chatDto0.otherUser, lastMessage: messageDto1, unreadCount: chatDto0.unreadCount, channelData: null, createdAt: 0)], asyncControl: true);
+      getChatsMustReturn(dp, [
+        ChatDto(id: chatDto0.id, otherUser: chatDto0.otherUser, lastMessage: messageDto1, unreadCount: chatDto0.unreadCount, channelData: null, createdAt: 0),
+      ], asyncControl: true);
       await restartApp(tester);
       tester.getChat(0).check(message: messageDto0.message);
       await sendGetChatsResponse(tester);

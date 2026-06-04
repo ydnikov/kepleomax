@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:kepleomax/core/data/models/channel_on_chat_screen_update.dart';
+import 'package:kepleomax/core/data/models/channel_update.dart';
 import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/network/websockets/models/channel_subscription_update.dart';
 import 'package:kepleomax/core/network/websockets/models/channel_unsubscription_update.dart';
@@ -66,8 +66,8 @@ class FakeMessagesWebSocket implements MessengerWebSocket {
       StreamController<ChannelUnsubscriptionUpdate>.broadcast().stream;
 
   @override
-  Stream<ChannelOnChatScreenUpdate> get channelUpdatesStream =>
-      StreamController<ChannelOnChatScreenUpdate>.broadcast().stream;
+  Stream<ChannelUpdate> get channelUpdatesStream =>
+      StreamController<ChannelUpdate>.broadcast().stream;
 
   @override
   void dispose() {}

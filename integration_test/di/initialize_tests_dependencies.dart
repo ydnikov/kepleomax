@@ -25,7 +25,6 @@ import 'package:kepleomax/core/flavor.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
 import 'package:kepleomax/core/network/apis/calls/calls_api.dart';
-import 'package:kepleomax/core/network/apis/channels/channel_api.dart';
 import 'package:kepleomax/core/network/apis/files/files_api.dart';
 import 'package:kepleomax/core/network/apis/posts/post_api.dart';
 import 'package:kepleomax/core/network/apis/profile/profile_api.dart';
@@ -127,9 +126,9 @@ List<_InitializationStep> _steps = [
     dp
       ..messagesApi = MockMessagesApi()
       ..chatsApi = MockChatsApi()
+      ..channelApi = MockChannelApi()
       ..postApi = PostApi(dp.dio, flavor.baseUrl)
-      ..callsApi = CallsApi(dp.dio, flavor.baseUrl)
-      ..channelApi = ChannelApi(dp.dio, flavor.baseUrl);
+      ..callsApi = CallsApi(dp.dio, flavor.baseUrl);
   }),
 
   _InitializationStep('api_data_sources', (dp) async {
