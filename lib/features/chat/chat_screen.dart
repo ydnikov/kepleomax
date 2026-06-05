@@ -440,7 +440,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
                       else if (!data.isLoading && data.isConnected)
                         if (data.chat.isChannel)
                           Text(
-                            '${data.chat.channelData!.subscribersCount ?? 0} subscriber${ParseTime.isSingular(data.chat.channelData!.subscribersCount ?? 0) ? '' : 's'}',
+                            '${data.chat.channelData!.subsCount} subscriber${ParseTime.isSingular(data.chat.channelData!.subsCount) ? '' : 's'}',
                             key: const Key('subscribers_count_text'),
                             style: context.textTheme.bodyMedium?.copyWith(
                               fontSize: 13,

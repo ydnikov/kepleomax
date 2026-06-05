@@ -60,8 +60,6 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
 
       if (_data.channelData.userRole.isOwner) {
         await _channelRepository.loadSubscribers();
-      } else if (_data.channelData.subscribersCount == null) {
-        await _channelRepository.loadSubscribersCount();
       }
     } catch (e, st) {
       logger.e(e, stackTrace: st);
@@ -76,7 +74,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     ChannelEventSubscribe event,
     Emitter<ChannelState> emit,
   ) async {
-    if (_data.channelData.subscribersCount == null) return;
+    if (_data.isLoading) return;
 
     _data = _data.copyWith(isLoading: true);
     emit(ChannelStateBase(_data));
@@ -96,7 +94,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
     ChannelEventUnsubscribe event,
     Emitter<ChannelState> emit,
   ) async {
-    if (_data.channelData.subscribersCount == null) return;
+    if (_data.isLoading) return;
 
     _data = _data.copyWith(isLoading: true);
     emit(ChannelStateBase(_data));

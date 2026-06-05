@@ -19,8 +19,6 @@ const int _channelSubsPagingLimit = 10;
 abstract class ChannelRepository implements ChannelEditorRepository, Disposable {
   Future<ChannelData> init({ChannelData? channelData, int? channelId});
 
-  Future<void> loadSubscribersCount();
-
   Future<void> loadSubscribers();
 
   Future<void> loadMoreSubscribers();
@@ -134,7 +132,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
 
           final newChannelData = _currentChannelData.copyWith(
             userRole: UserChannelRole.none,
-            subscribersCount: update.subsCount,
+            subsCount: update.subsCount,
           );
 
           _channelUpdatesController.add(newChannelData);
@@ -167,21 +165,6 @@ class ChannelRepositoryImpl implements ChannelRepository {
   }
 
   @override
-  Future<void> loadSubscribersCount() async {
-    final res = await _api.getSubscribersCount(channelId: _currentChannelData.id);
-
-    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
-      throw Exception(
-        res.data.message ?? 'Failed to get subs count: ${res.response.statusCode}',
-      );
-    }
-
-    _channelUpdatesController.add(
-      _currentChannelData.copyWith(subscribersCount: res.data.count),
-    );
-  }
-
-  @override
   Future<void> loadSubscribers() async {
     final res = await _api.getSubscribers(
       channelId: _currentChannelData.id,
@@ -197,7 +180,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
 
     _usersStreamController.add(res.data.data!.map(User.fromDto).toList());
     _channelUpdatesController.add(
-      _currentChannelData.copyWith(subscribersCount: res.data.totalCount),
+      _currentChannelData.copyWith(subsCount: res.data.totalCount!),
     );
   }
 
@@ -206,9 +189,10 @@ class ChannelRepositoryImpl implements ChannelRepository {
     final res = await _api.subscribe(channelId: _currentChannelData.id);
 
     if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+      /// TODO make so if code is 409, pass it up somehow and update ui (request chat, or just change role)
       throw Exception(
         res.response.statusCode == 409
-            ? 'You are already subscribed'
+            ? "You're already subscribed"
             : 'Failed to subscribe: ${res.response.statusCode}',
       );
     }
@@ -223,8 +207,8 @@ class ChannelRepositoryImpl implements ChannelRepository {
 
     if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
       throw Exception(
-        res.response.statusCode == 404
-            ? 'You are not a subscriber'
+        res.response.statusCode == 409
+            ? "You're not a subscriber"
             : 'Failed to unsubscribe: ${res.response.statusCode}',
       );
     }
@@ -235,7 +219,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
       );
       _channelUpdatesController.add(
         _currentChannelData.copyWith(
-          subscribersCount: _currentChannelData.subscribersCount! - 1,
+          subsCount: _currentChannelData.subsCount - 1,
         ),
       );
     }

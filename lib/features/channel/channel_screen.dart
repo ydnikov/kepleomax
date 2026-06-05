@@ -171,12 +171,9 @@ class _BodyState extends State<_Body> {
               //   child:
               // ),
               const SizedBox(height: 2),
-              Skeletonizer(
-                enabled: channelData.subscribersCount == null,
-                child: Text(
-                  '${channelData.subscribersCount ?? 0} subscriber${ParseTime.isSingular(channelData.subscribersCount ?? 0) ? '' : 's'}',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
+              Text(
+                '${channelData.subsCount} subscriber${ParseTime.isSingular(channelData.subsCount) ? '' : 's'}',
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

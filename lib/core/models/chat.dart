@@ -70,7 +70,7 @@ abstract class ChannelData with _$ChannelData {
     required String? image,
     required bool isOfficial,
     required UserChannelRole userRole,
-    int? subscribersCount,
+    required int subsCount,
   }) = _ChannelData;
 
   const ChannelData._();
@@ -83,7 +83,7 @@ abstract class ChannelData with _$ChannelData {
     image: dto.image,
     isOfficial: dto.isOfficial,
     userRole: UserChannelRole.fromDto(dto.userChannelRole),
-    subscribersCount: dto.subscribersCount,
+    subsCount: dto.subsCount,
   );
 
   ChannelData keepRoleIfNeeded(UserChannelRole originalRole) {

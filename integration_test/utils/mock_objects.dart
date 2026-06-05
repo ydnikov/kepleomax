@@ -64,6 +64,7 @@ final chatChannelDto0 = ChatDto(
     isOfficial: false,
     userChannelRole: UserChannelRoleDto.subscriber,
     tag: 'CHANNEL_0',
+    subsCount: 2
   ),
 );
 
@@ -81,6 +82,7 @@ final chatChannelDto1 = ChatDto(
     isOfficial: false,
     userChannelRole: UserChannelRoleDto.subscriber,
     tag: 'CHANNEL_1',
+    subsCount: 3
   ),
 );
 

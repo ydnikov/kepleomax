@@ -205,7 +205,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       if (chat.isChannel) {
         await _channelRepository.init(channelData: chat.channelData);
-        await _channelRepository.loadSubscribersCount();
       } else {
         /// get user and check updates, because online status can be changed
         unawaited(

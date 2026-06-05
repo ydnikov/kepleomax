@@ -1,4 +1,4 @@
-// dart format width=200
+// dart format width=250
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -115,7 +115,7 @@ void main() {
 
       /// add subEvent, check
       final chat = Chat.fromDto(chatChannelDto0);
-      final chatWithSubsCount = chat.copyWith(channelData: chat.channelData!.copyWith(subscribersCount: 2));
+      final chatWithSubsCount = chat.copyWith(channelData: chat.channelData!.copyWith(subsCount: 2));
       ws.addSubChannel(ChannelSubscriptionUpdate(chat: chatWithSubsCount));
       await tester.pumpAndSettle();
       tester
@@ -140,9 +140,7 @@ void main() {
       ws.addChannelUpdateEvent(
         ChannelUpdate(
           channelId: 0,
-          newChannelData: ChannelData.fromDto(
-            ChannelDataDto(id: 0, channelName: chatChannelDto1.channelData!.channelName, description: '', image: null, isOfficial: false, userChannelRole: UserChannelRoleDto.subscriber, tag: 'tag'),
-          ),
+          newChannelData: ChannelData.fromDto(ChannelDataDto(id: 0, channelName: chatChannelDto1.channelData!.channelName, description: '', image: null, isOfficial: false, userChannelRole: UserChannelRoleDto.subscriber, tag: 'tag', subsCount: 2)),
         ),
       );
       await tester.pumpAndSettle();
@@ -164,18 +162,7 @@ void main() {
       ws.addChannelUpdateEvent(
         ChannelUpdate(
           channelId: 0,
-          newChannelData: ChannelData.fromDto(
-            ChannelDataDto(
-              id: 0,
-              channelName: chatChannelDto1.channelData!.channelName,
-              description: '',
-              image: null,
-              isOfficial: false,
-              userChannelRole: UserChannelRoleDto.subscriber,
-              tag: 'tag',
-              subscribersCount: 88,
-            ),
-          ),
+          newChannelData: ChannelData.fromDto(ChannelDataDto(id: 0, channelName: chatChannelDto1.channelData!.channelName, description: '', image: null, isOfficial: false, userChannelRole: UserChannelRoleDto.subscriber, tag: 'tag', subsCount: 88)),
         ),
       );
       await tester.pumpAndSettle();
