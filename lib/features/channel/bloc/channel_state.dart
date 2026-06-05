@@ -38,6 +38,7 @@ abstract class ChannelScreenData with _$ChannelScreenData implements ChannelStat
     required ChannelData channelData,
     required List<User> subs,
     @Default(true) bool isLoading,
+    @Default(false) bool isConnected,
   }) = _ChannelData;
 
   factory ChannelScreenData.initial({required ChannelData channelData}) =>

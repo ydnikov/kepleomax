@@ -36,7 +36,7 @@ abstract class AppConstantsType {
 
   Duration get callingTimeout => const Duration(seconds: 15);
 
-  Duration get fakeDelayDuration => const Duration(milliseconds: 500);
+  Duration get fakeDelayDuration => const Duration(milliseconds: 300);
 
   int get msgPagingLimit => 15;
 

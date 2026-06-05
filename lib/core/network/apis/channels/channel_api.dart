@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:kepleomax/core/network/apis/channels/channel_dtos.dart';
+import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'channel_api.g.dart';
@@ -38,12 +39,12 @@ abstract class ChannelApi {
   });
 
   @POST('/subscribe')
-  Future<HttpResponse<void>> subscribe({
+  Future<HttpResponse<ChatResponse>> subscribe({
     @Query('channel_id') required int channelId,
   });
 
   @DELETE('/unsubscribe')
-  Future<HttpResponse<void>> unsubscribe({
+  Future<HttpResponse<ChatResponse>> unsubscribe({
     @Query('channel_id') required int channelId,
     @Query('user_id') int? userId,
   });

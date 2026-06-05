@@ -196,6 +196,8 @@ class ChannelRepositoryImpl implements ChannelRepository {
             : 'Failed to subscribe: ${res.response.statusCode}',
       );
     }
+
+    _channelUpdatesController.add(ChannelData.fromDto(res.data.data!.channelData!));
   }
 
   @override
@@ -217,12 +219,9 @@ class ChannelRepositoryImpl implements ChannelRepository {
       _usersStreamController.add(
         _usersStreamController.currentValue!.where((u) => u.id != userId).toList(),
       );
-      _channelUpdatesController.add(
-        _currentChannelData.copyWith(
-          subsCount: _currentChannelData.subsCount - 1,
-        ),
-      );
     }
+
+    _channelUpdatesController.add(ChannelData.fromDto(res.data.data!.channelData!));
   }
 
   @override

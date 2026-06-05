@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
 import 'package:kepleomax/core/extensions/build_context_extensions.dart';
 import 'package:kepleomax/core/models/chat.dart';
@@ -56,12 +57,16 @@ class _ChannelScreenState extends State<ChannelScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ChannelBloc>(
-      create: (context) => ChannelBloc(
-        channelData: widget.channelData,
+      create: (context) {
+        final dp = Dependencies.of(context);
+        return ChannelBloc(
+          channelData: widget.channelData,
 
-        /// must be opened from chat_screen, for having this in dp
-        channelRepository: Dependencies.of(context).read<ChannelRepository>(),
-      )..add(const ChannelEventLoad()),
+          /// must be opened from chat_screen, for having this in dp
+          channelRepository: dp.read<ChannelRepository>(),
+          connectionRepository: dp.read<ConnectionRepository>(),
+        )..add(const ChannelEventLoad());
+      },
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: _AppBar(scrollController: _scrollController),
@@ -171,10 +176,30 @@ class _BodyState extends State<_Body> {
               //   child:
               // ),
               const SizedBox(height: 2),
-              Text(
-                '${channelData.subsCount} subscriber${ParseTime.isSingular(channelData.subsCount) ? '' : 's'}',
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
-              ),
+              if (!data.isConnected)
+                const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(
+                        color: Colors.grey,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Connecting',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                )
+              else
+                Text(
+                  '${channelData.subsCount} subscriber${ParseTime.isSingular(channelData.subsCount) ? '' : 's'}',
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Column(
@@ -183,6 +208,7 @@ class _BodyState extends State<_Body> {
                     _ChannelButtonsWidget(
                       channelData: channelData,
                       isLoading: data.isLoading,
+                      isConnected: data.isConnected,
                     ),
                     const SizedBox(height: 12),
                     const Divider(),
@@ -277,11 +303,11 @@ class _BodyState extends State<_Body> {
                       itemBuilder: (context, i) => _ChannelUserWidget(
                         user: data.subs[i],
                         key: Key('channel_subscriber_${data.subs[i].id}'),
-                        onDelete: () {
+                        onDelete: data.isConnected ? () {
                           context.read<ChannelBloc>().add(
                             ChannelEventUnsubscribe(userId: data.subs[i].id),
                           );
-                        },
+                        } : null,
                       ),
                     ),
                   )

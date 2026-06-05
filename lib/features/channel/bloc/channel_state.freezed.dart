@@ -806,7 +806,7 @@ as bool,
 /// @nodoc
 mixin _$ChannelScreenData {
 
- ChannelData get channelData; List<User> get subs; bool get isLoading;
+ ChannelData get channelData; List<User> get subs; bool get isLoading; bool get isConnected;
 /// Create a copy of ChannelScreenData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -817,16 +817,16 @@ $ChannelScreenDataCopyWith<ChannelScreenData> get copyWith => _$ChannelScreenDat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelScreenData&&(identical(other.channelData, channelData) || other.channelData == channelData)&&const DeepCollectionEquality().equals(other.subs, subs)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelScreenData&&(identical(other.channelData, channelData) || other.channelData == channelData)&&const DeepCollectionEquality().equals(other.subs, subs)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isConnected, isConnected) || other.isConnected == isConnected));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,channelData,const DeepCollectionEquality().hash(subs),isLoading);
+int get hashCode => Object.hash(runtimeType,channelData,const DeepCollectionEquality().hash(subs),isLoading,isConnected);
 
 @override
 String toString() {
-  return 'ChannelScreenData(channelData: $channelData, subs: $subs, isLoading: $isLoading)';
+  return 'ChannelScreenData(channelData: $channelData, subs: $subs, isLoading: $isLoading, isConnected: $isConnected)';
 }
 
 
@@ -837,7 +837,7 @@ abstract mixin class $ChannelScreenDataCopyWith<$Res>  {
   factory $ChannelScreenDataCopyWith(ChannelScreenData value, $Res Function(ChannelScreenData) _then) = _$ChannelScreenDataCopyWithImpl;
 @useResult
 $Res call({
- ChannelData channelData, List<User> subs, bool isLoading
+ ChannelData channelData, List<User> subs, bool isLoading, bool isConnected
 });
 
 
@@ -854,11 +854,12 @@ class _$ChannelScreenDataCopyWithImpl<$Res>
 
 /// Create a copy of ChannelScreenData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? channelData = null,Object? subs = null,Object? isLoading = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? channelData = null,Object? subs = null,Object? isLoading = null,Object? isConnected = null,}) {
   return _then(_self.copyWith(
 channelData: null == channelData ? _self.channelData : channelData // ignore: cast_nullable_to_non_nullable
 as ChannelData,subs: null == subs ? _self.subs : subs // ignore: cast_nullable_to_non_nullable
 as List<User>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -953,10 +954,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ChannelData channelData,  List<User> subs,  bool isLoading)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ChannelData channelData,  List<User> subs,  bool isLoading,  bool isConnected)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChannelData() when $default != null:
-return $default(_that.channelData,_that.subs,_that.isLoading);case _:
+return $default(_that.channelData,_that.subs,_that.isLoading,_that.isConnected);case _:
   return orElse();
 
 }
@@ -974,10 +975,10 @@ return $default(_that.channelData,_that.subs,_that.isLoading);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ChannelData channelData,  List<User> subs,  bool isLoading)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ChannelData channelData,  List<User> subs,  bool isLoading,  bool isConnected)  $default,) {final _that = this;
 switch (_that) {
 case _ChannelData():
-return $default(_that.channelData,_that.subs,_that.isLoading);case _:
+return $default(_that.channelData,_that.subs,_that.isLoading,_that.isConnected);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -994,10 +995,10 @@ return $default(_that.channelData,_that.subs,_that.isLoading);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ChannelData channelData,  List<User> subs,  bool isLoading)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ChannelData channelData,  List<User> subs,  bool isLoading,  bool isConnected)?  $default,) {final _that = this;
 switch (_that) {
 case _ChannelData() when $default != null:
-return $default(_that.channelData,_that.subs,_that.isLoading);case _:
+return $default(_that.channelData,_that.subs,_that.isLoading,_that.isConnected);case _:
   return null;
 
 }
@@ -1009,7 +1010,7 @@ return $default(_that.channelData,_that.subs,_that.isLoading);case _:
 
 
 class _ChannelData implements ChannelScreenData {
-  const _ChannelData({required this.channelData, required final  List<User> subs, this.isLoading = true}): _subs = subs;
+  const _ChannelData({required this.channelData, required final  List<User> subs, this.isLoading = true, this.isConnected = false}): _subs = subs;
   
 
 @override final  ChannelData channelData;
@@ -1021,6 +1022,7 @@ class _ChannelData implements ChannelScreenData {
 }
 
 @override@JsonKey() final  bool isLoading;
+@override@JsonKey() final  bool isConnected;
 
 /// Create a copy of ChannelScreenData
 /// with the given fields replaced by the non-null parameter values.
@@ -1032,16 +1034,16 @@ _$ChannelDataCopyWith<_ChannelData> get copyWith => __$ChannelDataCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelData&&(identical(other.channelData, channelData) || other.channelData == channelData)&&const DeepCollectionEquality().equals(other._subs, _subs)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelData&&(identical(other.channelData, channelData) || other.channelData == channelData)&&const DeepCollectionEquality().equals(other._subs, _subs)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isConnected, isConnected) || other.isConnected == isConnected));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,channelData,const DeepCollectionEquality().hash(_subs),isLoading);
+int get hashCode => Object.hash(runtimeType,channelData,const DeepCollectionEquality().hash(_subs),isLoading,isConnected);
 
 @override
 String toString() {
-  return 'ChannelScreenData(channelData: $channelData, subs: $subs, isLoading: $isLoading)';
+  return 'ChannelScreenData(channelData: $channelData, subs: $subs, isLoading: $isLoading, isConnected: $isConnected)';
 }
 
 
@@ -1052,7 +1054,7 @@ abstract mixin class _$ChannelDataCopyWith<$Res> implements $ChannelScreenDataCo
   factory _$ChannelDataCopyWith(_ChannelData value, $Res Function(_ChannelData) _then) = __$ChannelDataCopyWithImpl;
 @override @useResult
 $Res call({
- ChannelData channelData, List<User> subs, bool isLoading
+ ChannelData channelData, List<User> subs, bool isLoading, bool isConnected
 });
 
 
@@ -1069,11 +1071,12 @@ class __$ChannelDataCopyWithImpl<$Res>
 
 /// Create a copy of ChannelScreenData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? channelData = null,Object? subs = null,Object? isLoading = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? channelData = null,Object? subs = null,Object? isLoading = null,Object? isConnected = null,}) {
   return _then(_ChannelData(
 channelData: null == channelData ? _self.channelData : channelData // ignore: cast_nullable_to_non_nullable
 as ChannelData,subs: null == subs ? _self._subs : subs // ignore: cast_nullable_to_non_nullable
 as List<User>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

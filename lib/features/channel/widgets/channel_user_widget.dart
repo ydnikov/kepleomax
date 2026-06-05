@@ -63,7 +63,7 @@ class _ChannelUserWidget extends StatelessWidget {
           ],
         ),
         contentPadding: const EdgeInsets.only(left: 16),
-        trailing: user.isCurrent || isLoading
+        trailing: user.isCurrent || isLoading || onDelete == null
             ? const SizedBox(width: 2)
             : IconButton(
                 onPressed: () {
@@ -72,7 +72,7 @@ class _ChannelUserWidget extends StatelessWidget {
                     (_) => _DeleteUserDialog(
                       user: user,
                       onDelete: () {
-                        onDelete?.call();
+                        onDelete!();
                       },
                     ),
                     barrierDismissible: true,

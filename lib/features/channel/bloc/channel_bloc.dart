@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kepleomax/core/data/connection_repository.dart';
 import 'package:kepleomax/core/extensions/fake_delay_extension.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/chat.dart';
@@ -14,6 +15,7 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
   ChannelBloc({
     required ChannelData channelData,
     required ChannelRepository channelRepository,
+    required ConnectionRepository connectionRepository,
   }) : _channelRepository = channelRepository,
        super(ChannelStateBase.initial(channelData: channelData)) {
     _data = ChannelScreenData.initial(channelData: channelData);
@@ -30,6 +32,9 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
         if (channelId != _data.channelData.id) return;
         add(const ChannelEventDeleted());
       }),
+      connectionRepository.connectionStateStream.listen((isConnected) {
+        add(_ChannelEventOnConnectionUpdate(isConnected: isConnected));
+      }),
     ]);
 
     on<ChannelEvent>(
@@ -45,6 +50,9 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
       transformer: sequential(),
     );
     on<ChannelEventDeleted>(_onDeleted);
+    on<_ChannelEventOnConnectionUpdate>(_onConnectionUpdate);
+
+    add(_ChannelEventOnConnectionUpdate(isConnected: connectionRepository.isConnected));
   }
 
   final List<StreamSubscription<void>> _subs = [];
@@ -122,7 +130,6 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
           .deleteChannel(channelId: _data.channelData.id)
           .withFakeDelay();
 
-
       /// don't add ChannelEventDeleted, cause it will be added via ws
     } catch (e, st) {
       logger.e(e, stackTrace: st);
@@ -144,6 +151,14 @@ class ChannelBloc extends Bloc<ChannelEvent, ChannelState> {
 
   void _onSubsUpdate(_ChannelEventOnSubsUpdate event, Emitter<ChannelState> emit) {
     _data = _data.copyWith(subs: event.users);
+    emit(ChannelStateBase(_data));
+  }
+
+  void _onConnectionUpdate(
+    _ChannelEventOnConnectionUpdate event,
+    Emitter<ChannelState> emit,
+  ) {
+    _data = _data.copyWith(isConnected: event.isConnected);
     emit(ChannelStateBase(_data));
   }
 
@@ -193,4 +208,10 @@ class _ChannelEventOnSubsUpdate implements ChannelEvent {
   const _ChannelEventOnSubsUpdate({required this.users});
 
   final List<User> users;
+}
+
+class _ChannelEventOnConnectionUpdate implements ChannelEvent {
+  _ChannelEventOnConnectionUpdate({required this.isConnected});
+
+  final bool isConnected;
 }

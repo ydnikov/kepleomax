@@ -174,12 +174,12 @@ class _ChannelApi implements ChannelApi {
   }
 
   @override
-  Future<HttpResponse<void>> subscribe({required int channelId}) async {
+  Future<HttpResponse<ChatResponse>> subscribe({required int channelId}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'channel_id': channelId};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<HttpResponse<void>>(
+    final _options = _setStreamType<HttpResponse<ChatResponse>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -189,13 +189,20 @@ class _ChannelApi implements ChannelApi {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<void>(_options);
-    final httpResponse = HttpResponse(null, _result);
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ChatResponse _value;
+    try {
+      _value = ChatResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
     return httpResponse;
   }
 
   @override
-  Future<HttpResponse<void>> unsubscribe({
+  Future<HttpResponse<ChatResponse>> unsubscribe({
     required int channelId,
     int? userId,
   }) async {
@@ -207,7 +214,7 @@ class _ChannelApi implements ChannelApi {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<HttpResponse<void>>(
+    final _options = _setStreamType<HttpResponse<ChatResponse>>(
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -217,8 +224,15 @@ class _ChannelApi implements ChannelApi {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch<void>(_options);
-    final httpResponse = HttpResponse(null, _result);
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ChatResponse _value;
+    try {
+      _value = ChatResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
     return httpResponse;
   }
 

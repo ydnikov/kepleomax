@@ -239,20 +239,22 @@ class MockChannelApi extends _i1.Mock implements _i8.ChannelApi {
           as _i4.Future<_i2.HttpResponse<_i9.GetSubscribersResponseDto>>);
 
   @override
-  _i4.Future<_i2.HttpResponse<void>> subscribe({required int? channelId}) =>
+  _i4.Future<_i2.HttpResponse<_i5.ChatResponse>> subscribe({
+    required int? channelId,
+  }) =>
       (super.noSuchMethod(
             Invocation.method(#subscribe, [], {#channelId: channelId}),
-            returnValue: _i4.Future<_i2.HttpResponse<void>>.value(
-              _FakeHttpResponse_0<void>(
+            returnValue: _i4.Future<_i2.HttpResponse<_i5.ChatResponse>>.value(
+              _FakeHttpResponse_0<_i5.ChatResponse>(
                 this,
                 Invocation.method(#subscribe, [], {#channelId: channelId}),
               ),
             ),
           )
-          as _i4.Future<_i2.HttpResponse<void>>);
+          as _i4.Future<_i2.HttpResponse<_i5.ChatResponse>>);
 
   @override
-  _i4.Future<_i2.HttpResponse<void>> unsubscribe({
+  _i4.Future<_i2.HttpResponse<_i5.ChatResponse>> unsubscribe({
     required int? channelId,
     int? userId,
   }) =>
@@ -261,8 +263,8 @@ class MockChannelApi extends _i1.Mock implements _i8.ChannelApi {
               #channelId: channelId,
               #userId: userId,
             }),
-            returnValue: _i4.Future<_i2.HttpResponse<void>>.value(
-              _FakeHttpResponse_0<void>(
+            returnValue: _i4.Future<_i2.HttpResponse<_i5.ChatResponse>>.value(
+              _FakeHttpResponse_0<_i5.ChatResponse>(
                 this,
                 Invocation.method(#unsubscribe, [], {
                   #channelId: channelId,
@@ -271,5 +273,5 @@ class MockChannelApi extends _i1.Mock implements _i8.ChannelApi {
               ),
             ),
           )
-          as _i4.Future<_i2.HttpResponse<void>>);
+          as _i4.Future<_i2.HttpResponse<_i5.ChatResponse>>);
 }

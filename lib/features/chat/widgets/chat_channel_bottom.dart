@@ -4,14 +4,14 @@ class _ChatChannelBottom extends StatelessWidget {
   const _ChatChannelBottom({
     required this.role,
     required this.isLoading,
-    required this.isSubscribeClickable,
+    required this.isSubscribeAvailable,
     required this.onSubscribeTap,
     required this.onGoToChannelTap,
   });
 
   final UserChannelRole role;
   final bool isLoading;
-  final bool isSubscribeClickable;
+  final bool isSubscribeAvailable;
   final VoidCallback? onSubscribeTap;
   final VoidCallback? onGoToChannelTap;
 
@@ -25,7 +25,7 @@ class _ChatChannelBottom extends StatelessWidget {
       right: false,
       child: InkWell(
         key: const Key('chat_channel_bottom_button'),
-        onTap: isLoading || !isSubscribeClickable
+        onTap: isLoading || !isSubscribeAvailable
             ? null
             : isSubscriber
             ? onGoToChannelTap

@@ -317,7 +317,7 @@ class _BodyState extends State<_Body> {
                 _ChatChannelBottom(
                   role: data.chat.channelData!.userRole,
                   isLoading: data.isBottomBarLoading,
-                  isSubscribeClickable: !data.isLoading && data.isConnected,
+                  isSubscribeAvailable: !data.isLoading && data.isConnected,
                   onSubscribeTap: () {
                     _chatBloc.add(const ChatEventSubscribeOnChannel());
                   },
