@@ -22,6 +22,7 @@ abstract class Message with _$Message {
     required DateTime createdAt,
     required DateTime? editedAt,
     CallModel? callData,
+    int? viewsCount,
   }) = _Message;
 
   const Message._();
@@ -44,6 +45,7 @@ abstract class Message with _$Message {
       callData: type == MessageType.call
           ? CallModel.fromJson(jsonDecode(dto.message) as Map<String, dynamic>)
           : null,
+      viewsCount: dto.viewsCount
     );
   }
 
@@ -94,6 +96,8 @@ abstract class Message with _$Message {
 
   bool get isSystem => userType == MessageUserType.system;
 
+  bool get isPost => type.isPost;
+
   bool get isCurrentUser => userType == MessageUserType.current;
 
   String get message =>
@@ -103,17 +107,17 @@ abstract class Message with _$Message {
     id: id,
     chatId: chatId,
     senderId: senderId,
-    // system messages are never cached
-    isCurrentUser: userType == MessageUserType.current,
-    type: type.value,
+    type: type._value,
     message: rawMessage,
     isRead: isRead,
     createdAt: createdAt.millisecondsSinceEpoch,
     editedAt: editedAt?.millisecondsSinceEpoch,
     fromCache: fromCache,
+    viewsCount: viewsCount,
   );
 }
 
+/// system messages are never cached
 enum MessageUserType { other, current, system }
 
 enum MessageType {
@@ -121,15 +125,18 @@ enum MessageType {
   unreadMessages('unread_messages'),
   date('date'),
   message('message'),
+  post('post'),
   call('call'),
   draft('draft'),
   unknown('unknown');
 
-  const MessageType(this.value);
+  const MessageType(this._value);
 
   factory MessageType.fromString(String value) =>
-      MessageType.values.firstWhereOrNull((el) => el.value == value) ??
+      MessageType.values.firstWhereOrNull((el) => el._value == value) ??
       MessageType.unknown;
 
-  final String value;
+  final String _value;
+
+  bool get isPost => this == post;
 }

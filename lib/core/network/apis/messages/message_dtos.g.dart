@@ -13,6 +13,3 @@ MessagesResponse _$MessagesResponseFromJson(Map<String, dynamic> json) =>
           .toList(),
       message: json['message'] as String?,
     );
-
-Map<String, dynamic> _$MessagesResponseToJson(MessagesResponse instance) =>
-    <String, dynamic>{'data': instance.data, 'message': instance.message};

@@ -2,7 +2,6 @@ import 'package:kepleomax/core/network/apis/auth/auth_api.dart';
 import 'package:kepleomax/core/network/apis/auth/login_dtos.dart';
 import 'package:kepleomax/core/network/apis/auth/logout_dtos.dart';
 
-
 abstract class AuthRepository {
   Future<LoginResponseData> login({required String email, required String password});
 
@@ -12,7 +11,6 @@ abstract class AuthRepository {
 }
 
 class AuthRepositoryImpl implements AuthRepository {
-
   AuthRepositoryImpl({required AuthApi authApi}) : _authApi = authApi;
   final AuthApi _authApi;
 

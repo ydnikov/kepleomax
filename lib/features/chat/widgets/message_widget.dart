@@ -54,7 +54,7 @@ class MessageWidget extends StatelessWidget {
         children: [
           if (message.isCurrentUser)
             const Spacer(key: Key('current_user_spacer'))
-          else ...[
+          else if (!message.isPost) ...[
             SizedBox(
               height: 35,
               width: 35,

@@ -292,10 +292,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   void _onSendMessage(ChatEventSendMessage event, Emitter<ChatState> emit) {
     _messengerRepository.saveDraft(message: '', chatId: _data.chat.id);
 
-    _messagesWebSocket.sendMessage(
-      message: event.value,
-      recipientId: _data.otherUser.id,
-    );
+    if (_data.chat.isChannel) {
+      _messagesWebSocket.sendChannelMessage(
+        message: event.value,
+        chatId: _data.chat.id,
+      );
+    } else {
+      _messagesWebSocket.sendMessage(
+        message: event.value,
+        recipientId: _data.otherUser.id,
+      );
+    }
   }
 
   void _onDeleteMessage(ChatEventDeleteMessage event, Emitter<ChatState> emit) {

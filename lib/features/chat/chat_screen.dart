@@ -339,6 +339,8 @@ class _BodyState extends State<_Body> {
   void _onVisibilityChanged(VisibilityInfo info, Message message) {
     if (_chatBloc.isClosed) return;
 
+    // print('KlmLog onVisibilityChanged, messageId: ${message.id}');
+
     final isVisible = info.visibleFraction > 0.6;
     if (!message.isRead &&
         !message.isCurrentUser &&

@@ -9,6 +9,8 @@ import 'package:kepleomax/core/models/user.dart';
 import 'package:kepleomax/core/network/token_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+User? _user;
+
 abstract class AuthController {
   User? get user;
 
@@ -25,6 +27,8 @@ abstract class AuthController {
   void addListener(VoidCallback listener);
 
   void removeAllListeners();
+
+  static int? get currentUserId => _user?.id;
 }
 
 class AuthControllerImpl implements AuthController {
@@ -42,8 +46,6 @@ class AuthControllerImpl implements AuthController {
   final UserRepository _userRepository;
   final TokenProvider _tokenProvider;
   final SharedPreferences _prefs;
-
-  User? _user;
 
   final List<VoidCallback> _listeners = [];
 

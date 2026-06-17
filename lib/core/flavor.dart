@@ -23,16 +23,16 @@ class Flavor {
   );
 
   factory Flavor.devPublic() => Flavor(
-    baseUrl: 'http://178.141.12.67',
-    imageUrl: 'http://178.141.12.67/api/files/',
+    baseUrl: 'http://kepleomax.com',
+    imageUrl: 'http://kepleomax.com/api/files/',
     type: FlavorType.develop,
     constants: AppConstantsType.develop(),
     versionName: 'dev-pub',
   );
 
   factory Flavor.devLocal() => Flavor(
-    baseUrl: 'http://192.168.0.102:13000',
-    imageUrl: 'http://192.168.0.102:13000/api/files/',
+    baseUrl: 'http://192.168.0.101:13000',
+    imageUrl: 'http://192.168.0.101:13000/api/files/',
     type: FlavorType.develop,
     constants: AppConstantsType.develop(),
     versionName: 'dev-local',

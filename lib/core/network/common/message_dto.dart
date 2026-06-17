@@ -2,7 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'message_dto.g.dart';
 
-@JsonSerializable()
+/// TODO rename to MessageResponse
+@JsonSerializable(createToJson: false)
 class MessageDto {
 
   MessageDto({required this.message});
@@ -10,6 +11,4 @@ class MessageDto {
   factory MessageDto.fromJson(Map<String, dynamic> json) =>
       _$MessageDtoFromJson(json);
   final String? message;
-
-  Map<String, dynamic> toJson() => _$MessageDtoToJson(this);
 }

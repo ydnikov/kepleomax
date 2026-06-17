@@ -1,9 +1,9 @@
 part of 'messenger_repository.dart';
 
 extension _OnNewMessageUpdateExtension on MessengerRepositoryImpl {
-  void _onNewMessageUpdate(NewMessageUpdate update) async {
+  Future<void> _onNewMessageUpdate(NewMessageUpdate update) async {
     final MessageDto messageDto = update.message;
-    _messagesLocal.insert(messageDto);
+    _messagesLocal.insert(messageDto).ignore();
 
     if (_currentMessagesCollection != null) {
       if (_currentMessagesCollection!.chatId == messageDto.chatId) {
@@ -34,7 +34,7 @@ extension _OnNewMessageUpdateExtension on MessengerRepositoryImpl {
       );
       if (affectedChat != null) {
         if (!messageDto.isCurrentUser && !messageDto.isRead) {
-          _chatsLocal.increaseUnreadCountBy1(affectedChat.id);
+          _chatsLocal.increaseUnreadCountBy1(affectedChat.id).ignore();
         }
         newChats
           ..remove(affectedChat)
@@ -53,7 +53,7 @@ extension _OnNewMessageUpdateExtension on MessengerRepositoryImpl {
         /// it's a new chat
         final newChat = await _chatsApi.getChatWithId(messageDto.chatId.toString());
         if (newChat == null) return;
-        _chatsLocal.insert(newChat);
+        _chatsLocal.insert(newChat).ignore();
         _emitChatsCollection(
           ChatsCollection(
             chats: [Chat.fromDto(newChat, fromCache: false), ...newChats],

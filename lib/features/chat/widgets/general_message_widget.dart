@@ -33,7 +33,7 @@ class _GeneralMessageWidget extends StatelessWidget {
           child: Container(
             key: messageContainerGlobalKey,
             constraints: BoxConstraints(maxWidth: context.screenSize.width * 0.78),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.only(left: 12, right: 12, top: 8, bottom: 4),
             decoration: BoxDecoration(
               color: (message.isCurrentUser ? KlmColors.currentUserBg : Colors.white)
                   .withGreen(
@@ -60,20 +60,55 @@ class _GeneralMessageWidget extends StatelessWidget {
                 //     color: Colors.red,
                 //   ),
                 // ),
-                Linkify(
-                  onOpen: (link) async {
-                    await context.launchUrl(Uri.parse(link.url));
-                  },
-                  text:
-                      '${message.message}${message.isCurrentUser ? '     ' : ' '}         ',
-                  style: context.textTheme.bodyMedium?.copyWith(fontSize: 15),
-                  options: const LinkifyOptions(removeWww: true),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Linkify(
+                    onOpen: (link) async {
+                      await context.launchUrl(Uri.parse(link.url));
+                    },
+                    text:
+                        '${message.message}${message.isPost ? '      ${' ' * (message.viewsCount ?? 0).toString().length}' : ''}${message.isCurrentUser && !message.isPost ? '     ' : ' '}         ',
+                    style: context.textTheme.bodyMedium?.copyWith(fontSize: 15),
+                    options: const LinkifyOptions(removeWww: true),
+                  ),
                 ),
                 Positioned(
                   right: 0,
                   bottom: 0,
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      // Text(
+                      //   '25 ',
+                      //   style: context.textTheme.bodyMedium?.copyWith(
+                      //     fontSize: 12,
+                      //     color: Colors.grey,
+                      //     letterSpacing: -0.2,
+                      //   ),
+                      // ),
+                      // const Icon(Icons.remove_red_eye, size: 12),
+                      if (message.isPost) ...[
+                        Icon(
+                          Icons.remove_red_eye_outlined,
+                          color: message.isCurrentUser
+                              ? KlmColors.readMessage
+                              : Colors.grey,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 1),
+                        Text(
+                          (message.viewsCount ?? 0).toString(),
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: message.isCurrentUser
+                                ? KlmColors.readMessage
+                                : Colors.grey,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
                       Tooltip(
                         message: ParseTime.toPreciseDate(message.createdAt),
                         triggerMode: TooltipTriggerMode.longPress,
@@ -90,7 +125,7 @@ class _GeneralMessageWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (message.isCurrentUser)
+                      if (message.isCurrentUser && !message.isPost)
                         Icon(
                           message.isRead ? Icons.check_box : Icons.check,
                           size: 14,
@@ -107,13 +142,14 @@ class _GeneralMessageWidget extends StatelessWidget {
     );
   }
 
+  /// TODO make OOP
   List<MessageMenuItem> get _menuItems => [
-    if (!message.fromCache) MessageMenuItem('Reply', Icons.reply, () {}),
+    // if (!message.fromCache) MessageMenuItem('Reply', Icons.reply, () {}),
     MessageMenuItem('Copy', Icons.copy, () {
       Clipboard.setData(ClipboardData(text: message.message));
     }),
     if (message.isCurrentUser && !message.fromCache) ...[
-      MessageMenuItem('Edit', Icons.edit, () {}),
+      // MessageMenuItem('Edit', Icons.edit, () {}),
       MessageMenuItem(
         'Delete',
         Icons.delete,

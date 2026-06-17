@@ -74,7 +74,7 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
 
   @override
   Future<void> update(MessageDto message) async {
-    await _database.update('messages', message.toJson());
+    await _database.update('messages', message.toLocalJson());
   }
 
   @override

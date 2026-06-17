@@ -17,6 +17,8 @@ abstract class MessengerWebSocket implements Disposable {
   /// actions
   void sendMessage({required String message, required int recipientId});
 
+  void sendChannelMessage({required String message, required int chatId});
+
   void deleteMessage({required int messageId});
 
   void readAllMessages({required int chatId});
@@ -73,9 +75,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
           case 'channel_edited':
             _onChannelEdited(
               ChannelData.fromDto(
-                ChannelDataDto.fromJson(
-                  data['new_channel'] as Map<String, dynamic>,
-                ),
+                ChannelDataDto.fromJson(data['new_channel'] as Map<String, dynamic>),
               ),
             );
           case 'channel_deleted':
@@ -93,6 +93,80 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
 
   final KlmWebSocket _klmWebSocket;
   final List<StreamSubscription<void>> _subs = [];
+
+  /// actions
+  @override
+  void sendMessage({required String message, required int recipientId}) {
+    _klmWebSocket.emit('message', {'recipient_id': recipientId, 'message': message});
+  }
+
+  @override
+  void sendChannelMessage({required String message, required int chatId}) {
+    _klmWebSocket.emit('channel_message', {
+      'channel_id': chatId,
+      'message': message,
+    });
+  }
+
+  @override
+  void deleteMessage({required int messageId}) {
+    _klmWebSocket.emit('delete_message', {'message_id': messageId});
+  }
+
+  @override
+  void readAllMessages({required int chatId}) {
+    _klmWebSocket.emit('read_all', {'chat_id': chatId});
+  }
+
+  @override
+  void readMessagesBeforeTime({required int chatId, required DateTime time}) {
+    _klmWebSocket.emit('read_before_time', {
+      'chat_id': chatId,
+      'time': time.millisecondsSinceEpoch,
+    });
+  }
+
+  final Set<int> _subscribedOnChatsIds = {};
+  final Set<int> _subscribedOnUsersIds = {};
+
+  @override
+  void subscribeOnChatsUpdatesIfNot({required List<int> ids}) {
+    final subscribeOn = <int>[];
+    for (final id in ids) {
+      if (!_subscribedOnChatsIds.contains(id)) {
+        subscribeOn.add(id);
+        _subscribedOnChatsIds.add(id);
+      }
+    }
+
+    if (subscribeOn.isNotEmpty) {
+      print('KlmLogSubs subscribeOnChats: $subscribeOn');
+      _klmWebSocket.emit('subscribe_on_chats_updates', {'ids': subscribeOn});
+    }
+  }
+
+  @override
+  void subscribeOnOnlineStatusUpdatesIfNot({required List<int> usersIds}) {
+    final subscribeOn = <int>[];
+    for (final id in usersIds) {
+      if (!_subscribedOnUsersIds.contains(id)) {
+        subscribeOn.add(id);
+        _subscribedOnUsersIds.add(id);
+      }
+    }
+
+    if (subscribeOn.isNotEmpty) {
+      print('KlmLogSubs subscribeOnUsers: $subscribeOn');
+      _klmWebSocket.emit('subscribe_on_online_status_updates', {
+        'users_ids': subscribeOn,
+      });
+    }
+  }
+
+  @override
+  void typingActivityDetected({required int chatId}) {
+    _klmWebSocket.emit('typing_activity_detected', {'chat_id': chatId});
+  }
 
   /// streams controllers
   final StreamController<NewMessageUpdate> _messagesController =
@@ -143,8 +217,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
       _channelUnsubUpdatesController.stream;
 
   @override
-  Stream<ChannelUpdate> get channelUpdatesStream =>
-      _channelUpdatesController.stream;
+  Stream<ChannelUpdate> get channelUpdatesStream => _channelUpdatesController.stream;
 
   @override
   Stream<int> get channelDeletedStream => _channelDeletedController.stream;
@@ -187,81 +260,12 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
 
   void _onChannelEdited(ChannelData channelData) {
     _channelUpdatesController.add(
-      ChannelUpdate(
-        channelId: channelData.id,
-        newChannelData: channelData,
-      ),
+      ChannelUpdate(channelId: channelData.id, newChannelData: channelData),
     );
   }
 
   void _onChannelDeleted(int channelId) {
     _channelDeletedController.add(channelId);
-  }
-
-  /// events
-  @override
-  void sendMessage({required String message, required int recipientId}) {
-    _klmWebSocket.emit('message', {'recipient_id': recipientId, 'message': message});
-  }
-
-  @override
-  void deleteMessage({required int messageId}) {
-    _klmWebSocket.emit('delete_message', {'message_id': messageId});
-  }
-
-  @override
-  void readAllMessages({required int chatId}) {
-    _klmWebSocket.emit('read_all', {'chat_id': chatId});
-  }
-
-  @override
-  void readMessagesBeforeTime({required int chatId, required DateTime time}) {
-    _klmWebSocket.emit('read_before_time', {
-      'chat_id': chatId,
-      'time': time.millisecondsSinceEpoch,
-    });
-  }
-
-  final Set<int> _subscribedOnChatsIds = {};
-  final Set<int> _subscribedOnUsersIds = {};
-
-  @override
-  void subscribeOnChatsUpdatesIfNot({required List<int> ids}) {
-    final subscribeOn = <int>[];
-    for (final id in ids) {
-      if (!_subscribedOnChatsIds.contains(id)) {
-        subscribeOn.add(id);
-        _subscribedOnChatsIds.add(id);
-      }
-    }
-
-    if (subscribeOn.isNotEmpty) {
-      print('KlmLog subscribeOnChats: $subscribeOn');
-      _klmWebSocket.emit('subscribe_on_chats_updates', {'ids': subscribeOn});
-    }
-  }
-
-  @override
-  void subscribeOnOnlineStatusUpdatesIfNot({required List<int> usersIds}) {
-    final subscribeOn = <int>[];
-    for (final id in usersIds) {
-      if (!_subscribedOnUsersIds.contains(id)) {
-        subscribeOn.add(id);
-        _subscribedOnUsersIds.add(id);
-      }
-    }
-
-    if (subscribeOn.isNotEmpty) {
-      print('KlmLog subscribeOnUsers: $subscribeOn');
-      _klmWebSocket.emit('subscribe_on_online_status_updates', {
-        'users_ids': subscribeOn,
-      });
-    }
-  }
-
-  @override
-  void typingActivityDetected({required int chatId}) {
-    _klmWebSocket.emit('typing_activity_detected', {'chat_id': chatId});
   }
 
   @override

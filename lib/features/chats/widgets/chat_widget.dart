@@ -68,7 +68,9 @@ class ChatWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              if (chat.lastMessage?.isCurrentUser ?? false)
+              if (chat.isChannel && (chat.channelData?.userRole.isOwner ?? false))
+                const Icon(Icons.check_box)
+              else if (chat.lastMessage?.isCurrentUser ?? false)
                 Icon(chat.lastMessage!.isRead ? Icons.check_box : Icons.check)
               else if (chat.lastMessage != null && chat.unreadCount > 0)
                 Container(

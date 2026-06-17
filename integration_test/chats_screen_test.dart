@@ -165,13 +165,13 @@ void main() {
       tester.checkTotalUnreadCount(2);
 
       /// add readMessages, check chat
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, senderId: chatDto0.otherUser.id, isCurrentUser: false, messagesIds: [999]));
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, senderId: chatDto0.otherUser.id, isCurrentUser: false, messagesData: [999]));
       await tester.pumpAndSettle();
       tester.getChat(0).check(unreadCount: 1);
       tester.checkTotalUnreadCount(1);
 
       /// add readMessages, check chat again
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, senderId: chatDto0.otherUser.id, isCurrentUser: false, messagesIds: [chatDto0.lastMessage!.id]));
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, senderId: chatDto0.otherUser.id, isCurrentUser: false, messagesData: [chatDto0.lastMessage!.id]));
       await tester.pumpAndSettle();
       tester.getChat(0).check(unreadCount: 0, unreadIcon: false, readIcon: false); // both was false and now still are false
       tester.checkTotalUnreadCount(0);
@@ -185,20 +185,20 @@ void main() {
       tester.checkTotalUnreadCount(2);
 
       /// add readMessages, check chat
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, senderId: 0, isCurrentUser: true, messagesIds: [999]));
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, senderId: 0, isCurrentUser: true, messagesData: [999]));
       await tester.pumpAndSettle();
       tester.getChat(0).check(unreadCount: 2);
       tester.checkTotalUnreadCount(2);
 
       /// check chat2, add readMessages, check chat2
       tester.getChat(2).check(unreadIcon: true, readIcon: false);
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto2.id, senderId: 0, isCurrentUser: true, messagesIds: [999]));
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto2.id, senderId: 0, isCurrentUser: true, messagesData: [999]));
       await tester.pumpAndSettle();
       tester.getChat(2).check(unreadIcon: true, readIcon: false);
       tester.checkTotalUnreadCount(2);
 
       /// add readMessages, check chat2
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto2.id, senderId: 0, isCurrentUser: true, messagesIds: [chatDto2.lastMessage!.id]));
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto2.id, senderId: 0, isCurrentUser: true, messagesData: [chatDto2.lastMessage!.id]));
       await tester.pumpAndSettle();
       tester.getChat(2).check(unreadIcon: false, readIcon: true);
       tester.checkTotalUnreadCount(2);
