@@ -380,7 +380,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           !_data.unreadMessagesValue.isLocked &&
           (event.data.fromCache == false || messages.length > 1);
 
-      /// event.data.maintainLoading == false || messages.length > 1 means:
+      /// event.data.fromCache == false || messages.length > 1 means:
       /// either messages are from api, not from cache, OR messages from cache, but
       /// if there is only 1 message -> that means the message from chat.lastMessage
       /// and chat is not loaded
@@ -389,7 +389,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           unreadMessagesValue: UnreadMessagesValue(
             isLocked: !event.data.fromCache,
             firstReadMessageCreatedAt:
-                messages.firstWhereOrNull((m) => m.isRead)?.createdAt ??
+                messages.firstWhereOrNull((m) => m.isRead || m.isCurrentUser)?.createdAt ??
                 DateTime.fromMillisecondsSinceEpoch(0),
           ),
         );

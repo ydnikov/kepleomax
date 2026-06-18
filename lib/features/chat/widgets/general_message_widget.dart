@@ -67,7 +67,7 @@ class _GeneralMessageWidget extends StatelessWidget {
                       await context.launchUrl(Uri.parse(link.url));
                     },
                     text:
-                        '${message.message}${message.isPost ? '      ${' ' * (message.viewsCount ?? 0).toString().length}' : ''}${message.isCurrentUser && !message.isPost ? '     ' : ' '}         ',
+                        '${message.message}${message.isPost ? '      ${' ' * message.viewsCount.toString().length}' : ''}${message.isCurrentUser && !message.isPost ? '     ' : ' '}         ',
                     style: context.textTheme.bodyMedium?.copyWith(fontSize: 15),
                     options: const LinkifyOptions(removeWww: true),
                   ),
@@ -97,7 +97,7 @@ class _GeneralMessageWidget extends StatelessWidget {
                         ),
                         const SizedBox(width: 1),
                         Text(
-                          (message.viewsCount ?? 0).toString(),
+                          message.viewsCount.toString(),
                           style: context.textTheme.bodyMedium?.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
@@ -127,7 +127,7 @@ class _GeneralMessageWidget extends StatelessWidget {
                       ),
                       if (message.isCurrentUser && !message.isPost)
                         Icon(
-                          message.isRead ? Icons.check_box : Icons.check,
+                          message.isReadByAny ? Icons.check_box : Icons.check,
                           size: 14,
                           color: KlmColors.readMessage,
                         ),

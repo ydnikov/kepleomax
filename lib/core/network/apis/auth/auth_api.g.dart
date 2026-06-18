@@ -20,7 +20,7 @@ class _AuthApi implements AuthApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<HttpResponse<MessageDto>> register({
+  Future<HttpResponse<MessageResponseDto>> register({
     required LoginRequestDto data,
   }) async {
     final _extra = <String, dynamic>{};
@@ -29,7 +29,7 @@ class _AuthApi implements AuthApi {
     _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
     _data.addAll(data.toJson());
-    final _options = _setStreamType<HttpResponse<MessageDto>>(
+    final _options = _setStreamType<HttpResponse<MessageResponseDto>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -40,9 +40,9 @@ class _AuthApi implements AuthApi {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late MessageDto _value;
+    late MessageResponseDto _value;
     try {
-      _value = MessageDto.fromJson(_result.data!);
+      _value = MessageResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

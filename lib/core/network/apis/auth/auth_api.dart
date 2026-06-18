@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart' hide Headers;
 import 'package:kepleomax/core/network/apis/auth/login_dtos.dart';
 import 'package:kepleomax/core/network/apis/auth/logout_dtos.dart';
-import 'package:kepleomax/core/network/common/message_dto.dart';
+import 'package:kepleomax/core/network/common/message_response_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'auth_api.g.dart';
@@ -13,7 +13,7 @@ abstract class AuthApi {
 
   @POST('/register')
   @Headers(<String, dynamic>{'requiresToken': false})
-  Future<HttpResponse<MessageDto>> register({@Body() required LoginRequestDto data});
+  Future<HttpResponse<MessageResponseDto>> register({@Body() required LoginRequestDto data});
 
   @POST('/login')
   @Headers(<String, dynamic>{'requiresToken': false})

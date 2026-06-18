@@ -20,9 +20,9 @@ abstract class Message with _$Message {
     required bool fromCache,
     required bool isRead,
     required DateTime createdAt,
-    required DateTime? editedAt,
+    DateTime? editedAt,
     CallModel? callData,
-    int? viewsCount,
+    @Default(0) int viewsCount,
   }) = _Message;
 
   const Message._();
@@ -45,7 +45,7 @@ abstract class Message with _$Message {
       callData: type == MessageType.call
           ? CallModel.fromJson(jsonDecode(dto.message) as Map<String, dynamic>)
           : null,
-      viewsCount: dto.viewsCount
+      viewsCount: dto.viewsCount,
     );
   }
 
@@ -59,7 +59,6 @@ abstract class Message with _$Message {
     chatId: -1,
     isRead: true,
     createdAt: DateTime(10000),
-    editedAt: null,
   );
 
   factory Message.unreadMessages() => Message(
@@ -73,7 +72,6 @@ abstract class Message with _$Message {
     // should be true so counter of unread messages works properly
     isRead: true,
     createdAt: DateTime(10000),
-    editedAt: null,
   );
 
   factory Message.date(DateTime dateTime) => Message(
@@ -87,7 +85,6 @@ abstract class Message with _$Message {
     // should be true so counter of unread messages works properly
     isRead: true,
     createdAt: dateTime,
-    editedAt: null,
   );
 
   /// for testing
@@ -99,6 +96,10 @@ abstract class Message with _$Message {
   bool get isPost => type.isPost;
 
   bool get isCurrentUser => userType == MessageUserType.current;
+
+  /// isRead shows is message read by current user or not. But in chats
+  /// it's unuseful for messages from currentUser
+  bool get isReadByAny => viewsCount > 0;
 
   String get message =>
       callData == null ? rawMessage : callData!.getCallType().userString;

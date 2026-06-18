@@ -25,7 +25,11 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
   final Database _database;
 
   @override
-  Future<List<MessageDto>> getMessagesByChatId(int chatId, {int offset = 0, int limit = 150}) async {
+  Future<List<MessageDto>> getMessagesByChatId(
+    int chatId, {
+    int offset = 0,
+    int limit = 150,
+  }) async {
     final query = await _database.query(
       'messages',
       where: 'chat_id = ?',
@@ -62,12 +66,19 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
 
   @override
   Future<void> readMessages(ReadMessagesUpdate data) async {
-    for (final id in data.messagesIds) {
+    final placeholders = List.filled(data.messagesIds.length, '?').join(', ');
+
+    if (data.byCurrentUser == true) {
       await _database.update(
         'messages',
         {'is_read': 1},
-        where: 'id = ?',
-        whereArgs: [id],
+        where: 'id IN ($placeholders)',
+        whereArgs: data.messagesIds,
+      );
+    } else {
+      await _database.rawUpdate(
+        'UPDATE messages SET views_count = views_count + 1 WHERE id IN ($placeholders)',
+        data.messagesIds,
       );
     }
   }

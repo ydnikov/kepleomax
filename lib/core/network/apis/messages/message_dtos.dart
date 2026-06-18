@@ -28,7 +28,7 @@ abstract class MessageDto with _$MessageDto {
     required int? editedAt,
     required bool fromCache,
     @Default('message') String type,
-    @Default(0) int? viewsCount
+    @Default(0) int viewsCount
   }) = _MessageDto;
 
   const MessageDto._();
@@ -48,7 +48,7 @@ abstract class MessageDto with _$MessageDto {
         createdAt: json['created_at'] as int,
         editedAt: json['edited_at'] as int?,
         fromCache: fromCache,
-        viewsCount: json['views_count'] as int?
+        viewsCount: json['views_count'] as int
       );
 
   factory MessageDto.fromDraft({required String message, required int chatId}) =>
@@ -73,6 +73,7 @@ abstract class MessageDto with _$MessageDto {
     'is_read': isRead ? 1 : 0,
     'created_at': createdAt,
     'edited_at': editedAt,
+    'views_count': viewsCount,
   };
 
   bool get isCurrentUser => senderId == AuthController.currentUserId;

@@ -1,10 +1,10 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'message_dto.dart';
+part of 'message_response_dto.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-MessageDto _$MessageDtoFromJson(Map<String, dynamic> json) =>
-    MessageDto(message: json['message'] as String?);
+MessageResponseDto _$MessageResponseDtoFromJson(Map<String, dynamic> json) =>
+    MessageResponseDto(message: json['message'] as String?);
