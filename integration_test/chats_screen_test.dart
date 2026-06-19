@@ -148,7 +148,7 @@ void main() {
       tester.getChat(4).check(unreadCount: 0, unreadIcon: false, readIcon: false, message: 'MSG_4', msgFromCurrentUser: false);
 
       /// add message
-      ws.addMessage(MessageDto(id: 5, chatId: chatDto4.id, senderId: chatDto4.otherUser.id, isCurrentUser: false, message: 'MSG_5', isRead: false, createdAt: 1100, editedAt: null, fromCache: false));
+      ws.addMessage(MessageDto(id: 5, chatId: chatDto4.id, senderId: chatDto4.otherUser.id, message: 'MSG_5', isRead: false, createdAt: 1100, editedAt: null, fromCache: false));
       await tester.pumpAndSettle();
 
       /// check chat again
@@ -157,6 +157,7 @@ void main() {
       tester.checkTotalUnreadCount(7);
     });
 
+    /// TODO wasn't improved after new read system implemented
     testWidgets('read_message_test', (tester) async {
       await setupAppWithChats(tester, [chatDto0]);
 
@@ -164,19 +165,32 @@ void main() {
       tester.getChat(0).check(unreadCount: 2);
       tester.checkTotalUnreadCount(2);
 
-      /// add readMessages, check chat
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, senderId: chatDto0.otherUser.id, isCurrentUser: false, messagesData: [999]));
+      /// add readMessages not by currentUser, check chat
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, byCurrentUser: null, messagesIds: [999]));
+      await tester.pumpAndSettle();
+      tester.getChat(0).check(unreadCount: 2);
+      tester.checkTotalUnreadCount(2);
+
+      /// add readMessages not by currentUser again, check chat
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, byCurrentUser: false, messagesIds: [999]));
+      await tester.pumpAndSettle();
+      tester.getChat(0).check(unreadCount: 2);
+      tester.checkTotalUnreadCount(2);
+
+      /// add readMessages by currentUser, check chat
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, byCurrentUser: true, messagesIds: [chatDto0.lastMessage!.id]));
       await tester.pumpAndSettle();
       tester.getChat(0).check(unreadCount: 1);
       tester.checkTotalUnreadCount(1);
 
-      /// add readMessages, check chat again
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, senderId: chatDto0.otherUser.id, isCurrentUser: false, messagesData: [chatDto0.lastMessage!.id]));
+      /// add readMessages by currentUser, check chat
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, byCurrentUser: true, messagesIds: [chatDto0.lastMessage!.id]));
       await tester.pumpAndSettle();
       tester.getChat(0).check(unreadCount: 0, unreadIcon: false, readIcon: false); // both was false and now still are false
       tester.checkTotalUnreadCount(0);
     });
 
+    /// TODO  wasn't improved after new read system implemented
     testWidgets('read_current_user_messages_test', (tester) async {
       await setupAppWithChats(tester, [chatDto0, chatDto2]);
 
@@ -185,20 +199,20 @@ void main() {
       tester.checkTotalUnreadCount(2);
 
       /// add readMessages, check chat
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, senderId: 0, isCurrentUser: true, messagesData: [999]));
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto0.id, byCurrentUser: false, messagesIds: [999]));
       await tester.pumpAndSettle();
       tester.getChat(0).check(unreadCount: 2);
       tester.checkTotalUnreadCount(2);
 
       /// check chat2, add readMessages, check chat2
       tester.getChat(2).check(unreadIcon: true, readIcon: false);
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto2.id, senderId: 0, isCurrentUser: true, messagesData: [999]));
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto2.id, byCurrentUser: false, messagesIds: [999]));
       await tester.pumpAndSettle();
       tester.getChat(2).check(unreadIcon: true, readIcon: false);
       tester.checkTotalUnreadCount(2);
 
       /// add readMessages, check chat2
-      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto2.id, senderId: 0, isCurrentUser: true, messagesData: [chatDto2.lastMessage!.id]));
+      ws.addReadMessagesUpdate(ReadMessagesUpdate(chatId: chatDto2.id, byCurrentUser: false, messagesIds: [chatDto2.lastMessage!.id]));
       await tester.pumpAndSettle();
       tester.getChat(2).check(unreadIcon: false, readIcon: true);
       tester.checkTotalUnreadCount(2);
@@ -224,7 +238,7 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, isCurrentUser: true, message: '', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, message: '', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
           newLastMessage: null,
         ),
       );
@@ -235,7 +249,7 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, isCurrentUser: false, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
           newLastMessage: null,
         ),
       );
@@ -246,7 +260,7 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, isCurrentUser: false, message: '', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
           newLastMessage: null,
         ),
       );
@@ -258,8 +272,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, isCurrentUser: false, message: '', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 998, chatId: 0, senderId: 0, isCurrentUser: false, message: 'NEW_MSG', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 998, chatId: 0, senderId: 1, message: 'NEW_MSG', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -270,8 +284,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, isCurrentUser: false, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 998, chatId: 0, senderId: 0, isCurrentUser: true, message: 'NEW_MSG_2', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 998, chatId: 0, senderId: 0, message: 'NEW_MSG_2', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -288,8 +302,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, isCurrentUser: false, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 999, chatId: 0, senderId: 0, isCurrentUser: false, message: '', isRead: false, createdAt: 1000, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 999, chatId: 0, senderId: 0, message: '', isRead: false, createdAt: 1000, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -300,8 +314,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 2,
-          deletedMessage: MessageDto(id: 999, chatId: 2, senderId: 0, isCurrentUser: false, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 999, chatId: 2, senderId: 0, isCurrentUser: false, message: '', isRead: false, createdAt: 1055, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 2, senderId: 0, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 999, chatId: 2, senderId: 0, message: '', isRead: false, createdAt: 1055, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -312,8 +326,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 4,
-          deletedMessage: MessageDto(id: 999, chatId: 4, senderId: 0, isCurrentUser: false, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 999, chatId: 4, senderId: 0, isCurrentUser: false, message: '', isRead: false, createdAt: 1052, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 4, senderId: 0, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 999, chatId: 4, senderId: 0, message: '', isRead: false, createdAt: 1052, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -355,7 +369,7 @@ void main() {
         ..checkChatsAppBarStatus(ChatsAppBarStatus.chats);
 
       /// add new message, check chats
-      const newMessage = MessageDto(id: 999, chatId: 2, senderId: 0, isCurrentUser: true, message: 'MSG_999', isRead: false, createdAt: 1100, editedAt: null, fromCache: false);
+      const newMessage = MessageDto(id: 999, chatId: 2, senderId: 0, message: 'MSG_999', isRead: false, createdAt: 1100, editedAt: null, fromCache: false);
       ws.addMessage(newMessage);
       await tester.pumpAndSettle();
       tester.checkChatsOrder([2, 0, 1, 3, 4]);

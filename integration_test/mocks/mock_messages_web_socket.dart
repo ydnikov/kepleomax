@@ -114,8 +114,7 @@ class MockMessengerWebSocket implements MessengerWebSocket {
       _channelUnsubUpdatesController.stream;
 
   @override
-  Stream<ChannelUpdate> get channelUpdatesStream =>
-      _channelUpdatesController.stream;
+  Stream<ChannelUpdate> get channelUpdatesStream => _channelUpdatesController.stream;
 
   /// events
   @override
@@ -130,7 +129,6 @@ class MockMessengerWebSocket implements MessengerWebSocket {
           id: _nextSendMessageId!,
           chatId: 0,
           senderId: 0,
-          isCurrentUser: true,
           message: '$message FIX THIS METHOD',
           type: 'message',
           isRead: false,
@@ -142,6 +140,9 @@ class MockMessengerWebSocket implements MessengerWebSocket {
       ),
     );
   }
+
+  @override
+  void sendChannelMessage({required String message, required int chatId}) {}
 
   @override
   void deleteMessage({required int messageId}) {

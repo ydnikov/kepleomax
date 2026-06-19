@@ -19,6 +19,9 @@ class FakeMessagesWebSocket implements MessengerWebSocket {
   void sendMessage({required String message, required int recipientId}) {}
 
   @override
+  void sendChannelMessage({required String message, required int chatId}) {}
+
+  @override
   void readAllMessages({required int chatId}) {}
 
   @override
