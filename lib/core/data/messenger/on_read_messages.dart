@@ -13,7 +13,7 @@ extension _OnReadMessagesExtension on MessengerRepositoryImpl {
       final newList = _currentMessagesCollection!.messages.map(
         (m) => update.messagesIds.contains(m.id)
             ? m.copyWith(
-                isRead: update.byCurrentUser == true || m.isRead,
+                isRead: update.byCurrentUser == true || m.isReadByCurrentUser,
                 viewsCount: update.byCurrentUser == true
                     ? m.viewsCount
                     : m.viewsCount + 1,
@@ -52,7 +52,7 @@ extension _OnReadMessagesExtension on MessengerRepositoryImpl {
           final m = chat.lastMessage!;
           return chat.copyWith(
             lastMessage: m.copyWith(
-              isRead: update.byCurrentUser == true || m.isRead,
+              isRead: update.byCurrentUser == true || m.isReadByCurrentUser,
               viewsCount: update.byCurrentUser == true
                   ? m.viewsCount
                   : m.viewsCount + 1,

@@ -374,7 +374,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       /// save unreadMessages widget position
       final unreadMessagesIsRequired =
-          messages.isNotEmpty && !messages[0].isCurrentUser && !messages[0].isRead;
+          messages.isNotEmpty && !messages[0].isCurrentUser && !messages[0].isReadByCurrentUser;
       final handleUnreadMessages =
           messages.isNotEmpty &&
           !_data.unreadMessagesValue.isLocked &&
@@ -389,7 +389,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           unreadMessagesValue: UnreadMessagesValue(
             isLocked: !event.data.fromCache,
             firstReadMessageCreatedAt:
-                messages.firstWhereOrNull((m) => m.isRead || m.isCurrentUser)?.createdAt ??
+                messages.firstWhereOrNull((m) => m.isReadByCurrentUser || m.isCurrentUser)?.createdAt ??
                 DateTime.fromMillisecondsSinceEpoch(0),
           ),
         );

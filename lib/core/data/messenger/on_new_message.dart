@@ -33,7 +33,7 @@ extension _OnNewMessageUpdateExtension on MessengerRepositoryImpl {
         (chat) => chat.id == messageDto.chatId,
       );
       if (affectedChat != null) {
-        if (!messageDto.isCurrentUser && !messageDto.isRead) {
+        if (!messageDto.isCurrentUser && !messageDto.isReadByCurrentUser) {
           _chatsLocal.increaseUnreadCountBy1(affectedChat.id).ignore();
         }
         newChats
@@ -45,7 +45,7 @@ extension _OnNewMessageUpdateExtension on MessengerRepositoryImpl {
               lastTypingActivityTime: null,
               unreadCount:
                   affectedChat.unreadCount +
-                  (!messageDto.isCurrentUser && !messageDto.isRead ? 1 : 0),
+                  (!messageDto.isCurrentUser && !messageDto.isReadByCurrentUser ? 1 : 0),
             ),
           );
         _emitChatsCollection(ChatsCollection(chats: newChats));

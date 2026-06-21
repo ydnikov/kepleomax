@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MessageDto {
 
- int get id; int get chatId; int get senderId; String get message; bool get isRead; int get createdAt; int? get editedAt; bool get fromCache; String get type; int get viewsCount;
+ int get id; int get chatId; int get senderId; String get message; bool get isReadByCurrentUser; int get createdAt; int? get editedAt; bool get fromCache; String get type; int get viewsCount;
 /// Create a copy of MessageDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $MessageDtoCopyWith<MessageDto> get copyWith => _$MessageDtoCopyWithImpl<Message
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageDto&&(identical(other.id, id) || other.id == id)&&(identical(other.chatId, chatId) || other.chatId == chatId)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.message, message) || other.message == message)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.editedAt, editedAt) || other.editedAt == editedAt)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.type, type) || other.type == type)&&(identical(other.viewsCount, viewsCount) || other.viewsCount == viewsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageDto&&(identical(other.id, id) || other.id == id)&&(identical(other.chatId, chatId) || other.chatId == chatId)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.message, message) || other.message == message)&&(identical(other.isReadByCurrentUser, isReadByCurrentUser) || other.isReadByCurrentUser == isReadByCurrentUser)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.editedAt, editedAt) || other.editedAt == editedAt)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.type, type) || other.type == type)&&(identical(other.viewsCount, viewsCount) || other.viewsCount == viewsCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,chatId,senderId,message,isRead,createdAt,editedAt,fromCache,type,viewsCount);
+int get hashCode => Object.hash(runtimeType,id,chatId,senderId,message,isReadByCurrentUser,createdAt,editedAt,fromCache,type,viewsCount);
 
 @override
 String toString() {
-  return 'MessageDto(id: $id, chatId: $chatId, senderId: $senderId, message: $message, isRead: $isRead, createdAt: $createdAt, editedAt: $editedAt, fromCache: $fromCache, type: $type, viewsCount: $viewsCount)';
+  return 'MessageDto(id: $id, chatId: $chatId, senderId: $senderId, message: $message, isRead: $isReadByCurrentUser, createdAt: $createdAt, editedAt: $editedAt, fromCache: $fromCache, type: $type, viewsCount: $viewsCount)';
 }
 
 
@@ -68,7 +68,7 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,chatId: null == chatId ? _self.chatId : chatId // ignore: cast_nullable_to_non_nullable
 as int,senderId: null == senderId ? _self.senderId : senderId // ignore: cast_nullable_to_non_nullable
 as int,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
+as String,isRead: null == isRead ? _self.isReadByCurrentUser : isRead // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as int,editedAt: freezed == editedAt ? _self.editedAt : editedAt // ignore: cast_nullable_to_non_nullable
 as int?,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
@@ -162,7 +162,7 @@ return $default(_that);case _:
 @optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  int chatId,  int senderId,  String message,  bool isRead,  int createdAt,  int? editedAt,  bool fromCache,  String type,  int viewsCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MessageDto() when $default != null:
-return $default(_that.id,_that.chatId,_that.senderId,_that.message,_that.isRead,_that.createdAt,_that.editedAt,_that.fromCache,_that.type,_that.viewsCount);case _:
+return $default(_that.id,_that.chatId,_that.senderId,_that.message,_that.isReadByCurrentUser,_that.createdAt,_that.editedAt,_that.fromCache,_that.type,_that.viewsCount);case _:
   return orElse();
 
 }
@@ -183,7 +183,7 @@ return $default(_that.id,_that.chatId,_that.senderId,_that.message,_that.isRead,
 @optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  int chatId,  int senderId,  String message,  bool isRead,  int createdAt,  int? editedAt,  bool fromCache,  String type,  int viewsCount)  $default,) {final _that = this;
 switch (_that) {
 case _MessageDto():
-return $default(_that.id,_that.chatId,_that.senderId,_that.message,_that.isRead,_that.createdAt,_that.editedAt,_that.fromCache,_that.type,_that.viewsCount);case _:
+return $default(_that.id,_that.chatId,_that.senderId,_that.message,_that.isReadByCurrentUser,_that.createdAt,_that.editedAt,_that.fromCache,_that.type,_that.viewsCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,7 +203,7 @@ return $default(_that.id,_that.chatId,_that.senderId,_that.message,_that.isRead,
 @optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  int chatId,  int senderId,  String message,  bool isRead,  int createdAt,  int? editedAt,  bool fromCache,  String type,  int viewsCount)?  $default,) {final _that = this;
 switch (_that) {
 case _MessageDto() when $default != null:
-return $default(_that.id,_that.chatId,_that.senderId,_that.message,_that.isRead,_that.createdAt,_that.editedAt,_that.fromCache,_that.type,_that.viewsCount);case _:
+return $default(_that.id,_that.chatId,_that.senderId,_that.message,_that.isReadByCurrentUser,_that.createdAt,_that.editedAt,_that.fromCache,_that.type,_that.viewsCount);case _:
   return null;
 
 }
@@ -215,14 +215,14 @@ return $default(_that.id,_that.chatId,_that.senderId,_that.message,_that.isRead,
 
 
 class _MessageDto extends MessageDto {
-  const _MessageDto({required this.id, required this.chatId, required this.senderId, required this.message, required this.isRead, required this.createdAt, required this.editedAt, required this.fromCache, this.type = 'message', this.viewsCount = 0}): super._();
+  const _MessageDto({required this.id, required this.chatId, required this.senderId, required this.message, required this.isReadByCurrentUser, required this.createdAt, required this.editedAt, required this.fromCache, this.type = 'message', this.viewsCount = 0}): super._();
   
 
 @override final  int id;
 @override final  int chatId;
 @override final  int senderId;
 @override final  String message;
-@override final  bool isRead;
+@override final  bool isReadByCurrentUser;
 @override final  int createdAt;
 @override final  int? editedAt;
 @override final  bool fromCache;
@@ -239,16 +239,16 @@ _$MessageDtoCopyWith<_MessageDto> get copyWith => __$MessageDtoCopyWithImpl<_Mes
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageDto&&(identical(other.id, id) || other.id == id)&&(identical(other.chatId, chatId) || other.chatId == chatId)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.message, message) || other.message == message)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.editedAt, editedAt) || other.editedAt == editedAt)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.type, type) || other.type == type)&&(identical(other.viewsCount, viewsCount) || other.viewsCount == viewsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageDto&&(identical(other.id, id) || other.id == id)&&(identical(other.chatId, chatId) || other.chatId == chatId)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.message, message) || other.message == message)&&(identical(other.isReadByCurrentUser, isReadByCurrentUser) || other.isReadByCurrentUser == isReadByCurrentUser)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.editedAt, editedAt) || other.editedAt == editedAt)&&(identical(other.fromCache, fromCache) || other.fromCache == fromCache)&&(identical(other.type, type) || other.type == type)&&(identical(other.viewsCount, viewsCount) || other.viewsCount == viewsCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,chatId,senderId,message,isRead,createdAt,editedAt,fromCache,type,viewsCount);
+int get hashCode => Object.hash(runtimeType,id,chatId,senderId,message,isReadByCurrentUser,createdAt,editedAt,fromCache,type,viewsCount);
 
 @override
 String toString() {
-  return 'MessageDto(id: $id, chatId: $chatId, senderId: $senderId, message: $message, isRead: $isRead, createdAt: $createdAt, editedAt: $editedAt, fromCache: $fromCache, type: $type, viewsCount: $viewsCount)';
+  return 'MessageDto(id: $id, chatId: $chatId, senderId: $senderId, message: $message, isRead: $isReadByCurrentUser, createdAt: $createdAt, editedAt: $editedAt, fromCache: $fromCache, type: $type, viewsCount: $viewsCount)';
 }
 
 
@@ -282,7 +282,7 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,chatId: null == chatId ? _self.chatId : chatId // ignore: cast_nullable_to_non_nullable
 as int,senderId: null == senderId ? _self.senderId : senderId // ignore: cast_nullable_to_non_nullable
 as int,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
+as String,isReadByCurrentUser: null == isRead ? _self.isReadByCurrentUser : isRead // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as int,editedAt: freezed == editedAt ? _self.editedAt : editedAt // ignore: cast_nullable_to_non_nullable
 as int?,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable

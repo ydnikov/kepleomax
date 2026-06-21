@@ -104,9 +104,9 @@ class CallsNotificationsService {
 
     await FlutterForegroundTask.startService(
       notificationTitle: 'Microphone is active',
-      notificationText: 'In use for active call',
+      notificationText: 'Active call',
+      // 250 is a random number
       serviceId: 250,
-      // random number
       serviceTypes: [ForegroundServiceTypes.microphone],
       notificationIcon: const NotificationIcon(
         metaDataName: 'com.kepleomax.kepleomax.IC_NOTIFICATION',

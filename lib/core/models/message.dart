@@ -18,7 +18,7 @@ abstract class Message with _$Message {
     required String rawMessage,
     required MessageType type,
     required bool fromCache,
-    required bool isRead,
+    required bool isReadByCurrentUser,
     required DateTime createdAt,
     DateTime? editedAt,
     CallModel? callData,
@@ -37,7 +37,7 @@ abstract class Message with _$Message {
       rawMessage: dto.message,
       type: type,
       fromCache: dto.fromCache,
-      isRead: dto.isRead,
+      isReadByCurrentUser: dto.isReadByCurrentUser,
       createdAt: DateTime.fromMillisecondsSinceEpoch(dto.createdAt),
       editedAt: dto.editedAt == null
           ? null
@@ -57,7 +57,7 @@ abstract class Message with _$Message {
     rawMessage: BoneMock.words(8),
     type: MessageType.loading,
     chatId: -1,
-    isRead: true,
+    isReadByCurrentUser: true,
     createdAt: DateTime(10000),
   );
 
@@ -70,7 +70,7 @@ abstract class Message with _$Message {
     type: MessageType.unreadMessages,
     chatId: -1,
     // should be true so counter of unread messages works properly
-    isRead: true,
+    isReadByCurrentUser: true,
     createdAt: DateTime(10000),
   );
 
@@ -83,7 +83,7 @@ abstract class Message with _$Message {
     type: MessageType.date,
     chatId: -1,
     // should be true so counter of unread messages works properly
-    isRead: true,
+    isReadByCurrentUser: true,
     createdAt: dateTime,
   );
 
@@ -97,9 +97,7 @@ abstract class Message with _$Message {
 
   bool get isCurrentUser => userType == MessageUserType.current;
 
-  /// isRead shows is message read by current user or not. But in chats
-  /// it's unuseful for messages from currentUser
-  bool get isReadByAny => viewsCount > 0;
+  bool get isRead => isCurrentUser ? viewsCount > 0 : isReadByCurrentUser;
 
   String get message =>
       callData == null ? rawMessage : callData!.getCallType().userString;
@@ -110,7 +108,7 @@ abstract class Message with _$Message {
     senderId: senderId,
     type: type._value,
     message: rawMessage,
-    isRead: isRead,
+    isReadByCurrentUser: isReadByCurrentUser,
     createdAt: createdAt.millisecondsSinceEpoch,
     editedAt: editedAt?.millisecondsSinceEpoch,
     fromCache: fromCache,

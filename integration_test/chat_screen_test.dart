@@ -170,12 +170,12 @@ void main() {
 
       /// check, send message from anotherUser, check
       tester.checkMessagesOrder([0, 1, 2, 3, 4]);
-      ws.addMessage(const MessageDto(id: 10, chatId: 1, senderId: 1, message: 'MSG_10', type: 'message', isRead: false, createdAt: 1500, editedAt: null, fromCache: false));
+      ws.addMessage(const MessageDto(id: 10, chatId: 1, senderId: 1, message: 'MSG_10', type: 'message', isReadByCurrentUser: false, createdAt: 1500, editedAt: null, fromCache: false));
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([0, 1, 2, 3, 4]);
 
       /// send message from currentUser, check
-      ws.addMessage(const MessageDto(id: 11, chatId: 1, senderId: 0, message: 'MSG_11', type: 'message', isRead: false, createdAt: 1550, editedAt: null, fromCache: false));
+      ws.addMessage(const MessageDto(id: 11, chatId: 1, senderId: 0, message: 'MSG_11', type: 'message', isReadByCurrentUser: false, createdAt: 1550, editedAt: null, fromCache: false));
       await tester.pumpAndSettle();
       tester.checkMessagesOrder([0, 1, 2, 3, 4]);
     });
@@ -495,7 +495,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       ws.addMessage(
-        const MessageDto(id: 13, chatId: 7, senderId: 10, message: 'MSG_0', type: 'message', isRead: false, createdAt: 1000, editedAt: null, fromCache: false),
+        const MessageDto(id: 13, chatId: 7, senderId: 10, message: 'MSG_0', type: 'message', isReadByCurrentUser: false, createdAt: 1000, editedAt: null, fromCache: false),
         createdChatInfo: CreatedChatInfo(chatId: 7, usersIds: [0, 10]),
       );
       await tester.pumpAndSettle();

@@ -292,7 +292,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     CallEventToggleMicrophone event,
     Emitter<CallState> emit,
   ) {
-    _localRenderer!.srcObject!.getAudioTracks().forEach((track) {
+    _mediaStream.getAudioTracks().forEach((track) {
       track.enabled = !track.enabled;
     });
     _data = _data.copyWith(isLocalMicrophoneOn: !_data.isLocalMicrophoneOn);

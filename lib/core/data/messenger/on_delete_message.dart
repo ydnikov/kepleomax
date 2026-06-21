@@ -34,7 +34,7 @@ extension _OnDeleteMessageExtension on MessengerRepositoryImpl {
       } else {
         /// update chat if needed
         final decreaseUnreadCount =
-            !update.deletedMessage.isCurrentUser && !update.deletedMessage.isRead;
+            !update.deletedMessage.isCurrentUser && !update.deletedMessage.isReadByCurrentUser;
         final newUnreadCount =
             newChats[affectedChatIndex].unreadCount - (decreaseUnreadCount ? 1 : 0);
         if (update.newLastMessage != null) {

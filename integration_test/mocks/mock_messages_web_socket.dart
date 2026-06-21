@@ -131,7 +131,7 @@ class MockMessengerWebSocket implements MessengerWebSocket {
           senderId: 0,
           message: '$message FIX THIS METHOD',
           type: 'message',
-          isRead: false,
+          isReadByCurrentUser: false,
           createdAt: 2000,
           editedAt: null,
           fromCache: false,

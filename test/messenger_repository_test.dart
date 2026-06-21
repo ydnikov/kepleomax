@@ -55,7 +55,7 @@ void main() {
         chatId: chatId,
         senderId: 1,
         message: 'MSG_${fromCache ? 'CACHE' : 'API'}_$id',
-        isRead: true,
+        isReadByCurrentUser: true,
         createdAt: 800,
         editedAt: null,
         fromCache: fromCache,

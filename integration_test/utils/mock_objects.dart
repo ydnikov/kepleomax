@@ -17,7 +17,7 @@ final chatDto0 = ChatDto(
 const chatDto1 = ChatDto(
   id: 1,
   otherUser: UserDto(id: 2, username: 'OTHER_USERNAME_2', profileImage: null, isCurrent: false, isOnline: true, lastActivityTime: 0),
-  lastMessage: MessageDto(id: 1, chatId: 1, senderId: 2, message: 'MSG_1', type: 'message', isRead: false, createdAt: 1080, editedAt: null, fromCache: false),
+  lastMessage: MessageDto(id: 1, chatId: 1, senderId: 2, message: 'MSG_1', type: 'message', isReadByCurrentUser: false, createdAt: 1080, editedAt: null, fromCache: false),
   unreadCount: 4,
   channelData: null,
   createdAt: 0,
@@ -26,7 +26,7 @@ const chatDto1 = ChatDto(
 const chatDto2 = ChatDto(
   id: 2,
   otherUser: UserDto(id: 3, username: 'OTHER_USERNAME_3', profileImage: null, isCurrent: false, isOnline: false, lastActivityTime: 0),
-  lastMessage: MessageDto(id: 2, chatId: 2, senderId: 0, message: 'MSG_2', type: 'message', isRead: false, createdAt: 1070, editedAt: null, fromCache: false),
+  lastMessage: MessageDto(id: 2, chatId: 2, senderId: 0, message: 'MSG_2', type: 'message', isReadByCurrentUser: false, createdAt: 1070, editedAt: null, fromCache: false),
   unreadCount: 0,
   channelData: null,
   createdAt: 0,
@@ -35,7 +35,7 @@ const chatDto2 = ChatDto(
 const chatDto3 = ChatDto(
   id: 3,
   otherUser: UserDto(id: 4, username: 'OTHER_USERNAME_4', profileImage: null, isCurrent: false, isOnline: false, lastActivityTime: 0),
-  lastMessage: MessageDto(id: 3, chatId: 3, senderId: 0, message: 'MSG_3', type: 'message', isRead: true, createdAt: 1060, editedAt: null, fromCache: false, viewsCount: 1),
+  lastMessage: MessageDto(id: 3, chatId: 3, senderId: 0, message: 'MSG_3', type: 'message', isReadByCurrentUser: true, createdAt: 1060, editedAt: null, fromCache: false, viewsCount: 1),
   unreadCount: 0,
   channelData: null,
   createdAt: 0,
@@ -44,7 +44,7 @@ const chatDto3 = ChatDto(
 const chatDto4 = ChatDto(
   id: 4,
   otherUser: UserDto(id: 5, username: 'OTHER_USERNAME_5', profileImage: null, isCurrent: false, isOnline: false, lastActivityTime: 0),
-  lastMessage: MessageDto(id: 4, chatId: 4, senderId: 5, message: 'MSG_4', type: 'message', isRead: true, createdAt: 1050, editedAt: null, fromCache: false, viewsCount: 1),
+  lastMessage: MessageDto(id: 4, chatId: 4, senderId: 5, message: 'MSG_4', type: 'message', isReadByCurrentUser: true, createdAt: 1050, editedAt: null, fromCache: false, viewsCount: 1),
   unreadCount: 0,
   channelData: null,
   createdAt: 0,
@@ -86,14 +86,14 @@ final chatChannelDto1 = ChatDto(
   ),
 );
 
-const messageDto0 = MessageDto(id: 0, chatId: 0, senderId: 1, message: 'MSG_0', type: 'message', isRead: false, createdAt: 1090, editedAt: null, fromCache: false);
-const messageDto1 = MessageDto(id: 1, chatId: 0, senderId: 1, message: 'MSG_1', type: 'message', isRead: false, createdAt: 1080, editedAt: null, fromCache: false);
-const messageDto2 = MessageDto(id: 2, chatId: 0, senderId: 1, message: 'MSG_2', type: 'message', isRead: true, createdAt: 1070, editedAt: null, fromCache: false, viewsCount: 1);
-const messageDto3 = MessageDto(id: 3, chatId: 0, senderId: 0, message: 'MSG_3', type: 'message', isRead: false, createdAt: 1060, editedAt: null, fromCache: false);
-const messageDto4 = MessageDto(id: 4, chatId: 0, senderId: 0, message: 'MSG_4', type: 'message', isRead: true, createdAt: 1050, editedAt: null, fromCache: false, viewsCount: 1);
+const messageDto0 = MessageDto(id: 0, chatId: 0, senderId: 1, message: 'MSG_0', type: 'message', isReadByCurrentUser: false, createdAt: 1090, editedAt: null, fromCache: false);
+const messageDto1 = MessageDto(id: 1, chatId: 0, senderId: 1, message: 'MSG_1', type: 'message', isReadByCurrentUser: false, createdAt: 1080, editedAt: null, fromCache: false);
+const messageDto2 = MessageDto(id: 2, chatId: 0, senderId: 1, message: 'MSG_2', type: 'message', isReadByCurrentUser: true, createdAt: 1070, editedAt: null, fromCache: false, viewsCount: 1);
+const messageDto3 = MessageDto(id: 3, chatId: 0, senderId: 0, message: 'MSG_3', type: 'message', isReadByCurrentUser: false, createdAt: 1060, editedAt: null, fromCache: false);
+const messageDto4 = MessageDto(id: 4, chatId: 0, senderId: 0, message: 'MSG_4', type: 'message', isReadByCurrentUser: true, createdAt: 1050, editedAt: null, fromCache: false, viewsCount: 1);
 
 List<MessageDto> generateMessages(int from, int count, {int chatId = 0}) =>
-    List.generate(count, (i) => MessageDto(id: i + from, chatId: chatId, senderId: 1, message: 'MSG_${i + from}', type: 'message', isRead: true, createdAt: 800, editedAt: null, fromCache: false));
+    List.generate(count, (i) => MessageDto(id: i + from, chatId: chatId, senderId: 1, message: 'MSG_${i + from}', type: 'message', isReadByCurrentUser: true, createdAt: 800, editedAt: null, fromCache: false));
 
 MessageDto createCallMessage({required int callerId, required int answererId, required CallType callType, required bool isRead, int createdAt = 1200}) {
   final bool hasStartTime = callType == CallType.active || callType == CallType.outgoing || callType == CallType.incoming;
@@ -104,7 +104,7 @@ MessageDto createCallMessage({required int callerId, required int answererId, re
     senderId: callerId,
     message: '{"id": 0, "caller_id": $callerId, "answerer_id": $answererId, ${hasStartTime ? '"start_time": 950, ' : ''}${hasEndTime ? '"end_time": 990, ' : ''}"created_at": $createdAt}',
     type: 'call',
-    isRead: isRead,
+    isReadByCurrentUser: isRead,
     createdAt: createdAt,
     editedAt: null,
     fromCache: false,

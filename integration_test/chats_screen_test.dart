@@ -148,7 +148,7 @@ void main() {
       tester.getChat(4).check(unreadCount: 0, unreadIcon: false, readIcon: false, message: 'MSG_4', msgFromCurrentUser: false);
 
       /// add message
-      ws.addMessage(MessageDto(id: 5, chatId: chatDto4.id, senderId: chatDto4.otherUser.id, message: 'MSG_5', isRead: false, createdAt: 1100, editedAt: null, fromCache: false));
+      ws.addMessage(MessageDto(id: 5, chatId: chatDto4.id, senderId: chatDto4.otherUser.id, message: 'MSG_5', isReadByCurrentUser: false, createdAt: 1100, editedAt: null, fromCache: false));
       await tester.pumpAndSettle();
 
       /// check chat again
@@ -238,7 +238,7 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, message: '', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, message: '', isReadByCurrentUser: true, createdAt: 999, editedAt: null, fromCache: false),
           newLastMessage: null,
         ),
       );
@@ -249,7 +249,7 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isReadByCurrentUser: false, createdAt: 999, editedAt: null, fromCache: false),
           newLastMessage: null,
         ),
       );
@@ -260,7 +260,7 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isReadByCurrentUser: true, createdAt: 999, editedAt: null, fromCache: false),
           newLastMessage: null,
         ),
       );
@@ -272,8 +272,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 998, chatId: 0, senderId: 1, message: 'NEW_MSG', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isReadByCurrentUser: true, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 998, chatId: 0, senderId: 1, message: 'NEW_MSG', isReadByCurrentUser: false, createdAt: 999, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -284,8 +284,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 998, chatId: 0, senderId: 0, message: 'NEW_MSG_2', isRead: true, createdAt: 999, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 1, message: '', isReadByCurrentUser: false, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 998, chatId: 0, senderId: 0, message: 'NEW_MSG_2', isReadByCurrentUser: true, createdAt: 999, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -302,8 +302,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 0,
-          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 999, chatId: 0, senderId: 0, message: '', isRead: false, createdAt: 1000, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 0, senderId: 0, message: '', isReadByCurrentUser: false, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 999, chatId: 0, senderId: 0, message: '', isReadByCurrentUser: false, createdAt: 1000, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -314,8 +314,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 2,
-          deletedMessage: MessageDto(id: 999, chatId: 2, senderId: 0, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 999, chatId: 2, senderId: 0, message: '', isRead: false, createdAt: 1055, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 2, senderId: 0, message: '', isReadByCurrentUser: false, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 999, chatId: 2, senderId: 0, message: '', isReadByCurrentUser: false, createdAt: 1055, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -326,8 +326,8 @@ void main() {
       ws.addDeletedMessagesUpdate(
         const DeletedMessageUpdate(
           chatId: 4,
-          deletedMessage: MessageDto(id: 999, chatId: 4, senderId: 0, message: '', isRead: false, createdAt: 999, editedAt: null, fromCache: false),
-          newLastMessage: MessageDto(id: 999, chatId: 4, senderId: 0, message: '', isRead: false, createdAt: 1052, editedAt: null, fromCache: false),
+          deletedMessage: MessageDto(id: 999, chatId: 4, senderId: 0, message: '', isReadByCurrentUser: false, createdAt: 999, editedAt: null, fromCache: false),
+          newLastMessage: MessageDto(id: 999, chatId: 4, senderId: 0, message: '', isReadByCurrentUser: false, createdAt: 1052, editedAt: null, fromCache: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -369,7 +369,7 @@ void main() {
         ..checkChatsAppBarStatus(ChatsAppBarStatus.chats);
 
       /// add new message, check chats
-      const newMessage = MessageDto(id: 999, chatId: 2, senderId: 0, message: 'MSG_999', isRead: false, createdAt: 1100, editedAt: null, fromCache: false);
+      const newMessage = MessageDto(id: 999, chatId: 2, senderId: 0, message: 'MSG_999', isReadByCurrentUser: false, createdAt: 1100, editedAt: null, fromCache: false);
       ws.addMessage(newMessage);
       await tester.pumpAndSettle();
       tester.checkChatsOrder([2, 0, 1, 3, 4]);

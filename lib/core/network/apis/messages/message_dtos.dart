@@ -23,7 +23,7 @@ abstract class MessageDto with _$MessageDto {
     required int chatId,
     required int senderId,
     required String message,
-    required bool isRead,
+    required bool isReadByCurrentUser,
     required int createdAt,
     required int? editedAt,
     required bool fromCache,
@@ -40,7 +40,7 @@ abstract class MessageDto with _$MessageDto {
         senderId: json['sender_id'] as int,
         message: json['message'] as String,
         type: json['type'] as String,
-        isRead: json['is_read'] == 1
+        isReadByCurrentUser: json['is_read'] == 1
             ? true
             : json['is_read'] == 0
             ? false
@@ -57,7 +57,7 @@ abstract class MessageDto with _$MessageDto {
         chatId: chatId,
         senderId: -1,
         message: message,
-        isRead: true,
+        isReadByCurrentUser: true,
         createdAt: 8640000000000000,
         editedAt: null,
         fromCache: true,
@@ -70,7 +70,7 @@ abstract class MessageDto with _$MessageDto {
     'is_current_user': isCurrentUser ? 1 : 0,
     'message': message,
     'type': type,
-    'is_read': isRead ? 1 : 0,
+    'is_read': isReadByCurrentUser ? 1 : 0,
     'created_at': createdAt,
     'edited_at': editedAt,
     'views_count': viewsCount,

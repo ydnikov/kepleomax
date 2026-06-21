@@ -127,7 +127,7 @@ class _GeneralMessageWidget extends StatelessWidget {
                       ),
                       if (message.isCurrentUser && !message.isPost)
                         Icon(
-                          message.isReadByAny ? Icons.check_box : Icons.check,
+                          message.isRead ? Icons.check_box : Icons.check,
                           size: 14,
                           color: KlmColors.readMessage,
                         ),
