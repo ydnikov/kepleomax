@@ -262,31 +262,45 @@ class _BodyState extends State<_Body> {
                                         flavor.isTesting
                                     ? 0
                                     : 3),
-                            itemBuilder: (context, i) => i >= data.messages.length
-                                ? MessageWidget(
-                                    message: Message.loading(),
-                                    user: data.otherUser,
-                                    onDelete: () {},
-                                  )
-                                : VisibilityDetector(
-                                    key: Key(
-                                      'visibility_detector_$i-${data.messages[i].fromCache}',
-                                    ),
-                                    onVisibilityChanged: (info) =>
-                                        _onVisibilityChanged(info, data.messages[i]),
-                                    child: MessageWidget(
-                                      key: Key('message_${data.messages[i].id}'),
-                                      onDelete: () {
-                                        _chatBloc.add(
-                                          ChatEventDeleteMessage(
-                                            messageId: data.messages[i].id,
-                                          ),
-                                        );
-                                      },
-                                      user: data.otherUser,
-                                      message: data.messages[i],
-                                    ),
+                            itemBuilder: (context, i) {
+                              if (i >= data.messages.length) {
+                                return MessageWidget(
+                                  message: Message.loading(),
+                                  user: data.otherUser,
+                                  onDelete: () {},
+                                );
+                              }
+
+                              final message = data.messages[i];
+                              final checkVisibility =
+                                  !message.isReadByCurrentUser &&
+                                  !message.isCurrentUser &&
+                                  !message.fromCache;
+
+                              final messageWidget = MessageWidget(
+                                key: Key('message_${message.id}'),
+                                onDelete: () {
+                                  _chatBloc.add(
+                                    ChatEventDeleteMessage(messageId: message.id),
+                                  );
+                                },
+                                user: data.otherUser,
+                                message: message,
+                              );
+
+                              if (checkVisibility) {
+                                return VisibilityDetector(
+                                  key: Key(
+                                    'visibility_detector_$i-${message.fromCache}',
                                   ),
+                                  onVisibilityChanged: (info) =>
+                                      _onVisibilityChanged(info, message),
+                                  child: messageWidget,
+                                );
+                              } else {
+                                return messageWidget;
+                              }
+                            },
                           ),
                         ),
                 ),
@@ -341,18 +355,15 @@ class _BodyState extends State<_Body> {
 
     // print('KlmLog onVisibilityChanged, messageId: ${message.id}');
 
-    final isVisible = info.visibleFraction > 0.6;
-    if (!message.isReadByCurrentUser &&
-        !message.isCurrentUser &&
-        !message.fromCache &&
-        isVisible) {
-      /// TODO make createdAt + 1 (also fix backend for it)
+    if (info.visibleFraction > 0.6) {
+      // TODO make createdAt + 1 (also fix backend for it)
       _chatBloc.add(ChatEventReadMessagesBeforeTime(time: message.createdAt));
     }
-    if (message.fromCache && !_chatBloc.isClosed) {
-      // print('KlmLog visibleMessageFromCache: ${data.messages[i].message}');
-      _chatBloc.add(ChatEventLoadMore(toMessageId: message.id));
-    }
+    // TODO why here?
+    // if (message.fromCache) {
+    //   // print('KlmLog visibleMessageFromCache: ${data.messages[i].message}');
+    //   _chatBloc.add(ChatEventLoadMore(toMessageId: message.id));
+    // }
   }
 
   void _onScrollListener() {
@@ -365,6 +376,7 @@ class _BodyState extends State<_Body> {
   }
 }
 
+/// other widgets
 class _AppBar extends StatelessWidget implements PreferredSizeWidget {
   const _AppBar({super.key});
 

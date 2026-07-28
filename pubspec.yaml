@@ -36,6 +36,7 @@ dependencies:
   image_picker: ^1.2.0
   images_keys: ^0.0.4
   intl: ^0.20.2
+  inview_notifier_list: ^4.0.1
   json_annotation: ^4.9.0
   jwt_decoder: ^2.0.1
   logger: ^2.6.2
