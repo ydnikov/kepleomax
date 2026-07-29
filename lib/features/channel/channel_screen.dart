@@ -36,6 +36,7 @@ part 'widgets/delete_user_dialog.dart';
 
 const int _appBarNameFullShownOffset = 130;
 
+/// screen
 class ChannelScreen extends StatefulWidget {
   const ChannelScreen({required this.channelData, super.key});
 
@@ -97,6 +98,7 @@ class _ChannelScreenState extends State<ChannelScreen> {
   }
 }
 
+/// body
 class _Body extends StatefulWidget {
   const _Body({required this.scrollController, required this.scrollTopPadding});
 
@@ -136,210 +138,224 @@ class _BodyState extends State<_Body> {
         final data = state.data;
         final channelData = data.channelData;
 
-        return SingleChildScrollView(
-          controller: widget.scrollController,
-          padding: EdgeInsets.only(top: widget.scrollTopPadding),
-          child: Column(
-            children: [
-              AutoScrollTag(
-                key: const Key('top_scroll_tag'),
-                controller: widget.scrollController,
-                index: 0,
-                child: ChannelImageWidget(
-                  image: channelData.image,
-                  openImageViewerOnTap: true,
-                  size: 130,
+        return RefreshIndicator(
+          notificationPredicate: (_) => data.isConnected,
+          onRefresh: () async {
+            context.read<ChannelBloc>().add(const ChannelEventLoad());
+          },
+          child: SingleChildScrollView(
+            controller: widget.scrollController,
+            padding: EdgeInsets.only(top: widget.scrollTopPadding),
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                AutoScrollTag(
+                  key: const Key('top_scroll_tag'),
+                  controller: widget.scrollController,
+                  index: 0,
+                  child: ChannelImageWidget(
+                    image: channelData.image,
+                    openImageViewerOnTap: true,
+                    size: 130,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: ChannelOfficialIconWidget(
-                  isOfficial: channelData.isOfficial,
-                  widthPadding: 0,
-                  showHintOnTap: true,
-                  leftWidget: SelectableText(
-                    channelData.name,
-                    textAlign: TextAlign.center,
-                    style: context.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 26,
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ChannelOfficialIconWidget(
+                    isOfficial: channelData.isOfficial,
+                    widthPadding: 0,
+                    showHintOnTap: true,
+                    leftWidget: SelectableText(
+                      channelData.name,
+                      textAlign: TextAlign.center,
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 26,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              // AutoScrollTag(
-              //   key: const Key('bottom_of_name_scroll_tag'),
-              //   controller: widget.scrollController,
-              //   index: 1,
-              //   child:
-              // ),
-              const SizedBox(height: 2),
-              if (!data.isConnected)
-                const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(
-                        color: Colors.grey,
-                        strokeWidth: 2,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Connecting',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                )
-              else
-                Text(
-                  '${channelData.subsCount} subscriber${ParseTime.isSingular(channelData.subsCount) ? '' : 's'}',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _ChannelButtonsWidget(
-                      channelData: channelData,
-                      isLoading: data.isLoading,
-                      isConnected: data.isConnected,
-                    ),
-                    const SizedBox(height: 12),
-                    const Divider(),
-                    const Text(
-                      'description:',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                    ),
-                    if (channelData.description.isNotEmpty)
-                      SelectableText(channelData.description)
-                    else
-                      const Text(
-                        'No description',
-                        style: TextStyle(
-                          color: Colors.black38,
-                          fontWeight: FontWeight.w500,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    const Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'share link:',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(
-                              width: context.screenSize.width * 0.75,
-                              child: SelectableText(
-                                data.channelData.fullTag,
-                                style: const TextStyle(
-                                  color: KlmColors.link,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          height: 34,
-                          margin: const EdgeInsets.only(top: 10),
-                          child: IconButton(
-                            onPressed: () {
-                              Clipboard.setData(
-                                ClipboardData(text: channelData.fullTag),
-                              );
-                            },
-                            style: IconButton.styleFrom(
-                              minimumSize: Size.zero,
-                              padding: const EdgeInsets.symmetric(horizontal: 6),
-                            ),
-                            icon: const Icon(
-                              Icons.copy,
-                              color: Colors.blue,
-                              size: 22,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(),
-              if (channelData.userRole.isOwner) ...[
-                const Padding(
-                  padding: EdgeInsets.only(left: 16),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Subscribers',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                if (data.subs.isNotEmpty)
-                  MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    child: ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: data.subs.length,
-                      itemBuilder: (context, i) => _ChannelUserWidget(
-                        user: data.subs[i],
-                        key: Key('channel_subscriber_${data.subs[i].id}'),
-                        onDelete: data.isConnected ? () {
-                          context.read<ChannelBloc>().add(
-                            ChannelEventUnsubscribe(userId: data.subs[i].id),
-                          );
-                        } : null,
-                      ),
-                    ),
-                  )
-                else if (data.isLoading)
-                  Column(
+                // AutoScrollTag(
+                //   key: const Key('bottom_of_name_scroll_tag'),
+                //   controller: widget.scrollController,
+                //   index: 1,
+                //   child:
+                // ),
+                const SizedBox(height: 2),
+                if (!data.isConnected)
+                  const Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      _ChannelUserWidget(user: User.loading(), isLoading: true),
-                      _ChannelUserWidget(user: User.loading(), isLoading: true),
-                      _ChannelUserWidget(user: User.loading(), isLoading: true),
+                      SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(
+                          color: Colors.grey,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Connecting',
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
                     ],
                   )
                 else
-                  Column(
+                  Text(
+                    '${channelData.subsCount} subscriber${ParseTime.isSingular(channelData.subsCount) ? '' : 's'}',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Failed to load subscribers list :(',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      _ChannelButtonsWidget(
+                        channelData: channelData,
+                        isLoading: data.isLoading,
+                        isConnected: data.isConnected,
                       ),
-                      const SizedBox(height: 6),
-                      KlmTextButton(
-                        onPressed: () {
-                          context.read<ChannelBloc>().add(const ChannelEventLoad());
-                        },
-                        text: 'Retry',
-                        width: 200,
+                      const SizedBox(height: 12),
+                      const Divider(),
+                      const Text(
+                        'description:',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
+                      if (channelData.description.isNotEmpty)
+                        SelectableText(channelData.description)
+                      else
+                        const Text(
+                          'No description',
+                          style: TextStyle(
+                            color: Colors.black38,
+                            fontWeight: FontWeight.w500,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      const Divider(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'share link:',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(
+                                width: context.screenSize.width * 0.75,
+                                child: SelectableText(
+                                  data.channelData.fullTag,
+                                  style: const TextStyle(
+                                    color: KlmColors.link,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            height: 34,
+                            margin: const EdgeInsets.only(top: 10),
+                            child: IconButton(
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: channelData.fullTag),
+                                );
+                              },
+                              style: IconButton.styleFrom(
+                                minimumSize: Size.zero,
+                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                              ),
+                              icon: const Icon(
+                                Icons.copy,
+                                color: Colors.blue,
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                ),
+                const Divider(),
+                if (channelData.userRole.isOwner) ...[
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Subscribers',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  if (data.subs.isNotEmpty)
+                    MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      child: ListView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: data.subs.length,
+                        itemBuilder: (context, i) => _ChannelUserWidget(
+                          user: data.subs[i],
+                          key: Key('channel_subscriber_${data.subs[i].id}'),
+                          onDelete: data.isConnected
+                              ? () {
+                                  context.read<ChannelBloc>().add(
+                                    ChannelEventUnsubscribe(userId: data.subs[i].id),
+                                  );
+                                }
+                              : null,
+                        ),
+                      ),
+                    )
+                  else if (data.isLoading)
+                    Column(
+                      children: [
+                        _ChannelUserWidget(user: User.loading(), isLoading: true),
+                        _ChannelUserWidget(user: User.loading(), isLoading: true),
+                        _ChannelUserWidget(user: User.loading(), isLoading: true),
+                      ],
+                    )
+                  else
+                    Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Failed to load subscribers list :(',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        KlmTextButton(
+                          onPressed: () {
+                            context.read<ChannelBloc>().add(
+                              const ChannelEventLoad(),
+                            );
+                          },
+                          text: 'Retry',
+                          width: 200,
+                        ),
+                      ],
+                    ),
+                ],
+                const SizedBox(height: 12),
               ],
-              const SizedBox(height: 12),
-            ],
+            ),
           ),
         );
       },

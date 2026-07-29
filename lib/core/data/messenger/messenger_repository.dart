@@ -204,7 +204,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
     _emitChatsCollection(ChatsCollection(chats: newList, fromCache: false));
 
     /// cache
-    unawaited(_chatsLocal.clearAndInsertChatsAndLastMessages(chats));
+    unawaited(_chatsLocal.clearAndInsertChatsAndLastMessage(chats));
   }
 
   @override

@@ -33,6 +33,18 @@ ChannelDataDto _$ChannelDataDtoFromJson(Map<String, dynamic> json) =>
       subsCount: (json['subs_count'] as num).toInt(),
     );
 
+Map<String, dynamic> _$ChannelDataDtoToJson(ChannelDataDto instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'channel_name': instance.channelName,
+      'description': instance.description,
+      'image': instance.image,
+      'is_official': instance.isOfficial,
+      'role': _$UserChannelRoleDtoEnumMap[instance.userChannelRole]!,
+      'tag': instance.tag,
+      'subs_count': instance.subsCount,
+    };
+
 const _$UserChannelRoleDtoEnumMap = {
   UserChannelRoleDto.owner: 'owner',
   UserChannelRoleDto.subscriber: 'subscriber',

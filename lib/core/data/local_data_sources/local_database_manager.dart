@@ -12,7 +12,7 @@ class LocalDatabaseManager {
 
   static Future<Database> _openDatabase() => openDatabase(
     'klm_database.db',
-    version: 3,
+    version: 5,
     onCreate: (db, _) async {
       await db.execute('''
         CREATE TABLE messages (
@@ -40,7 +40,9 @@ class LocalDatabaseManager {
         CREATE TABLE chats (
           id INT PRIMARY KEY,
           other_user_id INT NOT NULL,
-          unread_count INT NOT NULL
+          unread_count INT NOT NULL,
+          created_at INT NOT NULL,
+          channel_data JSON
         )''');
 
       await db.execute('''
@@ -56,8 +58,14 @@ class LocalDatabaseManager {
     onUpgrade: (db, oldV, newV) async {
       for (int i = oldV + 1; i <= newV; i++) {
         if (i == 3) {
-          await db.execute('ALTER TABLE messages ADD COLUMN views_count INT NOT NULL DEFAULT 0');
+          await db.execute(
+            'ALTER TABLE messages ADD COLUMN views_count INT NOT NULL DEFAULT 0',
+          );
           await db.execute('ALTER TABLE messages ALTER COLUMN DROP DEFAULT');
+        } else if (i == 5) {
+          await db.execute('DELETE FROM chats');
+          await db.execute('ALTER TABLE chats ADD COLUMN created_at INT NOT NULL');
+          await db.execute('ALTER TABLE chats ADD COLUMN channel_data JSON');
         }
       }
     },

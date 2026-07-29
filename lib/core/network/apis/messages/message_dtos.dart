@@ -28,28 +28,30 @@ abstract class MessageDto with _$MessageDto {
     required int? editedAt,
     required bool fromCache,
     @Default('message') String type,
-    @Default(0) int viewsCount
+    @Default(0) int viewsCount,
   }) = _MessageDto;
 
   const MessageDto._();
 
-  factory MessageDto.fromJson(Map<String, dynamic> json, {bool fromCache = false}) =>
-      MessageDto(
-        id: (json['message_id'] as int?) ?? json['id'] as int,
-        chatId: json['chat_id'] as int,
-        senderId: json['sender_id'] as int,
-        message: json['message'] as String,
-        type: json['type'] as String,
-        isReadByCurrentUser: json['is_read'] == 1
-            ? true
-            : json['is_read'] == 0
-            ? false
-            : json['is_read'] as bool,
-        createdAt: json['created_at'] as int,
-        editedAt: json['edited_at'] as int?,
-        fromCache: fromCache,
-        viewsCount: json['views_count'] as int
-      );
+  factory MessageDto.fromJson(Map<String, dynamic> json, {bool fromCache = false}) {
+    print('KlmLog, MessageDto.fromJson, created_at: ${json['created_at']}');
+    return MessageDto(
+      id: (json['message_id'] as int?) ?? json['id'] as int,
+      chatId: json['chat_id'] as int,
+      senderId: json['sender_id'] as int,
+      message: json['message'] as String,
+      type: json['type'] as String,
+      isReadByCurrentUser: json['is_read'] == 1
+          ? true
+          : json['is_read'] == 0
+          ? false
+          : json['is_read'] as bool,
+      createdAt: json['created_at'] as int,
+      editedAt: json['edited_at'] as int?,
+      fromCache: fromCache,
+      viewsCount: json['views_count'] as int,
+    );
+  }
 
   factory MessageDto.fromDraft({required String message, required int chatId}) =>
       MessageDto(

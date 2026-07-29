@@ -134,7 +134,7 @@ class MockChatsLocalDataSource extends _i1.Mock
           as _i3.Future<_i4.ChatDto?>);
 
   @override
-  _i3.Future<void> clearAndInsertChatsAndLastMessages(
+  _i3.Future<void> clearAndInsertChatsAndLastMessage(
     Iterable<_i4.ChatDto>? chats,
   ) =>
       (super.noSuchMethod(

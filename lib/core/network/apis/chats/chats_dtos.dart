@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kepleomax/core/models/message_draft.dart';
@@ -47,31 +49,39 @@ class ChatDto extends Equatable {
     lastMessage: json['last_message'] == null
         ? null
         : MessageDto.fromJson(json['last_message'] as Map<String, dynamic>),
-    channelData: json['is_channel'] == true
-        ? ChannelDataDto.fromJson(json)
-        : null,
+    channelData: json['is_channel'] == true ? ChannelDataDto.fromJson(json) : null,
     unreadCount: (json['unread_count'] as num? ?? 0).toInt(),
     createdAt: json['created_at'] as int,
   );
 
   /// json['other_user'] should be map\<String, dynamic>
-  factory ChatDto.fromLocalJson(Map<String, dynamic> json) => ChatDto(
-    id: json['id'] as int,
-    otherUser: UserDto.fromJson(json),
-    lastMessage: json['message_id'] == null
-        ? null
-        : MessageDto.fromJson(json, fromCache: true),
-    unreadCount: json['unread_count'] as int,
-    channelData: null,
-    draft: json['draft_message'] == null
-        ? null
-        : MessageDraft(
-            message: json['draft_message'] as String,
-            chatId: json['id'] as int,
-            createdAt: json['draft_created_at'] as int,
-          ),
-    createdAt: 0, // TODO
-  );
+  factory ChatDto.fromLocalJson(Map<String, dynamic> json) {
+    // print('KlmLog ChatDto.fromLocalJson, created_at: ${json['chat_created_at']}');
+
+    return ChatDto(
+      id: json['chat_id'] as int,
+      otherUser: UserDto.fromJson(
+        json.map((k, v) => MapEntry(k.replaceAll('user_', ''), v)),
+      ),
+      lastMessage: json['msg_id'] == null
+          ? null
+          : MessageDto.fromJson(json.map((k, v) => MapEntry(k.replaceAll('msg_', ''), v)), fromCache: true),
+      unreadCount: json['chat_unread_count'] as int,
+      channelData: json['chat_channel_data'] == null
+          ? null
+          : ChannelDataDto.fromJson(
+              jsonDecode(json['chat_channel_data'] as String) as Map<String, dynamic>,
+            ),
+      draft: json['draft_message'] == null
+          ? null
+          : MessageDraft(
+              message: json['draft_message'] as String,
+              chatId: json['chat_id'] as int,
+              createdAt: json['draft_created_at'] as int,
+            ),
+      createdAt: json['chat_created_at'] as int,
+    );
+  }
 
   ChatDto copyWithNewDraft(MessageDraft? draft) => ChatDto(
     id: id,
@@ -95,13 +105,15 @@ class ChatDto extends Equatable {
     'id': id,
     'other_user_id': otherUser.id,
     'unread_count': unreadCount,
+    'created_at': createdAt,
+    'channel_data': channelData == null ? null : jsonEncode(channelData!.toJson()),
   };
 
   @override
   List<Object?> get props => [id, otherUser, lastMessage, unreadCount];
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class ChannelDataDto {
   const ChannelDataDto({
     required this.id,
@@ -116,6 +128,8 @@ class ChannelDataDto {
 
   factory ChannelDataDto.fromJson(Map<String, dynamic> json) =>
       _$ChannelDataDtoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ChannelDataDtoToJson(this);
 
   final int id;
   @JsonKey(name: 'channel_name')

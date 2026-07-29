@@ -11,7 +11,7 @@ abstract class ChatsLocalDataSource {
 
   Future<ChatDto?> getChatByOtherUserId(int otherUserId);
 
-  Future<void> clearAndInsertChatsAndLastMessages(Iterable<ChatDto> chats);
+  Future<void> clearAndInsertChatsAndLastMessage(Iterable<ChatDto> chats);
 
   Future<void> insert(ChatDto chat);
 
@@ -28,6 +28,7 @@ class ChatsLocalDataSourceImpl implements ChatsLocalDataSource {
   ChatsLocalDataSourceImpl({required Database database}) : _database = database;
   final Database _database;
 
+  /// read
   @override
   Future<ChatDto?> getChat(int chatId) async {
     final query = await _database.query(
@@ -81,28 +82,48 @@ class ChatsLocalDataSourceImpl implements ChatsLocalDataSource {
     /// there are user_id and message_id fields
     final query = await _database.rawQuery('''
       SELECT 
-        users.id AS user_id, 
-        messages.id as message_id, 
-        users.*, 
-        messages.*, 
-        chats.*, 
+        users.id AS user_id,
+        users.username AS user_username,
+        users.profile_image AS user_profile_image,
+        users.is_current AS user_is_current,
+        users.is_online AS user_is_online,
+        users.last_activity_time AS user_last_activity_time,
+        
+        messages.id as msg_id,
+        messages.chat_id as msg_id,
+        messages.sender_id as msg_sender_id,
+        messages.is_current_user as msg_is_current_user,
+        messages.message as msg_message,
+        messages.type as msg_type,
+        messages.is_read as msg_is_read,
+        messages.created_at as msg_created_at,
+        messages.edited_at as msg_edited_at,
+        messages.views_count as msg_views_count,
+         
+        chats.id as chat_id,
+        chats.other_user_id as chat_other_user_id,
+        chats.unread_count as chat_unread_count,
+        chats.created_at as chat_created_at,
+        chats.channel_data as chat_channel_data,
+        
         drafts.message AS draft_message,
         drafts.created_at AS draft_created_at
       FROM chats 
         LEFT JOIN users ON users.id = chats.other_user_id 
         LEFT JOIN messages ON messages.id = (SELECT id FROM messages WHERE chat_id = chats.id ORDER BY created_at DESC LIMIT 1)
         LEFT JOIN drafts ON drafts.chat_id = chats.id
+      ORDER BY COALESCE(messages.created_at, chats.created_at) DESC
       ''');
 
     final result = <ChatDto>[];
     await _database.transaction((ts) async {
       for (final chatJson in query) {
-        if (chatJson['username'] == null) {
+        if (chatJson['user_username'] == null) {
           unawaited(
             ts.delete(
               'chats',
               where: 'other_user_id = ?',
-              whereArgs: [chatJson['other_user_id']],
+              whereArgs: [chatJson['user_other_user_id']],
             ),
           );
           continue;
@@ -112,13 +133,10 @@ class ChatsLocalDataSourceImpl implements ChatsLocalDataSource {
       }
     });
 
-    return result.sorted(
-      (a, b) =>
-          (b.lastMessage?.createdAt ?? b.createdAt) -
-          (a.lastMessage?.createdAt ?? a.createdAt),
-    );
+    return result;
   }
 
+  /// edit
   @override
   Future<void> insert(ChatDto chat) async {
     await _database.insert(
@@ -144,7 +162,7 @@ class ChatsLocalDataSourceImpl implements ChatsLocalDataSource {
   }
 
   @override
-  Future<void> clearAndInsertChatsAndLastMessages(Iterable<ChatDto> chats) async {
+  Future<void> clearAndInsertChatsAndLastMessage(Iterable<ChatDto> chats) async {
     /// delete lastMessages
     final oldChats = await getChats();
     final chatsMap = <int, ChatDto>{};

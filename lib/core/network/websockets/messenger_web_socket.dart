@@ -140,7 +140,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
     }
 
     if (subscribeOn.isNotEmpty) {
-      print('KlmLogSubs subscribeOnChats: $subscribeOn');
+      // print('KlmLogSubs subscribeOnChats: $subscribeOn');
       _klmWebSocket.emit('subscribe_on_chats_updates', {'ids': subscribeOn});
     }
   }
@@ -156,7 +156,7 @@ class MessengerWebSocketImpl implements MessengerWebSocket {
     }
 
     if (subscribeOn.isNotEmpty) {
-      print('KlmLogSubs subscribeOnUsers: $subscribeOn');
+      // print('KlmLogSubs subscribeOnUsers: $subscribeOn');
       _klmWebSocket.emit('subscribe_on_online_status_updates', {
         'users_ids': subscribeOn,
       });
