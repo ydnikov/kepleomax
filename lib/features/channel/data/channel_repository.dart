@@ -14,7 +14,7 @@ import 'package:kepleomax/core/network/websockets/messenger_web_socket.dart';
 import 'package:kepleomax/core/utils/stateful_stream.dart';
 import 'package:kepleomax/features/channel_editor/bloc/channel_editor_state.dart';
 
-const int _channelSubsPagingLimit = 10;
+const int _channelSubsPagingLimit = 999; // 999 cause there is no paging now
 
 abstract class ChannelRepository implements ChannelEditorRepository, Disposable {
   Future<ChannelData> init({ChannelData? channelData, int? channelId});
@@ -188,13 +188,10 @@ class ChannelRepositoryImpl implements ChannelRepository {
   Future<void> subscribe() async {
     final res = await _api.subscribe(channelId: _currentChannelData.id);
 
-    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
-      /// TODO make so if code is 409, pass it up somehow and update ui (request chat, or just change role)
-      throw Exception(
-        res.response.statusCode == 409
-            ? "You're already subscribed"
-            : 'Failed to subscribe: ${res.response.statusCode}',
-      );
+    final statusCode = res.response.statusCode!;
+    if (statusCode != 409 &&
+        (res.response.statusCode! < 200 || res.response.statusCode! > 299)) {
+      throw Exception('Failed to subscribe: ${res.response.statusCode}');
     }
 
     _channelUpdatesController.add(ChannelData.fromDto(res.data.data!.channelData!));
@@ -207,12 +204,9 @@ class ChannelRepositoryImpl implements ChannelRepository {
       userId: userId,
     );
 
-    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
-      throw Exception(
-        res.response.statusCode == 409
-            ? "You're not a subscriber"
-            : 'Failed to unsubscribe: ${res.response.statusCode}',
-      );
+    final statusCode = res.response.statusCode!;
+    if (statusCode != 409 && (statusCode < 200 || statusCode > 299)) {
+      throw Exception('Failed to unsubscribe: ${res.response.statusCode}');
     }
 
     if (userId != null) {

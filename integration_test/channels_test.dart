@@ -61,7 +61,7 @@ void main() {
 
       if (openFirstChat) {
         getMessagesMustReturn(dp, []);
-        getSubsCountMustReturn(dp, 2);
+        // getSubsCountMustReturn(dp, 2);
         await tester.tap(find.byKey(Key('chat_${initialChats[0].id}')));
         await tester.pumpAndSettle();
       }

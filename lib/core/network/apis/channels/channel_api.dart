@@ -26,11 +26,6 @@ abstract class ChannelApi {
     @Query('channel_id') required int channelId,
   });
 
-  @GET('/subsCount')
-  Future<HttpResponse<GetSubscribersCountResponseDto>> getSubscribersCount({
-    @Query('channel_id') required int channelId,
-  });
-
   @GET('/subs')
   Future<HttpResponse<GetSubscribersResponseDto>> getSubscribers({
     @Query('channel_id') required int channelId,

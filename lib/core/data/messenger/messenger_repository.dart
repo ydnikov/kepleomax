@@ -3,7 +3,6 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:kepleomax/core/app_constants.dart';
-import 'package:kepleomax/core/auth/auth_controller.dart';
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
 import 'package:kepleomax/core/data/data_sources/messages_api_data_sources.dart';
 import 'package:kepleomax/core/data/local_data_sources/chats_local_data_source.dart';

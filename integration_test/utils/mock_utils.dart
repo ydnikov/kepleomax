@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kepleomax/core/app_constants.dart';
 import 'package:kepleomax/core/di/dependencies.dart';
-import 'package:kepleomax/core/network/apis/channels/channel_dtos.dart';
 import 'package:kepleomax/core/network/apis/chats/chats_dtos.dart';
 import 'package:kepleomax/core/network/apis/messages/message_dtos.dart';
 import 'package:mockito/mockito.dart';
@@ -92,16 +91,6 @@ void getMessagesMustReturn(
     );
   });
 }
-
-void getSubsCountMustReturn(Dependencies dp, int subsCount, {int chatId = 0}) {
-  when(dp.channelApi.getSubscribersCount(channelId: chatId)).thenAnswer((_) async {
-    return HttpResponse(
-      GetSubscribersCountResponseDto(count: subsCount, message: null),
-      Response(requestOptions: RequestOptions(), statusCode: 200),
-    );
-  });
-}
-
 void getChatWithUserMustReturn(Dependencies dp, ChatDto? chat, {int userId = 1}) {
   when(dp.chatsApi.getChatWithUser(otherUserId: userId)).thenAnswer(
     (_) async => HttpResponse(
