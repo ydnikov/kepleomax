@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Chat {
 
- int get id; User get otherUser; ChannelData? get channelData; Message? get lastMessage; bool get fromCache; int get unreadCount; int get createdAt; MessageDraft? get draft; DateTime? get lastTypingActivityTime;
+ int get id; User get otherUser; ChannelData? get channelData; Message? get lastMessage; bool get fromCache; int get unreadCount; DateTime get createdAt; MessageDraft? get draft; DateTime? get lastTypingActivityTime;
 /// Create a copy of Chat
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +45,7 @@ abstract mixin class $ChatCopyWith<$Res>  {
   factory $ChatCopyWith(Chat value, $Res Function(Chat) _then) = _$ChatCopyWithImpl;
 @useResult
 $Res call({
- int id, User otherUser, ChannelData? channelData, Message? lastMessage, bool fromCache, int unreadCount, int createdAt, MessageDraft? draft, DateTime? lastTypingActivityTime
+ int id, User otherUser, ChannelData? channelData, Message? lastMessage, bool fromCache, int unreadCount, DateTime createdAt, MessageDraft? draft, DateTime? lastTypingActivityTime
 });
 
 
@@ -71,7 +71,7 @@ as ChannelData?,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMe
 as Message?,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
 as bool,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as int,draft: freezed == draft ? _self.draft : draft // ignore: cast_nullable_to_non_nullable
+as DateTime,draft: freezed == draft ? _self.draft : draft // ignore: cast_nullable_to_non_nullable
 as MessageDraft?,lastTypingActivityTime: freezed == lastTypingActivityTime ? _self.lastTypingActivityTime : lastTypingActivityTime // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -203,7 +203,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  int createdAt,  MessageDraft? draft,  DateTime? lastTypingActivityTime)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  DateTime createdAt,  MessageDraft? draft,  DateTime? lastTypingActivityTime)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Chat() when $default != null:
 return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_that.fromCache,_that.unreadCount,_that.createdAt,_that.draft,_that.lastTypingActivityTime);case _:
@@ -224,7 +224,7 @@ return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  int createdAt,  MessageDraft? draft,  DateTime? lastTypingActivityTime)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  DateTime createdAt,  MessageDraft? draft,  DateTime? lastTypingActivityTime)  $default,) {final _that = this;
 switch (_that) {
 case _Chat():
 return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_that.fromCache,_that.unreadCount,_that.createdAt,_that.draft,_that.lastTypingActivityTime);case _:
@@ -244,7 +244,7 @@ return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  int createdAt,  MessageDraft? draft,  DateTime? lastTypingActivityTime)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  User otherUser,  ChannelData? channelData,  Message? lastMessage,  bool fromCache,  int unreadCount,  DateTime createdAt,  MessageDraft? draft,  DateTime? lastTypingActivityTime)?  $default,) {final _that = this;
 switch (_that) {
 case _Chat() when $default != null:
 return $default(_that.id,_that.otherUser,_that.channelData,_that.lastMessage,_that.fromCache,_that.unreadCount,_that.createdAt,_that.draft,_that.lastTypingActivityTime);case _:
@@ -268,7 +268,7 @@ class _Chat extends Chat {
 @override final  Message? lastMessage;
 @override final  bool fromCache;
 @override final  int unreadCount;
-@override final  int createdAt;
+@override final  DateTime createdAt;
 @override final  MessageDraft? draft;
 @override final  DateTime? lastTypingActivityTime;
 
@@ -302,7 +302,7 @@ abstract mixin class _$ChatCopyWith<$Res> implements $ChatCopyWith<$Res> {
   factory _$ChatCopyWith(_Chat value, $Res Function(_Chat) _then) = __$ChatCopyWithImpl;
 @override @useResult
 $Res call({
- int id, User otherUser, ChannelData? channelData, Message? lastMessage, bool fromCache, int unreadCount, int createdAt, MessageDraft? draft, DateTime? lastTypingActivityTime
+ int id, User otherUser, ChannelData? channelData, Message? lastMessage, bool fromCache, int unreadCount, DateTime createdAt, MessageDraft? draft, DateTime? lastTypingActivityTime
 });
 
 
@@ -328,7 +328,7 @@ as ChannelData?,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMe
 as Message?,fromCache: null == fromCache ? _self.fromCache : fromCache // ignore: cast_nullable_to_non_nullable
 as bool,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as int,draft: freezed == draft ? _self.draft : draft // ignore: cast_nullable_to_non_nullable
+as DateTime,draft: freezed == draft ? _self.draft : draft // ignore: cast_nullable_to_non_nullable
 as MessageDraft?,lastTypingActivityTime: freezed == lastTypingActivityTime ? _self.lastTypingActivityTime : lastTypingActivityTime // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -386,7 +386,7 @@ $MessageDraftCopyWith<$Res>? get draft {
 mixin _$ChannelData {
 
  int get id;// equals to chat_id
- String get name; String get description; String get tag; String? get image; bool get isOfficial; UserChannelRole get userRole; int get subsCount;
+ String get name; String get description; String get tag; String? get image; bool get isOfficial; UserChannelRole get userRole; int get subsCount; DateTime get createdAt;
 /// Create a copy of ChannelData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -397,16 +397,16 @@ $ChannelDataCopyWith<ChannelData> get copyWith => _$ChannelDataCopyWithImpl<Chan
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelData&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.image, image) || other.image == image)&&(identical(other.isOfficial, isOfficial) || other.isOfficial == isOfficial)&&(identical(other.userRole, userRole) || other.userRole == userRole)&&(identical(other.subsCount, subsCount) || other.subsCount == subsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChannelData&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.image, image) || other.image == image)&&(identical(other.isOfficial, isOfficial) || other.isOfficial == isOfficial)&&(identical(other.userRole, userRole) || other.userRole == userRole)&&(identical(other.subsCount, subsCount) || other.subsCount == subsCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,tag,image,isOfficial,userRole,subsCount);
+int get hashCode => Object.hash(runtimeType,id,name,description,tag,image,isOfficial,userRole,subsCount,createdAt);
 
 @override
 String toString() {
-  return 'ChannelData(id: $id, name: $name, description: $description, tag: $tag, image: $image, isOfficial: $isOfficial, userRole: $userRole, subsCount: $subsCount)';
+  return 'ChannelData(id: $id, name: $name, description: $description, tag: $tag, image: $image, isOfficial: $isOfficial, userRole: $userRole, subsCount: $subsCount, createdAt: $createdAt)';
 }
 
 
@@ -417,7 +417,7 @@ abstract mixin class $ChannelDataCopyWith<$Res>  {
   factory $ChannelDataCopyWith(ChannelData value, $Res Function(ChannelData) _then) = _$ChannelDataCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, String description, String tag, String? image, bool isOfficial, UserChannelRole userRole, int subsCount
+ int id, String name, String description, String tag, String? image, bool isOfficial, UserChannelRole userRole, int subsCount, DateTime createdAt
 });
 
 
@@ -434,7 +434,7 @@ class _$ChannelDataCopyWithImpl<$Res>
 
 /// Create a copy of ChannelData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = null,Object? tag = null,Object? image = freezed,Object? isOfficial = null,Object? userRole = null,Object? subsCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = null,Object? tag = null,Object? image = freezed,Object? isOfficial = null,Object? userRole = null,Object? subsCount = null,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -444,7 +444,8 @@ as String,image: freezed == image ? _self.image : image // ignore: cast_nullable
 as String?,isOfficial: null == isOfficial ? _self.isOfficial : isOfficial // ignore: cast_nullable_to_non_nullable
 as bool,userRole: null == userRole ? _self.userRole : userRole // ignore: cast_nullable_to_non_nullable
 as UserChannelRole,subsCount: null == subsCount ? _self.subsCount : subsCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
   ));
 }
 
@@ -529,10 +530,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String description,  String tag,  String? image,  bool isOfficial,  UserChannelRole userRole,  int subsCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String description,  String tag,  String? image,  bool isOfficial,  UserChannelRole userRole,  int subsCount,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChannelData() when $default != null:
-return $default(_that.id,_that.name,_that.description,_that.tag,_that.image,_that.isOfficial,_that.userRole,_that.subsCount);case _:
+return $default(_that.id,_that.name,_that.description,_that.tag,_that.image,_that.isOfficial,_that.userRole,_that.subsCount,_that.createdAt);case _:
   return orElse();
 
 }
@@ -550,10 +551,10 @@ return $default(_that.id,_that.name,_that.description,_that.tag,_that.image,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String description,  String tag,  String? image,  bool isOfficial,  UserChannelRole userRole,  int subsCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String description,  String tag,  String? image,  bool isOfficial,  UserChannelRole userRole,  int subsCount,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _ChannelData():
-return $default(_that.id,_that.name,_that.description,_that.tag,_that.image,_that.isOfficial,_that.userRole,_that.subsCount);case _:
+return $default(_that.id,_that.name,_that.description,_that.tag,_that.image,_that.isOfficial,_that.userRole,_that.subsCount,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -570,10 +571,10 @@ return $default(_that.id,_that.name,_that.description,_that.tag,_that.image,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String description,  String tag,  String? image,  bool isOfficial,  UserChannelRole userRole,  int subsCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String description,  String tag,  String? image,  bool isOfficial,  UserChannelRole userRole,  int subsCount,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _ChannelData() when $default != null:
-return $default(_that.id,_that.name,_that.description,_that.tag,_that.image,_that.isOfficial,_that.userRole,_that.subsCount);case _:
+return $default(_that.id,_that.name,_that.description,_that.tag,_that.image,_that.isOfficial,_that.userRole,_that.subsCount,_that.createdAt);case _:
   return null;
 
 }
@@ -585,7 +586,7 @@ return $default(_that.id,_that.name,_that.description,_that.tag,_that.image,_tha
 
 
 class _ChannelData extends ChannelData {
-  const _ChannelData({required this.id, required this.name, required this.description, required this.tag, required this.image, required this.isOfficial, required this.userRole, required this.subsCount}): super._();
+  const _ChannelData({required this.id, required this.name, required this.description, required this.tag, required this.image, required this.isOfficial, required this.userRole, required this.subsCount, required this.createdAt}): super._();
   
 
 @override final  int id;
@@ -597,6 +598,7 @@ class _ChannelData extends ChannelData {
 @override final  bool isOfficial;
 @override final  UserChannelRole userRole;
 @override final  int subsCount;
+@override final  DateTime createdAt;
 
 /// Create a copy of ChannelData
 /// with the given fields replaced by the non-null parameter values.
@@ -608,16 +610,16 @@ _$ChannelDataCopyWith<_ChannelData> get copyWith => __$ChannelDataCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelData&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.image, image) || other.image == image)&&(identical(other.isOfficial, isOfficial) || other.isOfficial == isOfficial)&&(identical(other.userRole, userRole) || other.userRole == userRole)&&(identical(other.subsCount, subsCount) || other.subsCount == subsCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChannelData&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.image, image) || other.image == image)&&(identical(other.isOfficial, isOfficial) || other.isOfficial == isOfficial)&&(identical(other.userRole, userRole) || other.userRole == userRole)&&(identical(other.subsCount, subsCount) || other.subsCount == subsCount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,tag,image,isOfficial,userRole,subsCount);
+int get hashCode => Object.hash(runtimeType,id,name,description,tag,image,isOfficial,userRole,subsCount,createdAt);
 
 @override
 String toString() {
-  return 'ChannelData(id: $id, name: $name, description: $description, tag: $tag, image: $image, isOfficial: $isOfficial, userRole: $userRole, subsCount: $subsCount)';
+  return 'ChannelData(id: $id, name: $name, description: $description, tag: $tag, image: $image, isOfficial: $isOfficial, userRole: $userRole, subsCount: $subsCount, createdAt: $createdAt)';
 }
 
 
@@ -628,7 +630,7 @@ abstract mixin class _$ChannelDataCopyWith<$Res> implements $ChannelDataCopyWith
   factory _$ChannelDataCopyWith(_ChannelData value, $Res Function(_ChannelData) _then) = __$ChannelDataCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, String description, String tag, String? image, bool isOfficial, UserChannelRole userRole, int subsCount
+ int id, String name, String description, String tag, String? image, bool isOfficial, UserChannelRole userRole, int subsCount, DateTime createdAt
 });
 
 
@@ -645,7 +647,7 @@ class __$ChannelDataCopyWithImpl<$Res>
 
 /// Create a copy of ChannelData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = null,Object? tag = null,Object? image = freezed,Object? isOfficial = null,Object? userRole = null,Object? subsCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = null,Object? tag = null,Object? image = freezed,Object? isOfficial = null,Object? userRole = null,Object? subsCount = null,Object? createdAt = null,}) {
   return _then(_ChannelData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -655,7 +657,8 @@ as String,image: freezed == image ? _self.image : image // ignore: cast_nullable
 as String?,isOfficial: null == isOfficial ? _self.isOfficial : isOfficial // ignore: cast_nullable_to_non_nullable
 as bool,userRole: null == userRole ? _self.userRole : userRole // ignore: cast_nullable_to_non_nullable
 as UserChannelRole,subsCount: null == subsCount ? _self.subsCount : subsCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
   ));
 }
 

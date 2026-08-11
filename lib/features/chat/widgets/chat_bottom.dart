@@ -11,8 +11,8 @@ class _ChatBottom extends StatefulWidget {
   });
 
   final TextEditingController controller;
-  final ValueChanged<String>? onSend;
-  final ValueChanged<String>? onEdit;
+  final VoidCallback onSend;
+  final VoidCallback onEdit;
   final bool isLoading;
   final bool isChannel;
 
@@ -21,6 +21,7 @@ class _ChatBottom extends StatefulWidget {
 }
 
 class _ChatBottomState extends State<_ChatBottom> {
+  /// callbacks
   @override
   void initState() {
     widget.controller.addListener(_setState);
@@ -33,6 +34,7 @@ class _ChatBottomState extends State<_ChatBottom> {
     super.dispose();
   }
 
+  /// build
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -57,7 +59,7 @@ class _ChatBottomState extends State<_ChatBottom> {
                 key: const Key('message_input_field'),
                 controller: widget.controller,
                 hint: widget.isChannel ? 'Broadcast' : 'Message',
-                onChanged: widget.onEdit,
+                onChanged: (_) => widget.onEdit,
                 multiline: true,
                 maxLength: 4000,
                 textCapitalization: TextCapitalization.sentences,
@@ -74,9 +76,7 @@ class _ChatBottomState extends State<_ChatBottom> {
               duration: const Duration(milliseconds: 100),
               child: widget.controller.text.isNotEmpty
                   ? _SendMessageButton(
-                      onPressed: widget.onSend == null || widget.isLoading
-                          ? null
-                          : _sendButtonAction,
+                      onPressed: widget.isLoading ? null : _sendButtonAction,
                     )
                   : _VoiceMessageButton(onPressed: () {}),
             ),
@@ -90,7 +90,8 @@ class _ChatBottomState extends State<_ChatBottom> {
 
   void _sendButtonAction() {
     if (widget.controller.text.isEmpty || widget.isLoading) return;
-    widget.onSend!(widget.controller.text.trim());
+
+    widget.onSend();
     widget.controller.clear();
   }
 }

@@ -51,7 +51,7 @@ class ChatDto extends Equatable {
         : MessageDto.fromJson(json['last_message'] as Map<String, dynamic>),
     channelData: json['is_channel'] == true ? ChannelDataDto.fromJson(json) : null,
     unreadCount: (json['unread_count'] as num? ?? 0).toInt(),
-    createdAt: json['created_at'] as int,
+    createdAt: (json['created_at'] as int?) ?? 0,
   );
 
   /// json['other_user'] should be map\<String, dynamic>
@@ -65,12 +65,16 @@ class ChatDto extends Equatable {
       ),
       lastMessage: json['msg_id'] == null
           ? null
-          : MessageDto.fromJson(json.map((k, v) => MapEntry(k.replaceAll('msg_', ''), v)), fromCache: true),
+          : MessageDto.fromJson(
+              json.map((k, v) => MapEntry(k.replaceAll('msg_', ''), v)),
+              fromCache: true,
+            ),
       unreadCount: json['chat_unread_count'] as int,
       channelData: json['chat_channel_data'] == null
           ? null
           : ChannelDataDto.fromJson(
-              jsonDecode(json['chat_channel_data'] as String) as Map<String, dynamic>,
+              jsonDecode(json['chat_channel_data'] as String)
+                  as Map<String, dynamic>,
             ),
       draft: json['draft_message'] == null
           ? null
@@ -79,7 +83,7 @@ class ChatDto extends Equatable {
               chatId: json['chat_id'] as int,
               createdAt: json['draft_created_at'] as int,
             ),
-      createdAt: json['chat_created_at'] as int,
+      createdAt: (json['chat_created_at'] as int?) ?? 0,
     );
   }
 
@@ -124,6 +128,7 @@ class ChannelDataDto {
     required this.userChannelRole,
     required this.tag,
     required this.subsCount,
+    required this.createdAt,
   });
 
   factory ChannelDataDto.fromJson(Map<String, dynamic> json) =>
@@ -143,6 +148,8 @@ class ChannelDataDto {
   final String tag;
   @JsonKey(name: 'subs_count')
   final int subsCount;
+  @JsonKey(name: 'channel_created_at')
+  final int createdAt;
 }
 
 @JsonEnum()

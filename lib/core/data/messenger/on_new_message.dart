@@ -12,18 +12,6 @@ extension _OnNewMessageUpdateExtension on MessengerRepositoryImpl {
           ..._currentMessagesCollection!.messages,
         ];
         _emitMessages(newList);
-      } else if (update.createdChatInfo != null &&
-          _currentMessagesCollection!.chatId == -1 &&
-          update.createdChatInfo!.usersIds.contains(_currentChatOtherUserId)) {
-        /// it's a new chat
-        final newList = <Message>[Message.fromDto(messageDto)];
-        _emitMessagesCollection(
-          MessagesCollection(
-            chatId: messageDto.chatId,
-            messages: newList,
-            allMessagesLoaded: true,
-          ),
-        );
       }
     }
 
@@ -45,15 +33,18 @@ extension _OnNewMessageUpdateExtension on MessengerRepositoryImpl {
               lastTypingActivityTime: null,
               unreadCount:
                   affectedChat.unreadCount +
-                  (!messageDto.isCurrentUser && !messageDto.isReadByCurrentUser ? 1 : 0),
+                  (!messageDto.isCurrentUser && !messageDto.isReadByCurrentUser
+                      ? 1
+                      : 0),
             ),
           );
         _emitChatsCollection(ChatsCollection(chats: newChats));
-      } else {
+      } else if (update.createdChatInfo != null) {
         /// it's a new chat
-        final newChat = await _chatsApi.getChatWithId(messageDto.chatId.toString());
-        if (newChat == null) return;
-        _chatsLocal.insert(newChat).ignore();
+        final newChat = await _chatsApi.getChatWithId(
+          update.createdChatInfo!.chatId.toString(),
+        );
+        _chatsLocal.insert(newChat!).ignore();
         _emitChatsCollection(
           ChatsCollection(
             chats: [Chat.fromDto(newChat, fromCache: false), ...newChats],

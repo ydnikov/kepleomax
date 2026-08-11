@@ -89,6 +89,19 @@ class MockChatsApi extends _i1.Mock implements _i3.ChatsApi {
             ),
           )
           as _i4.Future<_i2.HttpResponse<_i5.ChatResponse>>);
+
+  @override
+  _i4.Future<_i2.HttpResponse<void>> delete({required int? chatId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#delete, [], {#chatId: chatId}),
+            returnValue: _i4.Future<_i2.HttpResponse<void>>.value(
+              _FakeHttpResponse_0<void>(
+                this,
+                Invocation.method(#delete, [], {#chatId: chatId}),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.HttpResponse<void>>);
 }
 
 /// A class which mocks [MessagesApi].
@@ -188,27 +201,6 @@ class MockChannelApi extends _i1.Mock implements _i8.ChannelApi {
             ),
           )
           as _i4.Future<_i2.HttpResponse<void>>);
-
-  @override
-  _i4.Future<_i2.HttpResponse<_i9.GetSubscribersCountResponseDto>>
-  getSubscribersCount({required int? channelId}) =>
-      (super.noSuchMethod(
-            Invocation.method(#getSubscribersCount, [], {
-              #channelId: channelId,
-            }),
-            returnValue:
-                _i4.Future<
-                  _i2.HttpResponse<_i9.GetSubscribersCountResponseDto>
-                >.value(
-                  _FakeHttpResponse_0<_i9.GetSubscribersCountResponseDto>(
-                    this,
-                    Invocation.method(#getSubscribersCount, [], {
-                      #channelId: channelId,
-                    }),
-                  ),
-                ),
-          )
-          as _i4.Future<_i2.HttpResponse<_i9.GetSubscribersCountResponseDto>>);
 
   @override
   _i4.Future<_i2.HttpResponse<_i9.GetSubscribersResponseDto>> getSubscribers({

@@ -21,4 +21,9 @@ abstract class ChatsApi {
   Future<HttpResponse<ChatResponse>> getChatWithUser({
     @Query('userId') required int otherUserId,
   });
+
+  @DELETE('/')
+  Future<HttpResponse<void>> delete({
+    @Query('chatId') required int chatId,
+  });
 }

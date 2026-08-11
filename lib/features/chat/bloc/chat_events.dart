@@ -46,13 +46,13 @@ class ChatEventReadAllMessages implements ChatEvent {
 }
 
 class ChatEventReadMessagesBeforeTime implements ChatEvent {
-  ChatEventReadMessagesBeforeTime({required this.time});
+  const ChatEventReadMessagesBeforeTime({required this.time});
 
   final DateTime time;
 }
 
 class ChatEventEditText implements ChatEvent {
-  ChatEventEditText({required this.text});
+  const ChatEventEditText({required this.text});
 
   final String text;
 }
@@ -73,27 +73,27 @@ class _ChatEventConnectingChanged implements ChatEvent {
 }
 
 class _ChatEventEmitOtherUser implements ChatEvent {
-  _ChatEventEmitOtherUser(this.otherUser);
+  const _ChatEventEmitOtherUser(this.otherUser);
 
   final User otherUser;
 }
 
 class _ChatEventOnlineStatusUpdate implements ChatEvent {
-  _ChatEventOnlineStatusUpdate(this.update);
+  const _ChatEventOnlineStatusUpdate(this.update);
 
   final OnlineStatusUpdate update;
 }
 
 class _ChatEventTypingUpdate implements ChatEvent {
-  _ChatEventTypingUpdate(this.update);
+  const _ChatEventTypingUpdate(this.update);
 
   final TypingActivityUpdate update;
 }
 
-class _ChatEventEmitUnreadCount implements ChatEvent {
-  _ChatEventEmitUnreadCount({required this.newCount});
+class _ChatEventEmitChat implements ChatEvent {
+  const _ChatEventEmitChat({required this.chat});
 
-  final int newCount;
+  final Chat chat;
 }
 
 class _ChatEventEmitMessages implements ChatEvent {

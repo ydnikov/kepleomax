@@ -2,7 +2,12 @@ part of 'messenger_repository.dart';
 
 extension _OnDeleteMessageExtension on MessengerRepositoryImpl {
   void _onDeletedMessage(DeletedMessageUpdate update) {
-    _messagesLocal.deleteById(update.deletedMessage.id);
+    if (update.deleteChat) {
+      _chatsLocal.deleteById(update.chatId);
+      _messagesLocal.deleteAllByChatId(update.chatId);
+    } else {
+      _messagesLocal.deleteById(update.deletedMessage.id);
+    }
 
     if (_currentMessagesCollection != null &&
         _currentMessagesCollection!.chatId == update.chatId) {
@@ -22,24 +27,22 @@ extension _OnDeleteMessageExtension on MessengerRepositoryImpl {
       } else if (update.deleteChat) {
         /// delete chat
         newChats.removeWhere((c) => c.id == update.chatId);
-        _chatsLocal.deleteById(update.chatId);
-        _messagesLocal.deleteAllByChatId(update.chatId);
         _emitChatsCollection(ChatsCollection(chats: newChats));
-        if (_currentMessagesCollection?.chatId == update.chatId) {
-          _emitMessagesCollection(_currentMessagesCollection!.copyWith(chatId: -1));
-          listenToMessagesWithOtherUserId(
-            otherUserId: update.deletedMessage.senderId,
-          );
-        }
       } else {
         /// update chat if needed
+        /// TODO viewsCount == 0 will not work in group chats and channels with more
+        /// than 1 viewer
         final decreaseUnreadCount =
-            !update.deletedMessage.isCurrentUser && !update.deletedMessage.isReadByCurrentUser;
+            !update.deletedMessage.isCurrentUser &&
+            update.deletedMessage.viewsCount == 0;
         final newUnreadCount =
             newChats[affectedChatIndex].unreadCount - (decreaseUnreadCount ? 1 : 0);
-        if (update.newLastMessage != null) {
+
+        if (update.newLastMessage != null || update.forceNewLastMessage) {
           newChats[affectedChatIndex] = newChats[affectedChatIndex].copyWith(
-            lastMessage: Message.fromDto(update.newLastMessage!),
+            lastMessage: update.newLastMessage == null
+                ? null
+                : Message.fromDto(update.newLastMessage!),
             unreadCount: newUnreadCount,
           );
         } else {
@@ -47,11 +50,7 @@ extension _OnDeleteMessageExtension on MessengerRepositoryImpl {
             unreadCount: newUnreadCount,
           );
         }
-        newChats.sort(
-          (a, b) =>
-              (b.lastMessage?.createdAt.millisecondsSinceEpoch ?? b.createdAt) -
-              (a.lastMessage?.createdAt.millisecondsSinceEpoch ?? a.createdAt),
-        );
+        newChats.sort(chatsSort);
         _emitChatsCollection(ChatsCollection(chats: newChats));
       }
     }

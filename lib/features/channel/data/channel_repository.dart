@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
+import 'package:kepleomax/core/data/data_sources/validate_code_extension.dart';
 import 'package:kepleomax/core/di/disposable.dart';
 import 'package:kepleomax/core/logger.dart';
 import 'package:kepleomax/core/models/chat.dart';
@@ -91,8 +92,8 @@ class ChannelRepositoryImpl implements ChannelRepository {
       }
 
       _channelUpdatesController.add(ChannelData.fromDto(chatDto!.channelData!));
-    } catch (e) {
-      logger.e(e);
+    } catch (e, st) {
+      logger.e(e, stackTrace: st);
     }
   }
 
@@ -137,7 +138,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
 
           _channelUpdatesController.add(newChannelData);
         }),
-        _webSocket.channelDeletedStream.listen((channelId) {
+        _webSocket.chatDeletedStream.listen((channelId) {
           if (channelId != _currentChannelData.id) return;
 
           _deletedController.add(channelId);
@@ -172,7 +173,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
       cursor: null,
     );
 
-    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+    if (res.response.statusCode!.isNot200) {
       throw Exception(
         res.data.message ?? 'Failed to get subs count: ${res.response.statusCode}',
       );
@@ -189,8 +190,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
     final res = await _api.subscribe(channelId: _currentChannelData.id);
 
     final statusCode = res.response.statusCode!;
-    if (statusCode != 409 &&
-        (res.response.statusCode! < 200 || res.response.statusCode! > 299)) {
+    if (statusCode != 409 && statusCode.isNot200) {
       throw Exception('Failed to subscribe: ${res.response.statusCode}');
     }
 
@@ -205,7 +205,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
     );
 
     final statusCode = res.response.statusCode!;
-    if (statusCode != 409 && (statusCode < 200 || statusCode > 299)) {
+    if (statusCode != 409 && statusCode.isNot200) {
       throw Exception('Failed to unsubscribe: ${res.response.statusCode}');
     }
 
@@ -231,8 +231,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
     String? imageUrl;
     if (channelUiData.imagePath != null) {
       final imageRes = await _filesApi.uploadFile(File(channelUiData.imagePath!));
-      if (imageRes.response.statusCode! < 200 ||
-          imageRes.response.statusCode! > 299) {
+      if (imageRes.response.statusCode!.isNot200) {
         throw Exception(
           imageRes.data.message ??
               'Failed to upload image: ${imageRes.response.statusCode}',
@@ -250,7 +249,9 @@ class ChannelRepositoryImpl implements ChannelRepository {
       ),
     );
 
-    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+    if (res.response.statusCode == 409) {
+      throw Exception('Tag is already in2 used');
+    } else if (res.response.statusCode!.isNot200) {
       throw Exception(
         res.data.message ??
             'Failed to create new channel, code: ${res.response.statusCode}',
@@ -268,8 +269,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
     String? imageUrl;
     if (channelUiData.imagePath != null) {
       final imageRes = await _filesApi.uploadFile(File(channelUiData.imagePath!));
-      if (imageRes.response.statusCode! < 200 ||
-          imageRes.response.statusCode! > 299) {
+      if (imageRes.response.statusCode!.isNot200) {
         throw Exception(
           imageRes.data.message ??
               'Failed to upload image: ${imageRes.response.statusCode}',
@@ -288,7 +288,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
       ),
     );
 
-    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+    if (res.response.statusCode!.isNot200) {
       throw Exception(
         res.data.message ?? 'Failed to edit, code: ${res.response.statusCode}',
       );
@@ -301,7 +301,7 @@ class ChannelRepositoryImpl implements ChannelRepository {
   Future<void> deleteChannel({required int channelId}) async {
     final res = await _api.deleteChannel(channelId: channelId);
 
-    if (res.response.statusCode! < 200 || res.response.statusCode! > 299) {
+    if (res.response.statusCode!.isNot200) {
       // TODO make better texts
       throw Exception('Failed to delete, code: ${res.response.statusCode}');
     }

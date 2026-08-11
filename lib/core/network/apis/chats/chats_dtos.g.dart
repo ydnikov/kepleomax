@@ -31,6 +31,7 @@ ChannelDataDto _$ChannelDataDtoFromJson(Map<String, dynamic> json) =>
       userChannelRole: $enumDecode(_$UserChannelRoleDtoEnumMap, json['role']),
       tag: json['tag'] as String,
       subsCount: (json['subs_count'] as num).toInt(),
+      createdAt: (json['channel_created_at'] as num).toInt(),
     );
 
 Map<String, dynamic> _$ChannelDataDtoToJson(ChannelDataDto instance) =>
@@ -43,6 +44,7 @@ Map<String, dynamic> _$ChannelDataDtoToJson(ChannelDataDto instance) =>
       'role': _$UserChannelRoleDtoEnumMap[instance.userChannelRole]!,
       'tag': instance.tag,
       'subs_count': instance.subsCount,
+      'channel_created_at': instance.createdAt,
     };
 
 const _$UserChannelRoleDtoEnumMap = {

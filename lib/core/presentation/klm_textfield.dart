@@ -56,6 +56,7 @@ class _KlmTextFieldState extends State<KlmTextField> {
   late final FocusNode _focusNode;
   late bool _obscureText;
 
+  /// callbacks
   @override
   void initState() {
     _obscureText = widget.isPassword;
@@ -76,21 +77,7 @@ class _KlmTextFieldState extends State<KlmTextField> {
     super.dispose();
   }
 
-  String? _error() {
-    if (!widget.showErrors) {
-      return null;
-    }
-
-    for (final validator in widget.validators) {
-      final check = validator(widget.controller.text);
-      if (check != null) {
-        return check;
-      }
-    }
-
-    return null;
-  }
-
+  /// build
   @override
   Widget build(BuildContext context) {
     return Focus(
@@ -196,6 +183,22 @@ class _KlmTextFieldState extends State<KlmTextField> {
         ],
       ),
     );
+  }
+
+  /// other
+  String? _error() {
+    if (!widget.showErrors) {
+      return null;
+    }
+
+    for (final validator in widget.validators) {
+      final check = validator(widget.controller.text);
+      if (check != null) {
+        return check;
+      }
+    }
+
+    return null;
   }
 
   InputBorder? _getFocusedBorder() => widget.readOnly

@@ -32,6 +32,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
       (event, emit) => switch (event) {
         final ChatsEventLoadCache event => _onLoadCache(event, emit),
         final ChatsEventLoad event => _onLoad(event, emit),
+        final ChatsEventDelete event => _onDelete(event, emit),
         _ => null,
       },
       //transformer: sequential(),
@@ -79,7 +80,14 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
     try {
       await _messengerRepository.loadChats();
     } catch (e, st) {
-      if (isClosed) return;
+      add(_ChatsEventEmitError(error: e, stackTrace: st));
+    }
+  }
+
+  Future<void> _onDelete(ChatsEventDelete event, Emitter<ChatsState> emit) async {
+    try {
+      await _messengerRepository.deleteChat(chatId: event.chatId);
+    } catch (e, st) {
       add(_ChatsEventEmitError(error: e, stackTrace: st));
     }
   }
@@ -148,6 +156,12 @@ class ChatsEventReconnect implements ChatsEvent {
   const ChatsEventReconnect({this.onlyIfNot = false});
 
   final bool onlyIfNot;
+}
+
+class ChatsEventDelete implements ChatsEvent {
+  const ChatsEventDelete({required this.chatId});
+
+  final int chatId;
 }
 
 class _ChatsEventConnectingChanged implements ChatsEvent {

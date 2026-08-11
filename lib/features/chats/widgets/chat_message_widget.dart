@@ -1,9 +1,10 @@
 part of '../chats_screen.dart';
 
 class _ChatMessageWidget extends StatefulWidget {
-  const _ChatMessageWidget({required this.chat});
+  const _ChatMessageWidget({required this.chat, this.showDate = true});
 
   final Chat chat;
+  final bool showDate;
 
   @override
   State<_ChatMessageWidget> createState() => _ChatMessageWidgetState();
@@ -38,50 +39,51 @@ class _ChatMessageWidgetState extends State<_ChatMessageWidget> {
     _isTyping = _isTypingRightNow;
     return _isTyping
         ? EllipsisTextWidget(
-      'typing',
-      style: context.textTheme.bodyLarge?.copyWith(
-        fontSize: 15,
-        color: Colors.grey.shade700,
-      ),
-    )
-        : Row(
-      children: [
-        if (_isDraft)
-          Text(
-            'Draft: ',
-            style: context.textTheme.bodyLarge?.copyWith(color: Colors.red),
-          )
-        else if (widget.chat.lastMessage!.isCurrentUser)
-          Text(
-            'You: ',
-            style: context.textTheme.bodyLarge?.copyWith(color: Colors.grey),
-          ),
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth:
-            context.screenSize.width *
-                (widget.chat.isLoadingChat ? 0.8 : 0.3),
-          ),
-          child: Text(
-            widget.chat.draft?.message ?? widget.chat.lastMessage!.message,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            'typing',
             style: context.textTheme.bodyLarge?.copyWith(
               fontSize: 15,
               color: Colors.grey.shade700,
             ),
-          ),
-        ),
-        const SizedBox(width: 4),
-        if (!widget.chat.isLoadingChat && !_isDraft)
-          Text(
-            ' • ${ParseTime.toShortPassTime(widget.chat.lastMessage!.createdAt)}',
-            style: context.textTheme.bodyLarge?.copyWith(
-              color: Colors.grey,
-              fontSize: 12,
-            ),
-          ),
-      ],
-    );
+          )
+        : Row(
+            children: [
+              if (_isDraft)
+                Text(
+                  'Draft: ',
+                  style: context.textTheme.bodyLarge?.copyWith(color: Colors.red),
+                )
+              else if (widget.chat.lastMessage!.isCurrentUser)
+                Text(
+                  'You: ',
+                  style: context.textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                ),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth:
+                      context.screenSize.width *
+                      (widget.chat.isLoadingChat || !widget.showDate ? 0.8 : 0.3),
+                ),
+                child: Text(
+                  (widget.chat.draft?.message ?? widget.chat.lastMessage!.message)
+                      .replaceAll('\n', ' '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodyLarge?.copyWith(
+                    fontSize: 15,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              if (!widget.chat.isLoadingChat && !_isDraft && widget.showDate)
+                Text(
+                  ' • ${ParseTime.toShortPassTime(widget.chat.lastMessage!.createdAt)}',
+                  style: context.textTheme.bodyLarge?.copyWith(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
+            ],
+          );
   }
 }

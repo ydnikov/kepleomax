@@ -291,7 +291,7 @@ class _BodyState extends State<_Body> {
                               if (checkVisibility) {
                                 return VisibilityDetector(
                                   key: Key(
-                                    'visibility_detector_$i-${message.fromCache}',
+                                    'visibility_detector_${message.id}-${message.fromCache}',
                                   ),
                                   onVisibilityChanged: (info) =>
                                       _onVisibilityChanged(info, message),
@@ -307,8 +307,10 @@ class _BodyState extends State<_Body> {
               ),
               if (data.chat.channelData?.userRole.isOwner ?? true)
                 _ChatBottom(
-                  onSend: (message) {
+                  onSend: () {
                     if (data.isLoading || !data.isConnected) return;
+                    final message = _textController.text;
+
                     _chatBloc.add(ChatEventSendMessage(value: message));
 
                     if (widget.scrollController.hasClients) {
@@ -319,7 +321,8 @@ class _BodyState extends State<_Body> {
                       );
                     }
                   },
-                  onEdit: (message) {
+                  onEdit: () {
+                    final message = _textController.text;
                     _chatBloc.add(ChatEventEditText(text: message));
                   },
                   isLoading: data.isLoading,
@@ -352,8 +355,6 @@ class _BodyState extends State<_Body> {
   /// listeners
   void _onVisibilityChanged(VisibilityInfo info, Message message) {
     if (_chatBloc.isClosed) return;
-
-    // print('KlmLog onVisibilityChanged, messageId: ${message.id}');
 
     if (info.visibleFraction > 0.6) {
       // TODO make createdAt + 1 (also fix backend for it)

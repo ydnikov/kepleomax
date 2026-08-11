@@ -34,7 +34,6 @@ abstract class MessageDto with _$MessageDto {
   const MessageDto._();
 
   factory MessageDto.fromJson(Map<String, dynamic> json, {bool fromCache = false}) {
-    print('KlmLog, MessageDto.fromJson, created_at: ${json['created_at']}');
     return MessageDto(
       id: (json['message_id'] as int?) ?? json['id'] as int,
       chatId: json['chat_id'] as int,

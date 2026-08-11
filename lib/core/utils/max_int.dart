@@ -1,3 +1,2 @@
-abstract class MaxInt {
-  static int get maxSafeInt => 9007199254740991;
-}
+const int maxSafeInt = 9007199254740991;
+

@@ -19,6 +19,15 @@ class ChatWidget extends StatelessWidget {
                   mainNavigatorKey,
                 )!.push(ChatPage(chat: chat, otherUser: chat.otherUser));
               },
+        onLongPress: chat.isLoadingChat
+            ? null
+            : () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  useRootNavigator: true,
+                  builder: (context) => _ChatInfoBottomSheet(chat: chat),
+                );
+              },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
@@ -52,7 +61,12 @@ class ChatWidget extends StatelessWidget {
                       ),
                       isOfficial: chat.channelData?.isOfficial ?? false,
                     ),
-                    if (chat.lastMessage != null || chat.draft != null)
+                    if ((chat.lastMessage != null &&
+                            (chat.channelData == null ||
+                                chat.createdAt.isBefore(
+                                  chat.lastMessage!.createdAt,
+                                ))) ||
+                        chat.draft != null)
                       FittedBox(
                         /// TODO is this key needed?
                         key: ValueKey(
@@ -68,7 +82,7 @@ class ChatWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              if (chat.isChannel && (chat.channelData?.userRole.isOwner ?? false))
+              if (chat.isChannel && chat.lastMessage != null && (chat.channelData?.userRole.isOwner ?? false))
                 const Icon(Icons.check_box)
               else if (chat.lastMessage?.isCurrentUser ?? false)
                 Icon(chat.lastMessage!.isRead ? Icons.check_box : Icons.check)

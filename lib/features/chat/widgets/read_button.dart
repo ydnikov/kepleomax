@@ -17,17 +17,7 @@ class _ReadButtonState extends State<_ReadButton> {
   static const _offsetToShow = 200;
   double _lastPosition = 0;
 
-  void _onScrollListener() {
-    if (_lastPosition < _offsetToShow &&
-        widget._scrollController.offset > _offsetToShow) {
-      setState(() {});
-    } else if (_lastPosition > _offsetToShow &&
-        widget._scrollController.offset < _offsetToShow) {
-      setState(() {});
-    }
-    _lastPosition = widget._scrollController.offset;
-  }
-
+  /// callbacks
   @override
   void initState() {
     widget._scrollController.addListener(_onScrollListener);
@@ -40,6 +30,19 @@ class _ReadButtonState extends State<_ReadButton> {
     super.dispose();
   }
 
+  /// listeners
+  void _onScrollListener() {
+    if (_lastPosition < _offsetToShow &&
+        widget._scrollController.offset > _offsetToShow) {
+      setState(() {});
+    } else if (_lastPosition > _offsetToShow &&
+        widget._scrollController.offset < _offsetToShow) {
+      setState(() {});
+    }
+    _lastPosition = widget._scrollController.offset;
+  }
+
+  /// build
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChatBloc, ChatState>(
@@ -54,12 +57,12 @@ class _ReadButtonState extends State<_ReadButton> {
         if (state is! ChatStateBase) return const SizedBox();
 
         final data = state.data;
-        final unreadCount = data.unreadCount;
-        final isScrolledUp = widget._scrollController.positions.length == 1
-            ? widget._scrollController.offset > _offsetToShow
-            : false;
+        final unreadCount = data.chat.unreadCount;
+        final isScrolledUp =
+            widget._scrollController.positions.length == 1 &&
+            widget._scrollController.offset > _offsetToShow;
         if (unreadCount < 0 && !flavor.isRelease) {
-          logger.w('unreadCount < 0');
+          logger.w('unreadCount < 0: $unreadCount');
         } else if (unreadCount <= 0 && !isScrolledUp) {
           return const SizedBox();
         }

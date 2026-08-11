@@ -17,7 +17,7 @@ abstract class Chat with _$Chat {
     required Message? lastMessage,
     required bool fromCache,
     required int unreadCount,
-    required int createdAt,
+    required DateTime createdAt,
     MessageDraft? draft,
     DateTime? lastTypingActivityTime,
   }) = _Chat;
@@ -31,7 +31,7 @@ abstract class Chat with _$Chat {
     draft: dto.draft,
     fromCache: fromCache,
     unreadCount: dto.unreadCount,
-    createdAt: dto.createdAt,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(dto.createdAt),
     channelData: dto.channelData == null
         ? null
         : ChannelData.fromDto(dto.channelData!),
@@ -43,7 +43,7 @@ abstract class Chat with _$Chat {
     fromCache: false,
     lastMessage: Message.loading(),
     unreadCount: 0,
-    createdAt: 0,
+    createdAt: DateTime(1970),
     channelData: null,
   );
 
@@ -71,6 +71,7 @@ abstract class ChannelData with _$ChannelData {
     required bool isOfficial,
     required UserChannelRole userRole,
     required int subsCount,
+    required DateTime createdAt,
   }) = _ChannelData;
 
   const ChannelData._();
@@ -84,6 +85,7 @@ abstract class ChannelData with _$ChannelData {
     isOfficial: dto.isOfficial,
     userRole: UserChannelRole.fromDto(dto.userChannelRole),
     subsCount: dto.subsCount,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(dto.createdAt),
   );
 
   ChannelData keepRoleIfNeeded(UserChannelRole originalRole) {

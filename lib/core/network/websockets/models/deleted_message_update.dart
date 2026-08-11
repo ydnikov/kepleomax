@@ -6,6 +6,7 @@ class DeletedMessageUpdate {
     required this.deletedMessage,
     required this.newLastMessage,
     this.deleteChat = false,
+    this.forceNewLastMessage = false,
   });
 
   factory DeletedMessageUpdate.fromJson(Map<String, dynamic> json) =>
@@ -16,10 +17,15 @@ class DeletedMessageUpdate {
             ? null
             : MessageDto.fromJson(json['new_last_message'] as Map<String, dynamic>),
         deleteChat: json['delete_chat'] as bool? ?? false,
+        forceNewLastMessage: json['force_new_last_message'] as bool? ?? false,
       );
 
   final int chatId;
   final MessageDto deletedMessage;
   final MessageDto? newLastMessage;
   final bool deleteChat;
+
+  /// when true, newLastMessage will be set to lastMessage even if it's null
+  /// when false, if newLastMessage is null, that means there is no need to update
+  final bool forceNewLastMessage;
 }

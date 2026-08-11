@@ -118,7 +118,7 @@ class MockMessengerWebSocket implements MessengerWebSocket {
 
   /// events
   @override
-  void sendMessage({required String message, required int recipientId}) {
+  void sendMessage({required String message, required int chatId}) {
     if (_nextSendMessageId == null) {
       throw Exception('id to new message is not specified');
     }
@@ -170,7 +170,7 @@ class MockMessengerWebSocket implements MessengerWebSocket {
 
   /// mock streams
   @override
-  Stream<int> get channelDeletedStream => const Stream.empty();
+  Stream<int> get chatDeletedStream => const Stream.empty();
 
   @override
   void dispose() {}

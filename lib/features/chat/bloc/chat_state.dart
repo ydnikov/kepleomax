@@ -44,7 +44,6 @@ abstract class ChatData with _$ChatData implements ChatState {
     required Chat chat,
     required User otherUser, // if user in chat was null, this user will be used
     required List<Message> messages,
-    required int unreadCount,
     required bool isAllMessagesLoaded,
     required UnreadMessagesValue unreadMessagesValue,
     @Default(false) bool isTyping,
@@ -56,7 +55,6 @@ abstract class ChatData with _$ChatData implements ChatState {
   factory ChatData.initial() => ChatData(
     chat: Chat.loading(),
     otherUser: User.loading(),
-    unreadCount: 0,
     messages: [],
     isAllMessagesLoaded: false,
     unreadMessagesValue: UnreadMessagesValue.initial(),

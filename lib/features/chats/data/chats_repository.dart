@@ -6,7 +6,7 @@ import 'package:kepleomax/core/models/chat.dart';
 
 abstract class ChatsRepository {
   /// api
-  Future<Chat?> getChatWithUser(int otherUserId);
+  Future<Chat> getChatWithUser(int otherUserId);
 
   /// chatId is string cause can be user for the channels via url
   Future<Chat?> getChatWithId(String chatId);
@@ -29,10 +29,10 @@ class ChatsRepositoryImpl implements ChatsRepository {
 
   /// api
   @override
-  Future<Chat?> getChatWithUser(int otherUserId) async {
+  Future<Chat> getChatWithUser(int otherUserId) async {
     final dto = await _chatsApi.getChatWithUser(otherUserId);
 
-    return dto == null ? null : Chat.fromDto(dto, fromCache: false);
+    return Chat.fromDto(dto, fromCache: false);
   }
 
   @override

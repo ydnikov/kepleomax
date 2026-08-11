@@ -2,6 +2,8 @@ part of 'messenger_repository.dart';
 
 extension _OnTypingUpdateExtension on MessengerRepositoryImpl {
   void _onTypingUpdate(TypingActivityUpdate update) {
+    if (update.userId == AuthController.currentUserId) return;
+
     if (_currentChatsCollection != null) {
       final newChats = List.of(_currentChatsCollection!.chats);
       for (int i = 0; i < newChats.length; i++) {

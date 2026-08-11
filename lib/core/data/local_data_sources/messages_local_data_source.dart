@@ -69,11 +69,9 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
     final placeholders = List.filled(data.messagesIds.length, '?').join(', ');
 
     if (data.byCurrentUser == true) {
-      await _database.update(
-        'messages',
-        {'is_read': 1},
-        where: 'id IN ($placeholders)',
-        whereArgs: data.messagesIds,
+      await _database.rawUpdate(
+        'UPDATE messages SET views_count = views_count + 1, is_read = 1 WHERE id IN ($placeholders)',
+        data.messagesIds,
       );
     } else {
       await _database.rawUpdate(

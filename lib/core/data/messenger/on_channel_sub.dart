@@ -5,7 +5,8 @@ extension _OnChannelSubUpdateExtension on MessengerRepositoryImpl {
     if (_currentChatsCollection == null) return;
 
     final currentChats = _currentChatsCollection!.chats;
-    final newChats = [update.chat, ...currentChats];
+    // TODO optimize sort here (big O)
+    final newChats = [update.chat, ...currentChats]..sort(chatsSort);
 
     _emitChatsCollection(
       ChatsCollection(

@@ -16,7 +16,7 @@ class FakeMessagesWebSocket implements MessengerWebSocket {
   void deleteMessage({required int messageId}) {}
 
   @override
-  void sendMessage({required String message, required int recipientId}) {}
+  void sendMessage({required String message, required int chatId}) {}
 
   @override
   void sendChannelMessage({required String message, required int chatId}) {}
@@ -58,7 +58,7 @@ class FakeMessagesWebSocket implements MessengerWebSocket {
       StreamController<TypingActivityUpdate>.broadcast().stream;
 
   @override
-  Stream<int> get channelDeletedStream => StreamController<int>.broadcast().stream;
+  Stream<int> get chatDeletedStream => StreamController<int>.broadcast().stream;
 
   @override
   Stream<ChannelSubscriptionUpdate> get channelSubscriptionUpdatesStream =>

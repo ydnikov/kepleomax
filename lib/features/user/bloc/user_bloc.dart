@@ -31,7 +31,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       },
       transformer: sequential(),
     );
-    _messengerWebSocket.subscribeOnOnlineStatusUpdatesIfNot(usersIds: [_userId]);
+    _messengerWebSocket.subscribeOnOnlineStatusUpdatesIfNot([_userId]);
     _onlineUpdatesSub = _messengerWebSocket.onlineUpdatesStream.listen((update) {
       if (update.userId == userId) {
         add(_UserEventUpdateOnlineStatus(update));

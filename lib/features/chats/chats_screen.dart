@@ -9,6 +9,7 @@ import 'package:kepleomax/core/navigation/app_navigator.dart';
 import 'package:kepleomax/core/navigation/pages.dart';
 import 'package:kepleomax/core/presentation/channel_image_widget.dart';
 import 'package:kepleomax/core/presentation/colors.dart';
+import 'package:kepleomax/core/presentation/divider_with_padding.dart';
 import 'package:kepleomax/core/presentation/ellipsis_text_widget.dart';
 import 'package:kepleomax/core/presentation/klm_app_bar.dart';
 import 'package:kepleomax/core/presentation/klm_text_button.dart';
@@ -26,6 +27,8 @@ part 'widgets/chat_widget.dart';
 part 'widgets/chat_message_widget.dart';
 
 part 'widgets/chat_empty_message_widget.dart';
+
+part 'widgets/chat_info_bottom_sheet.dart';
 
 /// screen
 class ChatsScreen extends StatefulWidget {

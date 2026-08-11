@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:kepleomax/core/app_constants.dart';
+import 'package:kepleomax/core/auth/auth_controller.dart';
 import 'package:kepleomax/core/data/data_sources/chats_api_data_sources.dart';
 import 'package:kepleomax/core/data/data_sources/messages_api_data_sources.dart';
 import 'package:kepleomax/core/data/local_data_sources/chats_local_data_source.dart';
@@ -27,16 +28,25 @@ import 'package:kepleomax/core/network/websockets/models/online_status_update.da
 import 'package:kepleomax/core/network/websockets/models/read_messages_update.dart';
 import 'package:kepleomax/core/network/websockets/models/typing_activity_update.dart';
 import 'package:kepleomax/core/services/notifications_service.dart';
+import 'package:kepleomax/core/utils/sort_chats.dart';
 import 'package:kepleomax/core/utils/stateful_stream.dart';
 
-part 'on_channel_deleted.dart';
+part 'on_chat_deleted.dart';
+
 part 'on_channel_sub.dart';
+
 part 'on_channel_unsub.dart';
+
 part 'on_channel_update.dart';
+
 part 'on_delete_message.dart';
+
 part 'on_new_message.dart';
+
 part 'on_online_update.dart';
+
 part 'on_read_messages.dart';
+
 part 'on_typing_update.dart';
 
 abstract class MessengerRepository implements Disposable {
@@ -45,6 +55,8 @@ abstract class MessengerRepository implements Disposable {
   Future<void> loadCachedChats();
 
   Future<void> loadChats();
+
+  Future<void> deleteChat({required int chatId});
 
   Future<void> loadMessages({
     required int chatId,
@@ -56,10 +68,7 @@ abstract class MessengerRepository implements Disposable {
 
   Future<String?> getDraft({required int chatId});
 
-  Future<void> saveDraft({required String message, required int chatId});
-
-  /// subscribes on messages from that userId, is used when chatId == -1
-  void listenToMessagesWithOtherUserId({required int? otherUserId});
+  Future<void> saveDraft(String message, {required int chatId});
 
   void subscribeOnUserOnlineUpdates({required int userId});
 
@@ -98,7 +107,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
       _webSocket.channelSubscriptionUpdatesStream.listen(_onChannelSub),
       _webSocket.channelUnsubscriptionUpdatesStream.listen(_onChannelUnsub),
       _webSocket.channelUpdatesStream.listen(_onChannelUpdate),
-      _webSocket.channelDeletedStream.listen(_onChannelDeleted),
+      _webSocket.chatDeletedStream.listen(_onChatDeleted),
     ]);
   }
 
@@ -114,13 +123,12 @@ class MessengerRepositoryImpl implements MessengerRepository {
 
   final CombineCacheAndApi _combiner;
 
-  /// uses when chatId == -1 (it's a new chat with new user)
-  int? _currentChatOtherUserId;
   int _currentChatId = -1;
   final List<StreamSubscription<void>> _subs = [];
 
   final _messagesUpdatesController = StatefulStreamController<MessagesCollection>();
   final _chatsUpdatesController = StatefulStreamController<ChatsCollection>();
+  final _chatUpdatesController = StreamController<Chat>();
 
   MessagesCollection? get _currentMessagesCollection =>
       _messagesUpdatesController.currentValue;
@@ -137,13 +145,15 @@ class MessengerRepositoryImpl implements MessengerRepository {
 
     // TODO also subscribe on user
     if (!collection.fromCache && collection.chatId >= 0) {
-      _webSocket.subscribeOnChatsUpdatesIfNot(ids: [collection.chatId]);
+      _webSocket.subscribeOnChatsUpdatesIfNot([collection.chatId]);
     }
   }
 
   void _emitMessages(Iterable<Message> messages) {
     final collection = _currentMessagesCollection!.copyWith(messages: messages);
     _messagesUpdatesController.add(collection);
+
+    _webSocket.subscribeOnChatsUpdatesIfNot([collection.chatId]);
   }
 
   void _emitChatsCollection(ChatsCollection collection) {
@@ -151,11 +161,9 @@ class MessengerRepositoryImpl implements MessengerRepository {
 
     if (!collection.fromCache && collection.chats.isNotEmpty) {
       _webSocket
-        ..subscribeOnChatsUpdatesIfNot(
-          ids: collection.chats.map((c) => c.id).toList(),
-        )
+        ..subscribeOnChatsUpdatesIfNot(collection.chats.map((c) => c.id).toList())
         ..subscribeOnOnlineStatusUpdatesIfNot(
-          usersIds: collection.chats
+          collection.chats
               .where((c) => !c.isChannel && c.otherUser.id >= 0)
               .map((c) => c.otherUser.id)
               .toList(),
@@ -207,19 +215,25 @@ class MessengerRepositoryImpl implements MessengerRepository {
   }
 
   @override
-  void listenToMessagesWithOtherUserId({required int? otherUserId}) {
-    _currentChatOtherUserId = otherUserId;
+  Future<void> deleteChat({required int chatId}) async {
+    final oldChats = List.of(_currentChatsCollection!.chats);
 
-    if (otherUserId == null) return;
+    final newChats = _currentChatsCollection!.chats
+        .where((c) => c.id != chatId)
+        .toList();
+    _emitChatsCollection(ChatsCollection(chats: newChats));
 
-    _emitMessagesCollection(
-      const MessagesCollection(chatId: -1, messages: [], allMessagesLoaded: true),
-    );
+    try {
+      await _chatsApi.delete(chatId);
+    } catch (_) {
+      _emitChatsCollection(ChatsCollection(chats: oldChats));
+      rethrow;
+    }
   }
 
   @override
   void subscribeOnUserOnlineUpdates({required int userId}) {
-    _webSocket.subscribeOnOnlineStatusUpdatesIfNot(usersIds: [userId]);
+    _webSocket.subscribeOnOnlineStatusUpdatesIfNot([userId]);
   }
 
   @override
@@ -227,17 +241,16 @@ class MessengerRepositoryImpl implements MessengerRepository {
     required int chatId,
     int? otherUserId,
     bool withCache = true,
+    // TODO change default to true (don't break tests)
     bool loadCacheInTwoSteps = false,
   }) async {
+    _webSocket.subscribeOnChatsUpdatesIfNot([chatId]);
+
     /// TODO maybe reset messagesCollection here?
-    /// _currentChatOtherUserId != null means it's a new chat. If delete this line, provided
-    /// chatId may broke something check the integration test: "open_deleted_chat_from_notification_test"
-    /// and also there are that check in other places in this method
-    if (_currentChatOtherUserId != null) return;
     _currentChatId = chatId;
 
     if (otherUserId != null) {
-      _webSocket.subscribeOnOnlineStatusUpdatesIfNot(usersIds: [otherUserId]);
+      _webSocket.subscribeOnOnlineStatusUpdatesIfNot([otherUserId]);
     }
 
     /// start loading api
@@ -255,7 +268,9 @@ class MessengerRepositoryImpl implements MessengerRepository {
         chatId,
         limit: loadCacheInTwoSteps ? 50 : 500,
       );
-      if (_currentChatOtherUserId != null || _currentChatId != chatId) return;
+
+      /// TODO for what these checks?
+      if (_currentChatId != chatId) return;
       _emitMessagesCollection(
         MessagesCollection(
           messages: cache.map(Message.fromDto),
@@ -270,7 +285,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
           limit: 500,
         );
         cache = [...cache, ...cacheAll];
-        if (_currentChatOtherUserId != null || _currentChatId != chatId) return;
+        if (_currentChatId != chatId) return;
         _emitMessagesCollection(
           MessagesCollection(
             messages: cache.map(Message.fromDto),
@@ -283,7 +298,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
 
     /// emit data from api
     final apiMessagesDtos = await apiMessagesDtosCompleter.future;
-    if (_currentChatOtherUserId != null || _currentChatId != chatId) return;
+    if (_currentChatId != chatId) return;
     final newList = _combiner.combineLoad(cache, apiMessagesDtos);
 
     _emitMessagesCollection(
@@ -349,7 +364,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
   }
 
   @override
-  Future<void> saveDraft({required String message, required int chatId}) async {
+  Future<void> saveDraft(String message, {required int chatId}) async {
     if (message.isEmpty) {
       await _draftsLocal.deleteByChatId(chatId);
     } else {
@@ -381,6 +396,7 @@ class MessengerRepositoryImpl implements MessengerRepository {
   void dispose() {
     _messagesUpdatesController.close();
     _chatsUpdatesController.close();
+    _chatUpdatesController.close();
     for (final sub in _subs) {
       sub.cancel();
     }
